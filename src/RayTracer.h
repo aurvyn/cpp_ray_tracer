@@ -8,6 +8,7 @@
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
 #include "Shader.h"
+#include "HSV.h"
 
 class RayTracer
 {
@@ -78,14 +79,14 @@ private:
 		{
 			for(int x=0; x<resX; x++)
 			{
-				Vector3 floatColor = floatBuffer.at(x,y);
-				float maxComp = floatColor.c[floatColor.maxComponent()];
-				if(maxComp > maxValue)
-					maxValue = maxComp;
+				Vector3 rgbColor = floatBuffer.at(x,y);
+				Vector3 hsvColor = rgbToHsv(rgbColor);
+				maxValue = std::max(hsvColor[2], maxValue);
+				floatBuffer.at(x,y) = hsvColor;
 			}
 		}
 
-		if(maxValue <= 0.0f)
+		if(maxValue <= 1.0f)
 			maxValue = 1.0f;
 		
 		float toneMappingScale = 1.0f / maxValue;
@@ -94,7 +95,10 @@ private:
 		{
 			for(int x=0; x<resX; x++)
 			{
-				floatBuffer.at(x,y) = floatBuffer.at(x,y)*toneMappingScale;
+				Vector3 toneMappedHSV = floatBuffer.at(x,y);
+				toneMappedHSV[2] *= toneMappingScale;
+				Vector3 toneMappedRGBColor = hsv2rgb(toneMappedHSV);
+				floatBuffer.at(x,y) = toneMappedRGBColor;
 			}
 		}
 	}

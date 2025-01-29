@@ -1,7 +1,7 @@
 #!/bin/bash
 prog=../build/tracer
 resList="100 200 300"
-sceneList=`ls ./*obj`
+sceneList=`ls | grep '.*obj *$'`
 
 function comparePerformance()
 {
