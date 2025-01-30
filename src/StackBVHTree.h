@@ -66,7 +66,7 @@ private:
 			}
 			if (stack.hasNext()) {
 				currentNodePtr = stack.pop();
-			} else {
+			} else if (!stack.hasNext()){
 				break;
 			}
 		}
