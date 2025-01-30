@@ -1,0 +1,58 @@
+#ifndef __OBJECTMEDIAN
+#define __OBJECTMEDIAN
+
+#include "Splitter.h"
+#include <assert.h>
+
+class ObjectMedian : public Splitter
+{
+public:
+	virtual void split(PrimitiveArray const & input, PrimitiveArray & left, PrimitiveArray & right) const
+	{
+		Vector3 dim = input.getDim();
+		int maxDim = dim.maxComponent();
+		Vector3 splitCenter = input.getCenter();
+		float splitPos = input.getMedian()[maxDim];
+		
+		assert( left.size() == 0);
+		assert( right.size() == 0);
+		
+		for(int i=0; i<input.size(); i++)
+		{
+			Vector3 center = input[i]->getCenter();
+			bool lessThan = center[maxDim] < splitPos;
+			if(lessThan)
+				left.add(input[i]);
+			else
+				right.add(input[i]);
+		}
+		
+		bool emptyChild = left.size() == 0 || right.size() == 0;
+		if(emptyChild)
+		{
+			left = PrimitiveArray();
+			right = PrimitiveArray();
+			for(int i=0; i<input.size()/2; i++)
+				left.add(input[i]);
+			for(int i=input.size()/2; i<input.size(); i++)
+				right.add(input[i]);
+			/* tree vis
+			printf(", spatial median FAIL");
+			*/
+		}
+		/* tree vis
+		else
+			printf(", spatial median");
+		printf(" @ axis(%d) %.3f\n", maxDim, splitPos);
+		*/
+
+		//printf(" @ ");
+		//if(maxDim == 0) printf("x");
+		//if(maxDim == 1) printf("y");
+		//if(maxDim == 2) printf("z");
+		//printf("-axis %.3f\n", splitPos);
+	}
+};
+
+#endif
+

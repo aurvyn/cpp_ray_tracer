@@ -14,6 +14,11 @@ public:
 	{
 		this->push_back(prim);
 		this->bounds.encompass(prim->getBBMin(), prim->getBBMax());
+			count++;
+			Vector3 center = prim->getCenter();
+			for (size_t i = 0; i < 3; ++i) {
+				this->median[i] += (center[i] - this->median[i]) / count;
+			}
 	}
 	
 	virtual bool intersect(Ray const & ray, Hitpoint & hitpoint) const
@@ -22,6 +27,11 @@ public:
 		for(int i=0; i<this->size(); i++)
 			hitSomething = this->at(i)->intersect(ray, hitpoint) | hitSomething;
 		return hitSomething;
+	}
+
+	Vector3 getMedian() const
+	{
+		return median;
 	}
 	
 	virtual Vector3 getBBMin() const
@@ -37,6 +47,8 @@ public:
 	
 private:
 	AABB bounds;
+	Vector3 median;
+	int count = 0;
 };
 
 #endif

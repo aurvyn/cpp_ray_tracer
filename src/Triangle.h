@@ -16,6 +16,7 @@ public:
 		this->vertex[2] = vertexC;
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexB).normalize();
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexA).normalize();
+		setCenter();
 	}
 	
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const

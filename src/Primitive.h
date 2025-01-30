@@ -19,9 +19,16 @@ public:
 	}
 	Vector3 getCenter() const
 	{
-		Vector3 center = (this->getDim() / 2) + this->getBBMin();
 		return center;
 	}
+
+	void setCenter()
+	{
+		center = (this->getDim() / 2) + this->getBBMin();
+	}
+private:
+
+	Vector3 center;
 };
 
 #endif
