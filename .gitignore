@@ -170,3 +170,6 @@ xcuserdata/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+run.sh
+run.bat
