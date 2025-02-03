@@ -14,7 +14,7 @@
 class RayTracer
 {
 public:
-	PostProcessor postProcessor;
+	Pipeline *pipeline = new DefaultPipeline();
 
 	void trace(Scene & scene, size_t resX, size_t resY, unsigned char * outputImage)
 	{
@@ -50,8 +50,8 @@ public:
 					floatBuffer.at(x,y) = rc;
 			}
 		}
-		
-		postProcessor.process(floatBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer);
+		pp->process();
 
 		for(int y=0; y<resY; y++)
 		{

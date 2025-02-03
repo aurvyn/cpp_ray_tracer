@@ -20,18 +20,23 @@ class PostProcessor
             this->root = root;
         }
 
-        void process(Buffer<Vector3> &imageBuffer) {
+        void process() {
             root->applyEffect();
         }
 };
 
-class DefaultPipeline 
+class Pipeline
 {
     public:
-        PostProcessor pp;
-        DefaultPipeline(Buffer<Vector3>* imageBuffer) {
+        virtual PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) = 0;
+};
+
+class DefaultPipeline: public Pipeline
+{
+    public:
+        PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) override {
             Effect *effect = new RGBConvert(new HSVConvert(imageBuffer));
 
-            this->pp = PostProcessor(effect);
+            return new PostProcessor(effect);
         }
 };

@@ -36,7 +36,7 @@ class Effect
         }
 
         Effect(Buffer<Vector3> *baseImage) { // 
-            this->imageBuffer = baseImage
+            this->imageBuffer = baseImage;
         }
 
         Buffer<Vector3> *applyEffect() {
