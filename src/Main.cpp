@@ -14,7 +14,7 @@
 
 #define RES 100
 
-bool usePrimitiveArray = false;
+bool usePrimitiveArray = true;
 bool foundScene = false;
 char const * defaultScene = "test.obj";
 char const * defaultOutput = "test.png";
@@ -128,7 +128,8 @@ int main(int argc, char ** argv)
 	Scene scene = loadWithOBJLoader(scenePath);
 
 	RayTracer tracer;
-	tracer.trace(scene, resX, resY, outputImage);
+	// tracer.trace(scene, resX, resY, outputImage);
+	tracer.march(scene, resX, resX, outputImage);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
 

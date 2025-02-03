@@ -22,8 +22,10 @@ public:
 		Vector3 center = (this->getDim() / 2) + this->getBBMin();
 		return center;
 	}
-	virtual float getSignedDistance(Vector3 rayOrigin) const = 0;
-	virtual Vector3 getSDFNorm(Vector3 rayOrigin) const = 0;
+	// virtual float getSignedDistance(Vector3 rayOrigin) const = 0;
+	// virtual Vector3 getSDFNorm(Vector3 rayOrigin) const = 0;
+	float getSignedDistance(Vector3 rayOrigin) const {};
+	Vector3 getSDFNorm(Vector3 rayOrigin) const {};
 };
 
 #endif
