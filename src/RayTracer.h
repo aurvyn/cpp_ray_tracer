@@ -9,10 +9,13 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 #include "HSV.h"
+#include "PostProcessor.h"
 
 class RayTracer
 {
 public:
+	PostProcessor postProcessor = DefaultPipeline().pp;
+
 	void trace(Scene & scene, size_t resX, size_t resY, unsigned char * outputImage)
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
@@ -48,7 +51,9 @@ public:
 			}
 		}
 
-		toneMap(floatBuffer, imageBuffer);
+		postProcessor.process(floatBuffer);
+
+		// toneMap(floatBuffer, imageBuffer);
 
 		for(int y=0; y<resY; y++)
 		{
@@ -68,7 +73,6 @@ public:
 	}
 
 private:
-
 	void toneMap(Buffer<Vector3> & floatBuffer, Buffer<Color> & imageBuffer) const
 	{
 		float maxValue = 0.0f;

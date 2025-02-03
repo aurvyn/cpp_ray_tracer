@@ -2,34 +2,37 @@
 
 #include "Buffer.h"
 #include <list>
+#include "HSV.h"
+#include "Effect.h"
 
+// TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
 {
     std::list<Effect> effects = std::list<Effect>();
     public:
+        PostProcessor() {}
         PostProcessor(std::list<Effect> &effects) {
             this->effects = effects;
         }
 
-        void apply(Buffer<Color> &imageBuffer) {
+        void process(Buffer<Vector3> &imageBuffer) {
             for(Effect effect : effects) {
-                effect.apply(imageBuffer);
+                effect.applyEffect(imageBuffer);
             }
         }
 };
 
-class Effect
+class DefaultPipeline 
 {
     public:
-        virtual void apply(Buffer<Color> &imageBuffer);
-};
+        PostProcessor pp;
+        DefaultPipeline() {
+            std::list<Effect> effects = std::list<Effect>();
+            // effects.push_front(HSVConvert());
+            effects.push_back(HueShift(20.0f));
+            // effects.push_back(LinearHSVHDR());
+            // effects.push_back(RGBConvert());
 
-class HueShift : public Effect
-{
-    float amount;
-    public:
-        HueShift(float amount)
-        {
-            this->amount = amount;
+            this->pp = PostProcessor(effects);
         }
 };
