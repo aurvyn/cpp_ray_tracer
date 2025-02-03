@@ -4,6 +4,8 @@
 #include "obj_loader/objLoader.h"
 #include "Scene.h"
 #include "BVHTree.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 class ObjLoader
 {
@@ -79,8 +81,10 @@ public:
 			//printf(" glossy: %i\n", mtl->glossy);
 			//printf(" refact: %.2f\n", mtl->refract_index);
 			
-			//printf(" texture: %s\n", mtl->texture_filename);
-			
+			// printf(" texture: %s\n", mtl->texture_filename);
+
+			// TODO load the texture
+
 			materials.push_back(mat);
 		}
 		scene.setMaterials(materials);
