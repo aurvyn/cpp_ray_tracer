@@ -22,6 +22,8 @@ public:
 		Vector3 center = (this->getDim() / 2) + this->getBBMin();
 		return center;
 	}
+	virtual float getSignedDistance() const = 0;
+	virtual Vector3 getSDFNorm() const = 0;
 };
 
 #endif

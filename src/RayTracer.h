@@ -66,6 +66,9 @@ public:
 		}
 	}
 
+	void trace(Scene & scene, size_t resX, size_t resY, unsigned char * outputImage) {
+
+	}
 private:
 
 	void toneMap(Buffer<Vector3> & floatBuffer, Buffer<Color> & imageBuffer) const
