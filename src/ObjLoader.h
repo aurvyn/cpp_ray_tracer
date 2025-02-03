@@ -4,8 +4,7 @@
 #include "obj_loader/objLoader.h"
 #include "Scene.h"
 #include "BVHTree.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
 
 class ObjLoader
 {
@@ -82,8 +81,7 @@ public:
 			//printf(" refact: %.2f\n", mtl->refract_index);
 			
 			// printf(" texture: %s\n", mtl->texture_filename);
-
-			// TODO load the texture
+			mat.loadTexture(mtl->diffuse_texture_filename);
 
 			materials.push_back(mat);
 		}
