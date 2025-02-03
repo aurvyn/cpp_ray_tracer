@@ -19,7 +19,7 @@ class HueShift : public Effect
         {
             this->amount = amount;
         }
-        virtual void applyEffect(Buffer<Vector3> & floatBuffer)
+        void applyEffect(Buffer<Vector3> & floatBuffer) override
         {
             size_t resX = floatBuffer.getWidth();
             size_t resY = floatBuffer.getHeight();
