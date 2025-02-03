@@ -12,7 +12,7 @@
 class RayTracer
 {
 public:
-	void trace(Scene & scene, size_t resX, size_t resY, unsigned char * outputImage)
+	void trace(Scene & scene, size_t resX, size_t resY, size_t rpp, unsigned char * outputImage)
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
@@ -34,16 +34,18 @@ public:
 				Vector3 rc = ray.getDirection();
 				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
 
-				bool hitSomething = false;
-				Hitpoint hit;
-				hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
-				if(hitSomething) {
-					Vector3 floatColor = Shader::shade(ray, hit, scene);
-					floatBuffer.at(x,y) = floatColor;
-					//floatBuffer.at(x,y) = Vector3(0.0f);
+				int hits = 1;
+				Vector3 color = rc;
+				for (int i = 0; i < rpp; i++) {
+					bool hitSomething = false;
+					Hitpoint hit;
+					hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
+					if(hitSomething) {
+						color += Shader::shade(ray, hit, scene);
+						hits++;
+					}
 				}
-				else
-					floatBuffer.at(x,y) = rc;
+				floatBuffer.at(x,y) = color / hits;
 			}
 		}
 

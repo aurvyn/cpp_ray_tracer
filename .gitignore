@@ -1,3 +1,6 @@
+.vscode/
+out.png
+
 *.dll
 *.exe
 Makefile

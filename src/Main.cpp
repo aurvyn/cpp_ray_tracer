@@ -22,31 +22,24 @@ char const * scenePath = defaultScene;
 char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
+size_t rpp = 500;
 
 void getArgs(int argc, char ** argv)
 {
 	for(int i=1; i<argc; i++)
 	{
-		if(strncmp(argv[i], "-linear", 7) == 0 ||
-		   strncmp(argv[i], "-l", 2) == 0)
+		if(strncmp(argv[i], "-linear", 7) == 0 || strncmp(argv[i], "-l", 2) == 0) {
 			usePrimitiveArray = true;
-		
-		else
-		if(strncmp(argv[i], "-res", 4) == 0 ||
-		   strncmp(argv[i], "-r", 2) == 0 )
-		{
+		} else if(strncmp(argv[i], "-res", 4) == 0 || strncmp(argv[i], "-r", 2) == 0 ) {
 			resX = atoi( argv[++i] );
 			resY = atoi( argv[++i] );
-		}
-		
-		else if(!foundScene)
-		{
+		} else if(strncmp(argv[i], "-rpp", 4) == 0 || strncmp(argv[i], "-p", 2) == 0 ) {
+			rpp = atoi( argv[++i] );
+		} else if(!foundScene) {
 			//must be scene name
 			foundScene = true;
 			scenePath = argv[i];
-		}
-		else
-		{
+		} else {
 			outputPath = argv[i];
 			return;
 		}
@@ -57,6 +50,7 @@ void printUsage()
 {
 	printf("usage: trace [options] scene [output]\n");
 	printf("\t-r x y\t set resolution\n");
+	printf("\t-p n\t set rays per pixel\n");
 	printf("\t-l\t linear intersect (very slow)\n");
 }
 
@@ -128,7 +122,7 @@ int main(int argc, char ** argv)
 	Scene scene = loadWithOBJLoader(scenePath);
 
 	RayTracer tracer;
-	tracer.trace(scene, resX, resY, outputImage);
+	tracer.trace(scene, resX, resY, rpp, outputImage);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
 
