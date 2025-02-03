@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Effect.h"
+#include "HSV.h"
 
 class LinearHSVHDR : public Effect
 {
@@ -15,9 +16,15 @@ class LinearHSVHDR : public Effect
 
             for(int y=0; y<resY; y++){
                 for(int x=0; x<resX; x++) {
-                    maxValue = std::max(this->imageBuffer->at(x,y)[2], maxValue);
+                    // Vector3 rgbVal = this->imageBuffer->at(x,y) * 255.0f;
+                    // Vector3 hsvVal = rgb2hsv(rgbVal);
+                    Vector3 hsvVal = this->imageBuffer->at(x,y);
+                    maxValue = std::max(hsvVal[2], maxValue);
+                    // this->imageBuffer->at(x,y) = hsvVal;
                 }
             }
+
+            printf("maxValue = %f\n", maxValue);
 
             if(maxValue <= 1.0f)
                 maxValue = 1.0f;

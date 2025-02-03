@@ -39,7 +39,7 @@ class Effect
             this->imageBuffer = baseImage;
         }
 
-        Buffer<Vector3> *applyEffect() {
+        virtual Buffer<Vector3> *applyEffect() {
             if(this->imageBuffer == NULL) {
                 this->imageBuffer = this->child->applyEffect();
             }
@@ -47,8 +47,21 @@ class Effect
             return this->imageBuffer;
         }
         virtual void _apply() = 0;
-
 };
 
+class BlendMode : public Effect {
+    Effect *layer2 = NULL;
 
+    public:
+        Buffer<Vector3> *imageBuffer2;
+        BlendMode(Effect *layer1, Effect *layer2) : Effect(layer1) {
+            this->layer2 = layer2;
+        }
 
+        Buffer<Vector3> *applyEffect() override {
+            this->imageBuffer = this->child->applyEffect();
+            this->imageBuffer2 = this->layer2->applyEffect();
+            this->_apply();
+            return this->imageBuffer;
+        }
+};

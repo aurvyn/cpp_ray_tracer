@@ -44,7 +44,7 @@ public:
 				if(hitSomething) {
 					Vector3 floatColor = Shader::shade(ray, hit, scene);
 					floatBuffer.at(x,y) = floatColor;
-					//floatBuffer.at(x,y) = Vector3(0.0f);
+					// floatBuffer.at(x,y) = Vector3(0.0f);
 				}
 				else
 					floatBuffer.at(x,y) = rc;
@@ -58,9 +58,6 @@ public:
 			for(int x=0; x<resX; x++)
 			{
 				Vector3 v = floatBuffer.at(x,y);
-				if(x == 250 && y == 250) {
-					printf("pixel = %f %f %f\n", v[0], v[1], v[2]);
-				}
 				Color c = Color(v[0], v[1], v[2]);
 				imageBuffer.at(x,y) = c;
 			}

@@ -2,23 +2,23 @@
 
 #include "Effect.h"
 
-class RGBConvert : public Effect
+class Add : public BlendMode
 {
-    using Effect::Effect; // uses super constructor
-
+    using BlendMode::BlendMode;
+    
     public:
         void _apply() override
         {
-            printf("Running HSVtoRGB!\n");
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
 
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
-                    Vector3 hsvColor = this->imageBuffer->at(x,y);
-                    // toneMappedHSV[2] *= toneMappingScale;
-                    this->imageBuffer->at(x,y) = hsv2rgb(hsvColor);
+                    Vector3 layer1Color = this->imageBuffer->at(x,y);
+                    Vector3 layer2Color = this->imageBuffer2->at(x,y);
+                    this->imageBuffer->at(x,y) = layer1Color + layer2Color;
                 }
             }
         }
 };
+
