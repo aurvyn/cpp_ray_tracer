@@ -12,7 +12,7 @@ class HSVConvert : public Effect
 
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
-                    Vector3 rgbColor = floatBuffer.at(x,y);
+                    Vector3 rgbColor = floatBuffer.at(x,y) * 255.0f;
                     Vector3 hsvColor = rgbToHsv(rgbColor);
                     floatBuffer.at(x,y) = hsvColor;
                 }
