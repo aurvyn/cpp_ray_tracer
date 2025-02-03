@@ -5,42 +5,38 @@
 #include "Effect.h"
 #include <memory>
 #include <vector>
+#include "filters/HSVConvert.h"
+#include "filters/HueShift.h"
+#include "filters/LinearHSVHDR.h"
+#include "filters/RGBConvert.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
 {
-    std::vector<Effect*> effects = std::vector<Effect*>();
+    Effect *root;
     public:
         PostProcessor() {}
-        PostProcessor(std::vector<Effect*> &effects) {
-            this->effects = effects;
+        PostProcessor(Effect *root) {
+            this->root = root;
         }
-        // ~PostProcessor() {
-        //     for(Effect* effect : effects) {
-        //         free(effect);
-        //     }
-        // }
 
-        void process(Buffer<Vector3> &imageBuffer) {
-            for(int i = 0; i < effects.size(); i++) {
-                Effect* effect = effects.at(i);
-                effect->applyEffect(imageBuffer);
-            }
+        void process() {
+            root->applyEffect();
         }
 };
 
-class DefaultPipeline 
+class Pipeline
 {
     public:
-        PostProcessor pp;
-        DefaultPipeline() {
-            std::vector<Effect*> effects = std::vector<Effect*>();
-            // TODO wont work
-            effects.push_back(new HSVConvert());
-            // effects.push_back(new HueShift(20.0));
-            // effects.push_back(new LinearHSVHDR());
-            // effects.push_back(new RGBConvert());
+        virtual PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) = 0;
+};
 
-            this->pp = PostProcessor(effects);
+class DefaultPipeline: public Pipeline
+{
+    public:
+        PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) override {
+            Effect *effect = new RGBConvert(new HSVConvert(imageBuffer));
+
+            return new PostProcessor(effect);
         }
 };

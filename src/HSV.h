@@ -3,6 +3,11 @@
 #include <math.h>
 #include "GenVector.h"
 
+/*
+RGB values are in range [0,255]                          (when normalized)
+HSV values are in range [H: [0,360], S: [0,1], V: [0,1]] (when normalized)
+*/
+
 Vector3 hsv2rgb(Vector3 in)
 {
     double      hh, p, q, t, ff;
@@ -48,7 +53,7 @@ Vector3 hsv2rgb(Vector3 in)
     return out;     
 }
 
-Vector3 rgbToHsv(Vector3 in) {
+Vector3 rgb2hsv(Vector3 in) {
     float r = in[0];
     float g = in[1];
     float b = in[2];

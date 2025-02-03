@@ -14,7 +14,7 @@
 class RayTracer
 {
 public:
-	PostProcessor postProcessor = DefaultPipeline().pp;
+	Pipeline *pipeline = new DefaultPipeline();
 
 	void trace(Scene & scene, size_t resX, size_t resY, unsigned char * outputImage)
 	{
@@ -50,16 +50,17 @@ public:
 					floatBuffer.at(x,y) = rc;
 			}
 		}
-
-		postProcessor.process(floatBuffer);
-
-		// toneMap(floatBuffer, imageBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer);
+		pp->process();
 
 		for(int y=0; y<resY; y++)
 		{
 			for(int x=0; x<resX; x++)
 			{
-				Vector3 v = floatBuffer.at(x,y) * 255.0f;
+				Vector3 v = floatBuffer.at(x,y);
+				if(x == 250 && y == 250) {
+					printf("pixel = %f %f %f\n", v[0], v[1], v[2]);
+				}
 				Color c = Color(v[0], v[1], v[2]);
 				imageBuffer.at(x,y) = c;
 			}
@@ -69,41 +70,6 @@ public:
 		for(int i=0; i<resX*resY*3; i++)
 		{
 			outputImage[i] = renderBuffer[i];
-		}
-	}
-
-private:
-	void toneMap(Buffer<Vector3> & floatBuffer, Buffer<Color> & imageBuffer) const
-	{
-		float maxValue = 0.0f;
-		size_t resX = imageBuffer.getWidth();
-		size_t resY = imageBuffer.getHeight();
-
-		for(int y=0; y<resY; y++)
-		{
-			for(int x=0; x<resX; x++)
-			{
-				Vector3 rgbColor = floatBuffer.at(x,y);
-				Vector3 hsvColor = rgbToHsv(rgbColor);
-				maxValue = std::max(hsvColor[2], maxValue);
-				floatBuffer.at(x,y) = hsvColor;
-			}
-		}
-
-		if(maxValue <= 1.0f)
-			maxValue = 1.0f;
-		
-		float toneMappingScale = 1.0f / maxValue;
-
-		for(int y=0; y<resY; y++)
-		{
-			for(int x=0; x<resX; x++)
-			{
-				Vector3 toneMappedHSV = floatBuffer.at(x,y);
-				toneMappedHSV[2] *= toneMappingScale;
-				Vector3 toneMappedRGBColor = hsv2rgb(toneMappedHSV);
-				floatBuffer.at(x,y) = toneMappedRGBColor;
-			}
 		}
 	}
 };
