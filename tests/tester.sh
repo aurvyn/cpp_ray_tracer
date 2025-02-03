@@ -21,7 +21,7 @@ function comparePerformance()
 function saveImage()
 {
 	scene=$1
-	res=100
+	res=500
 	echo $scene $res
 	output=$( ( time -p $prog -res $res $res $scene $scene.png) )
 }

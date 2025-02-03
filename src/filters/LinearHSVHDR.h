@@ -4,16 +4,18 @@
 
 class LinearHSVHDR : public Effect
 {
+    using Effect::Effect;
+    
     public:
-        void applyEffect(Buffer<Vector3> & floatBuffer) override
+        void _apply() override
         {
             float maxValue = 0.0f;
-            size_t resX = floatBuffer.getWidth();
-            size_t resY = floatBuffer.getHeight();
+            size_t resX = this->imageBuffer->getWidth();
+            size_t resY = this->imageBuffer->getHeight();
 
             for(int y=0; y<resY; y++){
                 for(int x=0; x<resX; x++) {
-                    maxValue = std::max(floatBuffer.at(x,y)[2], maxValue);
+                    maxValue = std::max(this->imageBuffer->at(x,y)[2], maxValue);
                 }
             }
 
@@ -24,9 +26,9 @@ class LinearHSVHDR : public Effect
 
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
-                    Vector3 toneMappedHSV = floatBuffer.at(x,y);
+                    Vector3 toneMappedHSV = this->imageBuffer->at(x,y);
                     toneMappedHSV[2] *= toneMappingScale;
-                    floatBuffer.at(x,y) = toneMappedHSV;
+                    this->imageBuffer->at(x,y) = toneMappedHSV;
                 }
             }
         }
