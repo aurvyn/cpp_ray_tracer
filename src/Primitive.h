@@ -22,12 +22,13 @@ public:
 		return center;
 	}
 
+	// this is kinda bad but i am not sure
 	void setCenter()
 	{
 		center = (this->getDim() / 2) + this->getBBMin();
 	}
 private:
-
+	// added in center
 	Vector3 center;
 };
 

@@ -36,21 +36,7 @@ public:
 				left.add(input[i]);
 			for(int i=input.size()/2; i<input.size(); i++)
 				right.add(input[i]);
-			/* tree vis
-			printf(", spatial median FAIL");
-			*/
 		}
-		/* tree vis
-		else
-			printf(", spatial median");
-		printf(" @ axis(%d) %.3f\n", maxDim, splitPos);
-		*/
-
-		//printf(" @ ");
-		//if(maxDim == 0) printf("x");
-		//if(maxDim == 1) printf("y");
-		//if(maxDim == 2) printf("z");
-		//printf("-axis %.3f\n", splitPos);
 	}
 };
 
