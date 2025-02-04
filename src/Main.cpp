@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <algorithm>
+#include <cmath>
 #include "GenVector.h"
 #include "simplePNG.h"
 #include "Buffer.h"
@@ -11,7 +12,7 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 #include "RayTracer.h"
-
+#include "Aliasing.h"
 
 #define RES 100
 
@@ -120,107 +121,6 @@ Scene loadWithSimpleLoader(char const *path)
 	return scene;
 }
 
-void applyAntiAliasing(unsigned char *inputImage, unsigned char *outputImage, size_t resX, size_t resY)
-{
-	size_t newResX = resX * 2;
-	size_t newResY = resY * 2;
-
-	for (size_t y = 0; y < newResY; y++)
-	{
-		for (size_t x = 0; x < newResX; x++)
-		{
-			int oldX = x / 2;
-			int oldY = y / 2;
-			int index = (oldY * resX + oldX) * 3;
-			int newIndex = (y * newResX + x) * 3;
-
-			outputImage[newIndex] = inputImage[index];
-			outputImage[newIndex + 1] = inputImage[index + 1];
-			outputImage[newIndex + 2] = inputImage[index + 2];
-		}
-	}
-
-	for (size_t y = 1; y < newResY - 1; y++)
-	{
-		for (size_t x = 1; x < newResX - 1; x++)
-		{
-			int index = (y * newResX + x) * 3;
-
-			for (int c = 0; c < 3; c++)
-			{
-				outputImage[index + c] = (
-					outputImage[index + c] +
-					outputImage[index + c - 3] +
-					outputImage[index + c + 3] +
-					outputImage[index + c - newResX * 3] +
-					outputImage[index + c + newResX * 3]
-				) / 5;
-			}
-		}
-	}
-}
-
-
-
-void applyAntiAliasing1(unsigned char *inputImage, unsigned char *outputImage, size_t resX, size_t resY)
-{
-    size_t newResX = resX * 2;
-    size_t newResY = resY * 2;
-
-    
-    for (size_t y = 0; y < newResY; y++)
-    {
-        for (size_t x = 0; x < newResX; x++)
-        {
-            int oldX = x / 2;
-            int oldY = y / 2;
-            int index = (oldY * resX + oldX) * 3;
-            int newIndex = (y * newResX + x) * 3;
-
-            outputImage[newIndex] = inputImage[index];
-            outputImage[newIndex + 1] = inputImage[index + 1];
-            outputImage[newIndex + 2] = inputImage[index + 2];
-        }
-    }
-
-   
-    const float gaussianKernel[3][3] = {
-        {1/16.0f, 1/8.0f, 1/16.0f},
-        {1/8.0f,  1/4.0f, 1/8.0f},
-        {1/16.0f, 1/8.0f, 1/16.0f}
-    };
-
-   
-    for (size_t y = 1; y < newResY - 1; y++)
-    {
-        for (size_t x = 1; x < newResX - 1; x++)
-        {
-            int index = (y * newResX + x) * 3;
-
-            for (int c = 0; c < 3; c++) 
-            {
-                float newValue = 0.0f;
-
-               
-                for (int ky = -1; ky <= 1; ky++) 
-                {
-                    for (int kx = -1; kx <= 1; kx++) 
-                    {
-                        int neighborX = x + kx;
-                        int neighborY = y + ky;
-                        int neighborIndex = (neighborY * newResX + neighborX) * 3;
-                        
-                       
-                        newValue += gaussianKernel[ky + 1][kx + 1] * outputImage[neighborIndex + c];
-                    }
-                }
-
-                // Set the new pixel value
-                outputImage[index + c] = static_cast<unsigned char>(std::clamp(newValue, 0.0f, 255.0f));
-            }
-        }
-    }
-}
 
 int main(int argc, char **argv)
 {
@@ -232,28 +132,29 @@ int main(int argc, char **argv)
 	RayTracer tracer;
 	tracer.trace(scene, resX, resY, outputImage);
 
-	
-	
 
-	simplePNG_write(outputPath, resX, resY, outputImage);
-
-	
 	size_t newResX = resX * 2;
 	size_t newResY = resY * 2;
-	unsigned char *antiAliasedImage = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	applyAntiAliasing(outputImage, antiAliasedImage, resX, resY);
-
+	unsigned char *antiAliasedImageEnd = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
+	unsigned char *antiAliasedImagePerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
 	
+	Aliasing alias;
+	alias.averageAliasing(outputImage, antiAliasedImageEnd, resX, resY);
+	alias.aliasTrace(scene, newResX, newResY, antiAliasedImagePerPixel);
+
 	char antiAliasedOutputPath[256];
+	char antiAliasedOutputPathPP[256];
 	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "aa_%s", outputPath);
-	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImage);
+	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "aapp_%s", outputPath);
 	
-
 	
+	simplePNG_write(outputPath, resX, resY, outputImage);
+	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImageEnd);
+	simplePNG_write(antiAliasedOutputPathPP, newResX, newResY, antiAliasedImagePerPixel);
 
 	free(outputImage);
-	free(antiAliasedImage);
-	
+	free(antiAliasedImageEnd);
+	free(antiAliasedImagePerPixel);
 
 	return 0;
 }
