@@ -122,16 +122,30 @@ Scene loadWithSimpleLoader(char const * path)
 int main(int argc, char ** argv)
 {
 	getArgs(argc, argv);
-	reportArgs();
+	// reportArgs();
 	
 	unsigned char * outputImage = (unsigned char*) malloc( resX * resY * 3 * sizeof(unsigned char));
-	Scene scene = loadWithOBJLoader(scenePath);
+	// Scene scene = loadWithOBJLoader(scenePath);
+
+	// TODO: Actual scene loading
+	// Temp hardcoded scene
+	// REMOVE THIS LATER
+	Scene scene;
+	PrimitiveArray *array = new PrimitiveArray();
+	Sphere *sphere = new Sphere(Vector3(0, 0, 0), 0.5f);
+	array->push_back(sphere);
+	scene.setRootPrimitive(array);
+	scene.setCamera(Camera(Vector3(1, 1, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)));
 
 	RayTracer tracer;
 	// tracer.trace(scene, resX, resY, outputImage);
 	tracer.march(scene, resX, resX, outputImage);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
+
+	delete sphere;
+
+	printf("Done!\n");
 
 	return 0;
 }

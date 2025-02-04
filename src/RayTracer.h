@@ -9,6 +9,9 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 
+#define MIN_RAYMARCH_STEP_SIZE 0.0001
+#define MAX_RAYMARCH_STEPS 100
+
 class RayTracer
 {
 public:
@@ -79,12 +82,32 @@ public:
 		{
 			for (int x = 0; x < resX; x++)
 			{
-				Ray ray = generator.getRay(x, y);
+				Ray currentRay = generator.getRay(x, y);
+				Vector3 rc = currentRay.getDirection();
+				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
+				bool hitSomething = false;
+				Hitpoint hit;
 
-				// 1. Find closest object
-				PrimitiveArray *rootPrim = (PrimitiveArray *)scene.getRootPrimitive();
-				// 2. Get distance and step that amount
-				// 3. Repeat until steps get really small (compare to epsilon)
+				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
+				{
+					float safeStepSize = ((PrimitiveArray *)scene.getRootPrimitive())->getSignedDistance(currentRay.getOrigin());
+					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
+					{
+						// TODO: Record hit point and normal
+						hitSomething = true;
+						break;
+					}
+					currentRay = rayStep(currentRay, safeStepSize);
+				}
+
+				if (hitSomething)
+				{
+					// TODO: actual shading
+					Vector3 floatColor = Vector3(1,1,1);
+					floatBuffer.at(x, y) = floatColor;
+				}
+				else
+					floatBuffer.at(x, y) = rc;
 			}
 		}
 
@@ -105,6 +128,11 @@ public:
 		{
 			outputImage[i] = renderBuffer[i];
 		}
+	}
+
+	Ray rayStep(Ray ray, float stepSize)
+	{
+		return Ray(ray.getDirection(), ray.pointAtParameter(stepSize));
 	}
 
 private:
