@@ -50,9 +50,6 @@ public:
 		encompass(p.getBBMin(), p.getBBMax());
 	}
 	
-	void setMaterialId(size_t materialId) {  }
-	size_t getMaterialId() const { return 0; }
-	
 	virtual Vector3 getBBMin() const
 	{ return this->bbMin; }
 	virtual Vector3 getBBMax() const

@@ -1,6 +1,9 @@
 #ifndef __CAMERA
 #define __CAMERA
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 class Camera
 {
 public:

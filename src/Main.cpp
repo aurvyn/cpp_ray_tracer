@@ -16,6 +16,7 @@
 
 bool usePrimitiveArray = true;
 bool foundScene = false;
+bool sdfRendering = false;
 char const * defaultScene = "test.obj";
 char const * defaultOutput = "test.png";
 char const * scenePath = defaultScene;
@@ -38,6 +39,10 @@ void getArgs(int argc, char ** argv)
 			resX = atoi( argv[++i] );
 			resY = atoi( argv[++i] );
 		}
+		else
+		if (strncmp(argv[i], "-sdf", 4) == 0 ||
+		   strncmp(argv[i], "-s", 2) == 0)
+		    sdfRendering = true;
 		
 		else if(!foundScene)
 		{
@@ -125,25 +130,15 @@ int main(int argc, char ** argv)
 	// reportArgs();
 	
 	unsigned char * outputImage = (unsigned char*) malloc( resX * resY * 3 * sizeof(unsigned char));
-	// Scene scene = loadWithOBJLoader(scenePath);
-
-	// TODO: Actual scene loading
-	// Temp hardcoded scene
-	// REMOVE THIS LATER
-	Scene scene;
-	PrimitiveArray *array = new PrimitiveArray();
-	Sphere *sphere = new Sphere(Vector3(0, 0, 0), 0.5f);
-	array->push_back(sphere);
-	scene.setRootPrimitive(array);
-	scene.setCamera(Camera(Vector3(1, 1, 1), Vector3(0, 0, 0), Vector3(0, 1, 0)));
+	Scene scene = loadWithOBJLoader(scenePath);
 
 	RayTracer tracer;
-	// tracer.trace(scene, resX, resY, outputImage);
-	tracer.march(scene, resX, resX, outputImage);
+	if (sdfRendering) 
+		tracer.march(scene, resX, resX, outputImage);
+	else
+		tracer.trace(scene, resX, resY, outputImage);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
-
-	delete sphere;
 
 	printf("Done!\n");
 

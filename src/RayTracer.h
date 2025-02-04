@@ -84,13 +84,14 @@ public:
 			{
 				Ray currentRay = generator.getRay(x, y);
 				Vector3 rc = currentRay.getDirection();
+				Vector3 origin = currentRay.getOrigin();
 				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
 				bool hitSomething = false;
 				Hitpoint hit;
 
 				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
 				{
-					float safeStepSize = ((PrimitiveArray *)scene.getRootPrimitive())->getSignedDistance(currentRay.getOrigin());
+					float safeStepSize = ((PrimitiveArray *)scene.getRootPrimitive())->getSignedDistance(currentRay.getOrigin(), hit);
 					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
 					{
 						// TODO: Record hit point and normal
@@ -102,8 +103,11 @@ public:
 
 				if (hitSomething)
 				{
-					// TODO: actual shading
-					Vector3 floatColor = Vector3(1,1,1);
+					// use this instead of Shader::shade to show distance field
+					//float appox_dist = -1 * (origin - currentRay.getOrigin()).length();
+					//Vector3 floatColor = Vector3(appox_dist, appox_dist, appox_dist) ;
+
+					Vector3 floatColor = Shader::shade(currentRay, hit, scene);
 					floatBuffer.at(x, y) = floatColor;
 				}
 				else
@@ -147,6 +151,9 @@ private:
 			for (int x = 0; x < resX; x++)
 			{
 				Vector3 floatColor = floatBuffer.at(x, y);
+				floatColor[0] = fabs(floatColor[0]);
+				floatColor[1] = fabs(floatColor[1]);
+				floatColor[2] = fabs(floatColor[2]);
 				float maxComp = floatColor.c[floatColor.maxComponent()];
 				if (maxComp > maxValue)
 					maxValue = maxComp;

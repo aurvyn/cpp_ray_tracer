@@ -74,10 +74,7 @@ public:
 		hit.setMaterialId( this->getMaterialId());
 		return true;
 	}
-	
-	void setMaterialId(size_t materialId) { this->materialId = materialId; }
-	size_t getMaterialId() const { return this->materialId; }
-	
+
 	virtual Vector3 getBBMin() const
 	{
 		Vector3 bound = vertex[0];
@@ -117,7 +114,6 @@ public:
 private:
 	Vector3 vertex[3];
 	Vector3 normal;
-	size_t materialId;
 };
 
 #endif

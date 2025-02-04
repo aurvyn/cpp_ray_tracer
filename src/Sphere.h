@@ -68,9 +68,6 @@ public:
 		return false;
 	}
 
-	void setMaterialId(size_t materialId) { this->materialId = materialId; }
-	size_t getMaterialId() const { return this->materialId; }
-
 	virtual Vector3 getBBMin() const
 	{
 		Vector3 bound;
@@ -98,7 +95,6 @@ public:
 private:
 	Vector3 position;
 	float radius;
-	size_t materialId;
 
 	Vector3 getPosition() const
 	{

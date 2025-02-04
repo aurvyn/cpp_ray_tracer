@@ -33,15 +33,18 @@ public:
 		return this->bounds.getBBMax();
 	}
 
-	float getSignedDistance(Vector3 rayOrigin) const
+	float getSignedDistance(Vector3 rayOrigin, Hitpoint& hitpoint) const
 	{
 		float minDist = INFINITY;
 		for (std::vector<Primitive *>::const_iterator it = begin() ; it != end(); ++it) {
-			// FIXME: Without the cast to Sphere* it tries to call the virtual function, which has no body
-			// Maybe need to implement getSignedDistance() on all prims and make function pure virtual?
-			float dist = ((Sphere *) (*it))->getSignedDistance(rayOrigin);
+			float dist = ((Primitive *) (*it))->getSignedDistance(rayOrigin);
+			Vector3 norm = ((Primitive *) (*it))->getSDFNorm(rayOrigin);
+			size_t material = ((Primitive *) (*it))->getMaterialId();
 			if (dist < minDist) {
 				minDist = dist;
+				hitpoint.setParameter(minDist);
+				hitpoint.setNormal(norm);
+				hitpoint.setMaterialId(material);
 			}
 		}
 		return minDist;
