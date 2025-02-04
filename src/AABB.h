@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "Hitpoint.h"
 #include "Primitive.h"
+#include <iostream>
 
 class AABB : public Primitive
 {
@@ -66,7 +67,8 @@ private:
 	
 	template<bool updateHit>
 	bool _intersect(Ray const & ray, Hitpoint & hit) const
-	{
+	{	
+		//return _fastIntersect<updateHit>(ray, hit);
 		//we want to find the farthest entrace and closest exit to the box
 		//if the exit is closer than the entrance, there is no hit
 		const size_t vecDim = 3;
@@ -116,6 +118,50 @@ private:
 		}
 		
 		return true;
+	}
+
+	bool _fastIntersect(Ray const & ray, Hitpoint & hit) const
+	{
+		float tmin, tmax, tymin, tymax, tzmin, tzmax;
+		float entrance = hit.getParameter();
+		float xInv = ray.getInvDirection()[0];
+		float yInv = ray.getInvDirection()[1];
+		float xOr = ray.getOrigin()[0];
+		float yOr = ray.getOrigin()[1];
+
+		tmin = (bbMin[0] - xOr) * xInv;
+		tmax = (bbMax[0]- xOr) * xInv;
+		if(tmax < tmin)
+				std::swap(tmax, tmin);
+
+		tymin = (bbMin[1] - yOr) * yInv;
+		tymax = (bbMax[1]- yOr) * yInv;
+		if(tymax < tymin)
+				std::swap(tymax, tymin);
+
+		if ( (tmin > tymax) || (tymin > tmax))
+			return false;
+		if (tymin > tmin)
+			tmin = tymin;
+		if (tymax < tmax)
+			tmax = tymax;
+
+		float zInv = ray.getInvDirection()[2];
+		float zOr = ray.getOrigin()[2];
+
+		tzmin = (bbMin[2] - zOr) * zInv;
+		tzmax = (bbMax[2]- zOr) * zInv;
+		if(tzmax < tzmin)
+				std::swap(tzmax, tzmin);
+
+		if ( (tmin > tzmax) || (tzmin > tmax))
+			return false;
+		if (tzmin > tmin)
+			tmin = tzmin;
+		if (tzmax < tmax)
+			tmax = tzmax;
+
+		return true;	
 	}
 };
 
