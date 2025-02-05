@@ -11,6 +11,8 @@
 #include "filters/RGBConvert.h"
 #include "filters/Add.h"
 #include "filters/NoOp.h"
+#include "filters/RGBMultiply.h"
+#include "filters/Negative.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
@@ -36,19 +38,12 @@ class Pipeline
 class DefaultPipeline: public Pipeline
 {
     public:
+        // make && ./build/tracer {scene}
+        // PostProcessor is responsible for making sure the image is in RGB255 format
         PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) override {
-        
-            Effect *effect = new RGBConvert(new LinearHSVHDR(
+            Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
                 (new HueShift(new HSVConvert(imageBuffer)))->init(60.0f)
-                ));
-            // Effect *effect = new NoOp(imageBuffer);
-            // Buffer<Vector3> copy = Buffer<Vector3>(*imageBuffer);
-            // Effect *effect2 =   new RGBConvert(
-            //                         (new HueShift(
-            //                             new HSVConvert(&copy)
-            //                         ))->init(20.0f)
-            //                     );
-            // Effect *root = new Add(effect, effect2);
+            )))))->init(255.0f);
 
             return new PostProcessor(effect);
         }

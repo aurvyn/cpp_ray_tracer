@@ -10,6 +10,7 @@ class LinearHSVHDR : public Effect
     public:
         void _apply() override
         {
+            this->colorSpace = this->child->colorSpace;
             float maxValue = 0.0f;
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
@@ -38,5 +39,6 @@ class LinearHSVHDR : public Effect
                     this->imageBuffer->at(x,y) = toneMappedHSV;
                 }
             }
+            
         }
 };

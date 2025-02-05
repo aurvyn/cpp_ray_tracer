@@ -27,5 +27,6 @@ class HueShift : public Effect
                     this->imageBuffer->at(x,y) = hsvColor;
                 }
             }
+            this->colorSpace = this->child->colorSpace;
         }
 };

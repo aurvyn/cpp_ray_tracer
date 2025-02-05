@@ -7,7 +7,8 @@ class NoOp : public Effect
     using Effect::Effect;
 
     public:
-        void _apply() override
-        { }
+        void _apply() override {
+            this->colorSpace = this->child->colorSpace;
+        }
 };
 

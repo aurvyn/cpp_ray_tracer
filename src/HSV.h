@@ -4,7 +4,7 @@
 #include "GenVector.h"
 
 /*
-RGB values are in range [0,255]                          (when normalized)
+RGB values are in range [0,1]                          (when normalized)
 HSV values are in range [H: [0,360], S: [0,1], V: [0,1]] (when normalized)
 */
 
@@ -30,24 +30,24 @@ Vector3 hsv2rgb(Vector3 in)
 
     switch(i) {
     case 0:
-        out = Vector3(255 * in[2], 255 * t, 255 * p);
+        out = Vector3(in[2], t, p);
         break;
     case 1:
-        out = Vector3(255 * q, 255 * in[2], 255 * p);
+        out = Vector3(q, in[2], p);
         break;
     case 2:
-        out = Vector3(255 * p, 255 * in[2], 255 * t);
+        out = Vector3(p, in[2], t);
         break;
 
     case 3:
-        out = Vector3(255 * p, 255 * q, 255 * in[2]);
+        out = Vector3(p, q, in[2]);
         break;
     case 4:
-        out = Vector3(255 * t, 255 * p, 255 * in[2]);
+        out = Vector3(t, p, in[2]);
         break;
     case 5:
     default:
-        out = Vector3(255 * in[2], 255 * p, 255 * q);        
+        out = Vector3(in[2], p, q);        
         break;
     }
     return out;     
@@ -60,11 +60,6 @@ Vector3 rgb2hsv(Vector3 in) {
     float h;
     float s;
     float v;
-
-    // Normalize RGB values to [0, 1]
-    r /= 255.0;
-    g /= 255.0;
-    b /= 255.0;
 
     float cmax = std::max(std::max(r, g), b);
     float cmin = std::min(std::min(r, g), b);

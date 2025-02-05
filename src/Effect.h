@@ -24,19 +24,24 @@ Ambient Occlusion
 Depth of field
 */
 
+typedef int COLORSPACE;
+static const COLORSPACE RGB = 0;
+static const COLORSPACE HSV = 1;
 
 class Effect
 {
     public:
         Effect *child = NULL;
         Buffer<Vector3> *imageBuffer = NULL;
+        COLORSPACE colorSpace;
 
         Effect(Effect *child) {
             this->child = child;
         }
 
-        Effect(Buffer<Vector3> *baseImage) { // 
+        Effect(Buffer<Vector3> *baseImage, COLORSPACE defaultColorSpace=RGB) { // 
             this->imageBuffer = baseImage;
+            this->colorSpace = defaultColorSpace;
         }
 
         virtual Buffer<Vector3> *applyEffect() {

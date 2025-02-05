@@ -9,7 +9,7 @@ class RGBConvert : public Effect
     public:
         void _apply() override
         {
-            printf("Running HSVtoRGB!\n");
+            this->colorSpace = RGB;
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
 
