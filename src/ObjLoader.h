@@ -81,7 +81,11 @@ public:
 			//printf(" refact: %.2f\n", mtl->refract_index);
 			
 			// printf(" texture: %s\n", mtl->texture_filename);
-			mat.loadTexture(mtl->diffuse_texture_filename);
+			if (mtl->diffuse_texture_filename)
+			{
+				mat.loadTexture(mtl->diffuse_texture_filename);
+			}
+			// mat.loadTexture(mtl->diffuse_texture_filename);
 
 			materials.push_back(mat);
 		}

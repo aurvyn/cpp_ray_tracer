@@ -172,3 +172,4 @@ xcuserdata/
 *.vsix
 
 .idea/
+*.blend
