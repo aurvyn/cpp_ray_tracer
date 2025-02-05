@@ -68,7 +68,7 @@ private:
 	template<bool updateHit>
 	bool _intersect(Ray const & ray, Hitpoint & hit) const
 	{	
-		//return _fastIntersect<updateHit>(ray, hit);
+		return _fastIntersect(ray, hit);
 		//we want to find the farthest entrace and closest exit to the box
 		//if the exit is closer than the entrance, there is no hit
 		const size_t vecDim = 3;
@@ -122,44 +122,42 @@ private:
 
 	bool _fastIntersect(Ray const & ray, Hitpoint & hit) const
 	{
-		float tmin, tmax, tymin, tymax, tzmin, tzmax;
-		float entrance = hit.getParameter();
+		float tmin, tmax, tymin, tymax;
 		float xInv = ray.getInvDirection()[0];
-		float yInv = ray.getInvDirection()[1];
 		float xOr = ray.getOrigin()[0];
-		float yOr = ray.getOrigin()[1];
 
 		tmin = (bbMin[0] - xOr) * xInv;
 		tmax = (bbMax[0]- xOr) * xInv;
 		if(tmax < tmin)
 				std::swap(tmax, tmin);
 
+		if (tmin > hit.getParameter() || tmax < 0)
+			return false;
+		
+		float yInv = ray.getInvDirection()[1];
+		float yOr = ray.getOrigin()[1];
+
 		tymin = (bbMin[1] - yOr) * yInv;
 		tymax = (bbMax[1]- yOr) * yInv;
 		if(tymax < tymin)
 				std::swap(tymax, tymin);
 
+		if ( (tmin > tymax) || (tymin > tmax)) return false;
+		tmin = tymin > tmin ? tymin : tmin;
+		tmax = tymax < tmax ? tymax : tmax;
+
+		yInv = ray.getInvDirection()[2];
+		yOr = ray.getOrigin()[2];
+
+		tymin = (bbMin[2] - yOr) * yInv;
+		tymax = (bbMax[2]- yOr) * yInv;
+		if(tymax < tymin)
+				std::swap(tymax, tymin);
+
 		if ( (tmin > tymax) || (tymin > tmax))
 			return false;
-		if (tymin > tmin)
-			tmin = tymin;
-		if (tymax < tmax)
-			tmax = tymax;
-
-		float zInv = ray.getInvDirection()[2];
-		float zOr = ray.getOrigin()[2];
-
-		tzmin = (bbMin[2] - zOr) * zInv;
-		tzmax = (bbMax[2]- zOr) * zInv;
-		if(tzmax < tzmin)
-				std::swap(tzmax, tzmin);
-
-		if ( (tmin > tzmax) || (tzmin > tmax))
-			return false;
-		if (tzmin > tmin)
-			tmin = tzmin;
-		if (tzmax < tmax)
-			tmax = tzmax;
+		tmin = tymin > tmin ? tymin : tmin;
+		tmax = tymax < tmax ? tymax : tmax;
 
 		return true;	
 	}
