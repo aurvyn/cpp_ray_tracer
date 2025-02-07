@@ -6,8 +6,9 @@
 #include "PrimitiveArray.h"
 #include "SpatialMedian.h"
 #include "ObjectMedian.h"
+#include <iostream>
 
-class BVHNode : public AABB
+class RopedBVHNode : public AABB
 {
 private:
 	bool leafNode;
@@ -15,17 +16,17 @@ private:
 	void const * rope;
 	
 public:
-	BVHNode()
+	RopedBVHNode()
 	{
 		leafNode = false;
 		left = NULL;
-		right = NULL;
+		rope = NULL;
 	}
 	
-	BVHNode const * getLeft() const
+	RopedBVHNode const * getLeft() const
 	{
 		assert(this->leafNode == false);
-		return reinterpret_cast<BVHNode const *>(this->left);
+		return reinterpret_cast<RopedBVHNode const *>(this->left);
 	}
 	
 	/*BVHNode const * getRight() const
@@ -34,10 +35,10 @@ public:
 		return reinterpret_cast<BVHNode const *>(this->right);
 	}*/
 
-    BVHNode const * getRope() const
+    RopedBVHNode const * getRope() const
     {
-        assert(this->leafNode == false);
-        return reinterpret_cast<BVHNode const *>(this->right);
+       // assert(this->leafNode == false);
+        return reinterpret_cast<RopedBVHNode const *>(this->rope);
     }
 	
 	Primitive const * getPrimitve() const
@@ -59,24 +60,23 @@ public:
 		this->leafNode = false;
 	}*/
 
-    void setPointers(BVHNode const * left, BVHNode const * rope)
+    void setChildren(RopedBVHNode const * left, RopedBVHNode const * right)
     {
         this->encompass(*left);
-        // It might try to encompass something that's null which could be bad
-        if(rope)
-            this->encompass(*rope);
+        this->encompass(*right);
 
         this->left = left;
-        this->rope = rope;
         this->leafNode = false;
     }
 
-    void setRope(BVHNode const * rope)
+    void setRope(RopedBVHNode const * rope)
     {
-        if(rope)
+        if(rope) {
             this->encompass(*rope);
-
+        }
+        
         this->rope = rope;
+
     }
 	
 	void setPrimitive(Primitive const * prim)
@@ -86,9 +86,10 @@ public:
 		this->left = prim;
 		this->leafNode = true;
 	}
+
 };
 
-class BVHTree : public Primitive
+class RopedBVHTree : public Primitive
 {
 public:
 	void setContents(PrimitiveArray const * primitives)
@@ -111,9 +112,9 @@ public:
 private:
 	
 	PrimitiveArray prims;
-	BVHNode root;
+	RopedBVHNode root;
 	
-	void buildTree(PrimitiveArray const & primitives, BVHNode * parent, int level, BVHNode * rope)
+	void buildTree(PrimitiveArray const & primitives, RopedBVHNode * parent, int level, const RopedBVHNode * rope)
 	{
 		assert(primitives.size() > 0);
 
@@ -123,6 +124,7 @@ private:
 			/* tree vis
 			printf(", leaf\n");
 			*/
+           
 			parent->setPrimitive(primitives[0]);
             parent->setRope(rope);
 			return;
@@ -138,8 +140,10 @@ private:
 		bool reducingWorkspace = leftPrims.size() < primitives.size() && rightPrims.size() < primitives.size();
 		assert(reducingWorkspace);
 		
-		BVHNode * leftNode = new BVHNode();
-		BVHNode * rightNode = new BVHNode();
+		RopedBVHNode * leftNode = new RopedBVHNode();
+		RopedBVHNode * rightNode = new RopedBVHNode();
+
+        parent->setRope(rope);
 		
 		/* tree vis
 		for(int i=0; i<level; i++) printf(" ");
@@ -150,9 +154,12 @@ private:
 		for(int i=0; i<level; i++) printf(" ");
 		printf("right %d", level);
 		*/
-		buildTree(rightPrims, rightNode, level+1, rope);
+		buildTree(rightPrims, rightNode, level+1, parent->getRope());
 		
-		parent->setPointers(leftNode, rope);
+		parent->setChildren(leftNode, rightNode);
+       // Vector3 center = parent->getBBMax();
+        //std::cout << center[0] << " " << center[1] << " " << center[2] << std::endl;
+
 	}
 	
 	/*virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
@@ -173,25 +180,40 @@ private:
 		return hitLeft || hitRight;
 	}*/
 
-    virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
+    virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, RopedBVHNode const & node) const
 	{
         bool hit = false;
-        while(node) {
-            bool hitNode = node.intersectNoUpdate(ray, hitpoint);
+        const RopedBVHNode* currNode = &node;
+        while(currNode != NULL) {
+            
+            bool hitNode = currNode->intersectNoUpdate(ray, hitpoint);
+
+           /* if (currNode->getRope()) {
+                std::cout << "Rope set: " << currNode << " -> " << currNode->getRope() << ": hitNode is " << hitNode << std::endl;
+            } else {
+                std::cout << "Rope set to NULL for node " << currNode << ": hitNode is " << hitNode << std::endl;
+            }
+
+            if(!hitNode && !currNode->getRope()) {
+                Vector3 min = currNode->getBBMin();
+                Vector3 max = currNode->getBBMax();
+                std::cout << min[0] << " " << min[1] << " " << min[2] << std::endl;
+                std::cout << max[0] << " " << max[1] << " " << max[2] << std::endl;
+            }*/
 		
             if(!hitNode) {
-                node = node->rope;
+                currNode = currNode->getRope();
                 continue;
             }
 
-            if(node.isLeaf())
+            if(currNode->isLeaf())
             {
-                hit = node.getPrimitve()->intersect(ray, hitpoint) || hit;
-                node = node->rope;
-                continue;
+                hit = currNode->getPrimitve()->intersect(ray, hitpoint) || hit;
+                currNode = currNode->getRope();
+            } else 
+            {
+                currNode = currNode->getLeft();
             }
-
-            node = node->left;
 
                 
         }
