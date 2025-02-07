@@ -150,8 +150,8 @@ private:
 		dCoef = clamp(0.0f, 1.0f, dCoef);
 		sCoef = clamp(0.0f, 1.0f, sCoef);
 		
-		// Vector3 Id = surfaceMat.getKd() * dCoef * lightMat.getKd();
-		Vector3 Id = surfaceMat.getKd(0, 0) * dCoef * lightMat.getKd(); // TODO get proper uv coordinates
+		// TODO: This needs to be updated I think
+		Vector3 Id = surfaceMat.getKd() * dCoef * lightMat.getKd();
 		Vector3 Is = surfaceMat.getKs() * sCoef * lightMat.getKs();
 		
 		Vector3 floatColor = (Ia + Id + Is);
