@@ -20,56 +20,45 @@ public:
 	
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{
-		Vector3 e = ray.getOrigin();
-		Vector3 d = ray.getDirection();
-		Vector3 a = this->vertex[0];
-		Vector3 b = this->vertex[1];
-		Vector3 c = this->vertex[2];
+		Vector3 pos = ray.getOrigin();
+		Vector3 dir = ray.getDirection();
+		Vector3 v0 = this->vertex[0];
+		Vector3 v1 = this->vertex[1];
+		Vector3 v2 = this->vertex[2];
 		Vector3 n = this->normal;
 		
-		//first, plane intersection
-		float numer = (a-e).dot(n);
-		float denom = d.dot(n);
-		
-		bool parallelToPlane = denom == 0.0f;
-		if(parallelToPlane)
+		double nDotDir = n.dot(dir);
+		if (nDotDir == 0)
 			return false;
-		
-		float planeHit = numer / denom;
-		bool hitBehindOrigin = planeHit < 0.0f;
-		if(hitBehindOrigin)
+
+		double distance = -(n.dot(pos) + -n.dot(v0)) / nDotDir;
+		if (distance < 0)
 			return false;
-		
-		//triangle bounds
-		Vector3 ab = (b - a);
-		Vector3 bc = (c - b);
-		Vector3 ca = (a - c);
-		
-		Vector3 x = ray.pointAtParameter(planeHit);
-		Vector3 ax = x - a;
-		Vector3 bx = x - b;
-		Vector3 cx = x - c;
-		
-		Vector3 abSide = ab.cross(ax);
-		Vector3 bcSide = bc.cross(bx);
-		Vector3 caSide = ca.cross(cx);
-		
-		float abDir = abSide.dot(n);
-		float bcDir = bcSide.dot(n);
-		float caDir = caSide.dot(n);
-		
-		if(abDir < 0.0f)
+
+		Vector3 location = pos + dir * distance;
+
+		Vector3 c;
+
+		Vector3 bLoc = location - v1;
+		c = (v2 - v1).cross(bLoc);
+		double u = n.dot(c);
+		if (u < 0)
 			return false;
-		if(bcDir < 0.0f)
+
+		Vector3 cLoc = location - v2;
+		c = (v0 - v2).cross(cLoc);
+		double v = n.dot(c);
+		if (v < 0)
 			return false;
-		if(caDir < 0.0f)
+
+		Vector3 aLoc = location - v0;
+		c = (v1 - v0).cross(aLoc);
+		double w = n.dot(c);
+		if (w < 0)
 			return false;
-		
-		bool isCloser = planeHit < hit.getParameter();
-		if(!isCloser)
-			return false;
-			
-		hit.setParameter(planeHit);
+				
+		hit.setParameter(distance);
+		hit.setSurfaceCoords(Vector2(u, v));
 		hit.setNormal(this->normal);
 		hit.setMaterialId( this->getMaterialId());
 		return true;

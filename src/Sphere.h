@@ -62,6 +62,7 @@ public:
 			Vector3 normal = ray.pointAtParameter(closestT) - c;
 			hit.setNormal(normal.normalize());
 			hit.setMaterialId( this->getMaterialId());
+			hit.setSurfaceCoords(sphericalMap(ray.pointAtParameter(closestT)));
 			return true;
 		}
 		
@@ -89,6 +90,20 @@ private:
 	Vector3 position;
 	float radius;
 	size_t materialId;
+
+	Vector2 Sphere::sphericalMap(const Vector3 &point) const
+	{
+		double theta = atan2(point.c[0], point.c[2]);
+
+		double phi = acos(point.c[1] / radius);
+
+		double rawU = theta / (2 * M_PI);
+		double u = 1 - (rawU + 0.5);
+
+		double v = 1 - (phi / M_PI);
+
+		return Vector2(u, v);
+	}
 	
 	Vector3 getPosition() const
 	{ return this->position; }
