@@ -62,7 +62,9 @@ public:
     void setPointers(BVHNode const * left, BVHNode const * rope)
     {
         this->encompass(*left);
-        this->encompass(*rope);
+        // It might try to encompass something that's null which could be bad
+        if(rope)
+            this->encompass(*rope);
 
         this->left = left;
         this->rope = rope;
@@ -71,7 +73,8 @@ public:
 
     void setRope(BVHNode const * rope)
     {
-        this->encompass(*rope);
+        if(rope)
+            this->encompass(*rope);
 
         this->rope = rope;
     }
@@ -152,7 +155,7 @@ private:
 		parent->setPointers(leftNode, rope);
 	}
 	
-	virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
+	/*virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
 	{
 		bool hitNode = node.intersectNoUpdate(ray, hitpoint);
 		
@@ -168,6 +171,32 @@ private:
 		bool hitRight = traverse(ray, hitpoint, *node.getRight());
 		
 		return hitLeft || hitRight;
+	}*/
+
+    virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
+	{
+        bool hit = false;
+        while(node) {
+            bool hitNode = node.intersectNoUpdate(ray, hitpoint);
+		
+            if(!hitNode) {
+                node = node->rope;
+                continue;
+            }
+
+            if(node.isLeaf())
+            {
+                hit = node.getPrimitve()->intersect(ray, hitpoint) || hit;
+                node = node->rope;
+                continue;
+            }
+
+            node = node->left;
+
+                
+        }
+		
+		return hit;
 	}
 };
 
