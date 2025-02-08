@@ -9,13 +9,13 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 
-#define MIN_RAYMARCH_STEP_SIZE 0.0001
+#define MIN_RAYMARCH_STEP_SIZE 0.00001
 #define MAX_RAYMARCH_STEPS 100
 
 class RayTracer
 {
 public:
-	void trace(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage)
+	void trace(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage, bool march)
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
@@ -39,10 +39,13 @@ public:
 
 				bool hitSomething = false;
 				Hitpoint hit;
-				hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
+				if (march)
+					hitSomething = ((PrimitiveArray *)scene.getRootPrimitive())->intersectSDF(ray, hit);
+				else
+					hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
 				if (hitSomething)
 				{
-					Vector3 floatColor = Shader::shade(ray, hit, scene);
+					Vector3 floatColor = Shader::shade(ray, hit, scene, true);
 					floatBuffer.at(x, y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 				}
@@ -104,10 +107,10 @@ public:
 				if (hitSomething)
 				{
 					// use this instead of Shader::shade to show distance field
-					//float appox_dist = -1 * (origin - currentRay.getOrigin()).length();
-					//Vector3 floatColor = Vector3(appox_dist, appox_dist, appox_dist) ;
+					// float appox_dist = -1 * (origin - currentRay.getOrigin()).length();
+					// Vector3 floatColor = Vector3(appox_dist, appox_dist, appox_dist) ;
 
-					Vector3 floatColor = Shader::shade(currentRay, hit, scene);
+					Vector3 floatColor = Shader::shade(currentRay, hit, scene, true);
 					floatBuffer.at(x, y) = floatColor;
 				}
 				else

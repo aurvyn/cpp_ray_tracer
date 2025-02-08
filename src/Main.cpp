@@ -136,7 +136,7 @@ int main(int argc, char ** argv)
 	if (sdfRendering) 
 		tracer.march(scene, resX, resX, outputImage);
 	else
-		tracer.trace(scene, resX, resY, outputImage);
+		tracer.trace(scene, resX, resY, outputImage, false);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
 

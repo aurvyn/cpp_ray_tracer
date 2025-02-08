@@ -1,6 +1,9 @@
 #ifndef __PRIMITVEARRAY
 #define __PRIMITVEARRAY
 
+#define MIN_RAYMARCH_STEP_SIZE 0.00001
+#define MAX_RAYMARCH_STEPS 100
+
 #include "Primitive.h"
 #include "Sphere.h"
 #include "Triangle.h"
@@ -48,6 +51,22 @@ public:
 			}
 		}
 		return minDist;
+	}
+
+	bool intersectSDF(Ray const &ray, Hitpoint &hitpoint) const {
+		Ray currentRay = ray;
+		for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
+		{
+			float safeStepSize = getSignedDistance(currentRay.getOrigin(), hitpoint);
+			if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
+			{
+				// TODO: Record hit point and normal
+				hitpoint.setParameter(safeStepSize);
+				return true;
+			}
+			currentRay = Ray(currentRay.getDirection(), currentRay.pointAtParameter(safeStepSize));
+		}
+		return false;
 	}
 
 	using std::vector<Primitive *>::size;
