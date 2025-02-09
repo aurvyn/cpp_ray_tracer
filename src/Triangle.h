@@ -9,13 +9,14 @@ class Triangle : public Primitive
 {
 public:
 	Triangle() { }
-	Triangle(Vector3 vertexA, Vector3 vertexB, Vector3 vertexC)
+	Triangle(Vector3 vertexA, Vector3 vertexB, Vector3 vertexC, Vector3 motion = Vector3(0.0f))
 	{
 		this->vertex[0] = vertexA;
 		this->vertex[1] = vertexB;
 		this->vertex[2] = vertexC;
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexB).normalize();
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexA).normalize();
+		this->motion = motion;
 	}
 	
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
@@ -71,6 +72,7 @@ public:
 			
 		hit.setParameter(planeHit);
 		hit.setNormal(this->normal);
+		hit.setMotion(this->motion);
 		hit.setMaterialId( this->getMaterialId());
 		return true;
 	}
@@ -117,6 +119,7 @@ public:
 private:
 	Vector3 vertex[3];
 	Vector3 normal;
+	Vector3 motion;
 	size_t materialId;
 };
 

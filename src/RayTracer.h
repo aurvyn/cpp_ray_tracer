@@ -20,6 +20,7 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
+		Buffer<Vector2> motionBuffer = Buffer<Vector2>(resX, resY);
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		for(int y=0; y<resY; y++)
@@ -45,9 +46,13 @@ public:
 					Vector3 floatColor = Shader::shade(ray, hit, scene);
 					floatBuffer.at(x,y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
+					Vector3 motion = hit.getMotion();
+					motion.projectToPlane(-scene.getCamera().getW());
+					motionBuffer.at(x,y) = motion;
 				}
 				else
 					floatBuffer.at(x,y) = rc;
+					motionBuffer.at(x,y) = Vector2(0.0f);
 			}
 		}
 		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer);

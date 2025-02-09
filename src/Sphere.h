@@ -9,10 +9,11 @@ class Sphere : public Primitive
 {
 public:
 	Sphere() { }
-	Sphere(Vector3 position, float radius)
+	Sphere(Vector3 position, float radius, Vector3 motion = Vector3(0.0f))
 	{
 		this->position = position;
 		this->radius = radius;
+		this->motion = motion;
 	}
 	
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
@@ -61,6 +62,7 @@ public:
 			
 			Vector3 normal = ray.pointAtParameter(closestT) - c;
 			hit.setNormal(normal.normalize());
+			hit.setMotion(this->motion);
 			hit.setMaterialId( this->getMaterialId());
 			return true;
 		}
@@ -87,6 +89,7 @@ public:
 	
 private:
 	Vector3 position;
+	Vector3 motion;
 	float radius;
 	size_t materialId;
 	

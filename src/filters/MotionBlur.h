@@ -15,16 +15,18 @@ public:
 
     void _apply() override
     {
-        size_t width = this->imageBuffer->getWidth();
-        size_t height = this->imageBuffer->getHeight();
+        size_t width = imageBuffer->getWidth();
+        size_t height = imageBuffer->getHeight();
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 Vector2 velocity = this->motionBuffer.at(x, y);
-                Color total(0, 0, 0);
-                for (int i = 0; i < this->samples; ++i) {
-
+                Vector3 color = imageBuffer->at(x, y);
+                for (int i = 1; i < samples; ++i) {
+                    Vector2 samplePos = Vector2(x, y) + velocity * i;
+                    color += imageBuffer->at(samplePos[0], samplePos[1]);
                 }
+                imageBuffer->at(x, y) = color / samples;
             }
         }
     }
