@@ -6,10 +6,11 @@ class MotionBlur : public Effect
 {
     using Effect::Effect; // uses super constructor
     
-    Buffer<Vector2> motionBuffer;
+    MotionBuffer motionBuffer;
     int samples;
 public:
-    MotionBlur *init(Buffer<Vector2> motionBuffer, int samples = 32) {
+    MotionBlur *init(MotionBuffer motionBuffer, int samples = 32) {
+        motionBuffer.dilute();
         this->motionBuffer = motionBuffer;
         this->samples = samples;
         return this;

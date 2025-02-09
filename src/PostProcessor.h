@@ -33,7 +33,7 @@ class Pipeline
     public:
         virtual PostProcessor* buildPipeline(
             Buffer<Vector3>* imageBuffer,
-            Buffer<Vector2> *motionBuffer = nullptr
+            MotionBuffer motionBuffer = MotionBuffer(0, 0)
         ) = 0;
 };
 
@@ -42,12 +42,12 @@ class DefaultPipeline: public Pipeline
     public:
         PostProcessor* buildPipeline(
             Buffer<Vector3>* imageBuffer,
-            Buffer<Vector2> *motionBuffer = nullptr
+            MotionBuffer motionBuffer
         ) override {
         
             Effect *effect = (new MotionBlur(new RGBConvert(new LinearHSVHDR(
                 (new HueShift(new HSVConvert(imageBuffer)))->init(60.0f)
-                ))))->init(*motionBuffer);
+                ))))->init(motionBuffer);
             // Effect *effect = new NoOp(imageBuffer);
             // Buffer<Vector3> copy = Buffer<Vector3>(*imageBuffer);
             // Effect *effect2 =   new RGBConvert(

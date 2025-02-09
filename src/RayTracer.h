@@ -58,8 +58,7 @@ public:
 				}
 			}
 		}
-		motionBuffer.dilute();
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &motionBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, motionBuffer);
 		pp->process();
 
 		for(int y=0; y<resY; y++)

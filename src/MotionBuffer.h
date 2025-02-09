@@ -8,11 +8,17 @@ class MotionBuffer : public Buffer<Vector2>
 public:
     using Buffer<Vector2>::Buffer;
 
-    // "samples" controls how smoothly the dilution of the motion buffer is.
-    // Higher samples means more smoothing.
-    // "chunkSize" should be scaled according to the movement of the entire scene.
-    // If an object is too fast and the chunkSize is too small, the blur will appear to be cut out.
-    // chunkSize of 32 means it's diluted in 32 pixel by 32 pixel chunks.
+    /**
+     * Dilutes the motion buffer to eliminate blur cut-offs.
+     * This function is mainly reserved for interal use by the MotionBlur effect.
+     * @param samples The number of samples to take for each pixel.
+     * This controls how smoothly the dilution of the motion buffer is.
+     * Higher number of samples means more smoothing.
+     * @param chunkSize The size of the chunks to dilute, in pixels.
+     * This should be scaled according to the movement of the entire scene.
+     * If an object is too fast and the chunkSize is too small, the blur will appear to be cut out.
+     * If the resolution is high, then this number might need to be increased.
+     */
     MotionBuffer *dilute(int samples = 32, int chunkSize = 32) {
         int width = this->getWidth();
         int height = this->getHeight();
