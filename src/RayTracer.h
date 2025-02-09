@@ -3,6 +3,7 @@
 
 #include "GenVector.h"
 #include "Buffer.h"
+#include "MotionBuffer.h"
 #include "Camera.h"
 #include "Scene.h"
 #include "RayGenerator.h"
@@ -20,6 +21,7 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
+		MotionBuffer motionBuffer(resX, resY);
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		for(int y=0; y<resY; y++)
@@ -45,12 +47,17 @@ public:
 					Vector3 floatColor = Shader::shade(ray, hit, scene);
 					floatBuffer.at(x,y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
+					Vector3 motion = hit.getMotion();
+					motion.projectToPlane(-scene.getCamera().getW());
+					motionBuffer.at(x,y) = motion;
 				}
-				else
+				else {
 					floatBuffer.at(x,y) = rc;
+					motionBuffer.at(x,y) = Vector2(0.0f);
+				}
 			}
 		}
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, motionBuffer);
 		pp->process();
 
 		for(int y=0; y<resY; y++)
