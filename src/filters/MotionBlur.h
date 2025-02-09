@@ -16,6 +16,7 @@ public:
         return this;
     }
 
+    // Applies the motion blur effect bidirectionally to the image buffer.
     void _apply() override
     {
         unsigned int width = imageBuffer->getWidth();

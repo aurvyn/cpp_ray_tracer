@@ -9,7 +9,7 @@ public:
     using Buffer<Vector2>::Buffer;
 
     /**
-     * Dilutes the motion buffer to eliminate blur cut-offs.
+     * Bidirectionally dilutes the motion buffer to eliminate blur cut-offs.
      * This function is mainly reserved for interal use by the MotionBlur effect.
      * @param samples The number of samples to take for each pixel.
      * This controls how smoothly the dilution of the motion buffer is.
