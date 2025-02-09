@@ -11,6 +11,7 @@
 #include "filters/RGBConvert.h"
 #include "filters/Add.h"
 #include "filters/NoOp.h"
+#include "filters/MotionBlur.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
@@ -30,17 +31,23 @@ class PostProcessor
 class Pipeline
 {
     public:
-        virtual PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) = 0;
+        virtual PostProcessor* buildPipeline(
+            Buffer<Vector3>* imageBuffer,
+            Buffer<Vector2> *motionBuffer = nullptr
+        ) = 0;
 };
 
 class DefaultPipeline: public Pipeline
 {
     public:
-        PostProcessor* buildPipeline(Buffer<Vector3>* imageBuffer) override {
+        PostProcessor* buildPipeline(
+            Buffer<Vector3>* imageBuffer,
+            Buffer<Vector2> *motionBuffer = nullptr
+        ) override {
         
-            Effect *effect = new RGBConvert(new LinearHSVHDR(
+            Effect *effect = (new MotionBlur(new RGBConvert(new LinearHSVHDR(
                 (new HueShift(new HSVConvert(imageBuffer)))->init(60.0f)
-                ));
+                ))))->init(*motionBuffer);
             // Effect *effect = new NoOp(imageBuffer);
             // Buffer<Vector3> copy = Buffer<Vector3>(*imageBuffer);
             // Effect *effect2 =   new RGBConvert(

@@ -4,6 +4,8 @@
 
 class MotionBlur : public Effect
 {
+    using Effect::Effect; // uses super constructor
+    
     Buffer<Vector2> motionBuffer;
     unsigned int samples;
 public:

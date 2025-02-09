@@ -1,6 +1,7 @@
 #ifndef __RAYTRACER_H
 #define __RAYTRACER_H
 
+#include <iostream>
 #include "GenVector.h"
 #include "Buffer.h"
 #include "Camera.h"
@@ -55,7 +56,7 @@ public:
 					motionBuffer.at(x,y) = Vector2(0.0f);
 			}
 		}
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &motionBuffer);
 		pp->process();
 
 		for(int y=0; y<resY; y++)
