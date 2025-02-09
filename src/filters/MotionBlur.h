@@ -9,7 +9,7 @@ class MotionBlur : public Effect
     Buffer<Vector2> motionBuffer;
     int samples;
 public:
-    MotionBlur *init(Buffer<Vector2> motionBuffer, int samples = 10) {
+    MotionBlur *init(Buffer<Vector2> motionBuffer, int samples = 32) {
         this->motionBuffer = motionBuffer;
         this->samples = samples;
         return this;
@@ -26,7 +26,7 @@ public:
                 Vector2 velocity = this->motionBuffer.at(x, y);
                 Vector3 color(0.0f);
                 for (int i = 1-samples/2; i < samples/2; ++i) {
-                    Vector2 samplePos = Vector2(x, y) + velocity * i;
+                    Vector2 samplePos = Vector2(x, y) + velocity * i / samples;
                     unsigned int sx = clamp(0, width - 1, samplePos[0]);
                     unsigned int sy = clamp(0, height - 1, samplePos[1]);
                     color += imageBuffer->at(sx, sy);

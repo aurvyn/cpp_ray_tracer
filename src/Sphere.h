@@ -9,7 +9,7 @@ class Sphere : public Primitive
 {
 public:
 	Sphere() { }
-	Sphere(Vector3 position, float radius, Vector3 motion = Vector3(0.0f))
+	Sphere(Vector3 position, float radius, Vector3 motion = Vector3(0.0))
 	{
 		this->position = position;
 		this->radius = radius;
