@@ -51,9 +51,10 @@ public:
 					motion.projectToPlane(-scene.getCamera().getW());
 					motionBuffer.at(x,y) = motion;
 				}
-				else
+				else {
 					floatBuffer.at(x,y) = rc;
 					motionBuffer.at(x,y) = Vector2(0.0f);
+				}
 			}
 		}
 		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &motionBuffer);
