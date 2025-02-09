@@ -7,9 +7,9 @@ class MotionBlur : public Effect
     using Effect::Effect; // uses super constructor
     
     Buffer<Vector2> motionBuffer;
-    unsigned int samples;
+    int samples;
 public:
-    MotionBlur *init(Buffer<Vector2> motionBuffer, unsigned int samples = 10) {
+    MotionBlur *init(Buffer<Vector2> motionBuffer, int samples = 10) {
         this->motionBuffer = motionBuffer;
         this->samples = samples;
         return this;
@@ -17,19 +17,23 @@ public:
 
     void _apply() override
     {
-        size_t width = imageBuffer->getWidth();
-        size_t height = imageBuffer->getHeight();
+        unsigned int width = imageBuffer->getWidth();
+        unsigned int height = imageBuffer->getHeight();
+        Buffer<Vector3> finalBuffer(width, height);
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 Vector2 velocity = this->motionBuffer.at(x, y);
-                Vector3 color = imageBuffer->at(x, y);
-                for (int i = 1; i < samples; ++i) {
+                Vector3 color(0.0f);
+                for (int i = 1-samples/2; i < samples/2; ++i) {
                     Vector2 samplePos = Vector2(x, y) + velocity * i;
-                    color += imageBuffer->at(samplePos[0], samplePos[1]);
+                    unsigned int sx = clamp(0, width - 1, samplePos[0]);
+                    unsigned int sy = clamp(0, height - 1, samplePos[1]);
+                    color += imageBuffer->at(sx, sy);
                 }
-                imageBuffer->at(x, y) = color / samples;
+                finalBuffer.at(x, y) = color / samples;
             }
         }
+        *imageBuffer = finalBuffer;
     }
 };
