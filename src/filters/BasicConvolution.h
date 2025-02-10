@@ -19,7 +19,7 @@ public:
 
     void _apply() override
     {
-        // this->colorSpace = this->child->colorSpace;
+        this->colorSpace = this->child->colorSpace;
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
         for (int i=0; i<3; i++) {
