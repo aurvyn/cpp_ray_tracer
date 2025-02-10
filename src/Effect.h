@@ -15,13 +15,25 @@ Photoshop effects
     Add
     Subtract
     Multiply
+    Negative
 
 Vignette
 Dithering
 Blur
 Sharpness
-Ambient Occlusion
+Ambient Occlusion - when there is a discontinuity in the depth buffer (like a corner), the further object is a little darker
 Depth of field
+
+Blur shadows when they're far away from the light source
+Normal buffer, depth buffer, shadow buffer
+Deferred renderring
+- split render into trace and shade
+- trace creates a buffer of hit information
+- as a postprocessor, shade each pixel
+- this allows you to postprocess the normals, shadows, etc etc beforehand
+- e.g. bend normals of a flat plane to make water
+
+
 */
 
 typedef int COLORSPACE;
