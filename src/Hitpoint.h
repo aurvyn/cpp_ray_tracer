@@ -15,17 +15,20 @@ public:
 	Vector3 getNormal() const { return normal; }
 	size_t getMaterialId() const { return materialId; }
 	Vector2 getSurfaceCoords() const { return surfaceCoords; }
+	Vector3 getBarycentricCoords() const { return barycentricCoords; }
 
 	void setParameter(float const & t) { this->t = t; }
 	void setNormal(Vector3 normal) { this->normal = normal; }
 	void setMaterialId(size_t materialId) {this->materialId = materialId; }
 	void setSurfaceCoords(Vector2 surfaceCoords) { this->surfaceCoords = surfaceCoords; }
+	void setBarycentricCoords(Vector3 barycentricCoords) { this->barycentricCoords = barycentricCoords; }
 
 private:
 	float t;
 	Vector3 normal;
 	size_t materialId;
 	Vector2 surfaceCoords;
+	Vector3 barycentricCoords;
 };
 #endif
 

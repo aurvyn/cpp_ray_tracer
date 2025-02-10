@@ -3,6 +3,7 @@
 
 #include "Ray.h"
 #include "Hitpoint.h"
+#include "Barycentric.h"
 
 class Primitive
 {

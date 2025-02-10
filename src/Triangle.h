@@ -16,8 +16,10 @@ public:
 		this->vertex[2] = vertexC;
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexB).normalize();
 		this->normal = (vertexB - vertexA).cross(vertexC - vertexA).normalize();
+
+		this->bary = new Barycentric(vertexA, vertexB, vertexC);
 	}
-	
+
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{
 		Vector3 pos = ray.getOrigin();
@@ -107,6 +109,8 @@ private:
 	Vector3 vertex[3];
 	Vector3 normal;
 	size_t materialId;
+
+	Barycentric* bary;
 };
 
 #endif
