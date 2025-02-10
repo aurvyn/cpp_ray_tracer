@@ -8,6 +8,7 @@
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
 #include "Shader.h"
+#include <omp.h>
 
 class RayTracer
 {
@@ -18,6 +19,7 @@ public:
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
+		#pragma omp parallel for
 		for(int y=0; y<resY; y++)
 		{
 			for(int x=0; x<resX; x++)

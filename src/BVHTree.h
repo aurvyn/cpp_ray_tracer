@@ -5,6 +5,7 @@
 #include "Primitive.h"
 #include "PrimitiveArray.h"
 #include "SpatialMedian.h"
+#include "ObjectMedian.h"
 
 class BVHNode : public AABB
 {
@@ -103,7 +104,7 @@ private:
 		printf(", nodes %d", primitives.size());
 		*/
 		
-		SpatialMedian split;
+		ObjectMedian split;
 		PrimitiveArray leftPrims, rightPrims;
 		split.split(primitives, leftPrims, rightPrims);
 		
