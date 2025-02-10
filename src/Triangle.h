@@ -9,7 +9,7 @@ class Triangle : public Primitive
 {
 public:
 	Triangle() { }
-	Triangle(Vector3 vertexA, Vector3 vertexB, Vector3 vertexC, Vector3 motion = Vector3(8.0))
+	Triangle(Vector3 vertexA, Vector3 vertexB, Vector3 vertexC, Vector3 motion = Vector3(0.05))
 	{
 		this->vertex[0] = vertexA;
 		this->vertex[1] = vertexB;

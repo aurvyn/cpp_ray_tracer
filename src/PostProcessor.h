@@ -15,6 +15,7 @@
 #include "filters/RGBMultiply.h"
 #include "filters/Negative.h"
 #include "filters/Bound.h"
+#include "filters/Vignette.h"
 #include "filters/BasicConvolution.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?

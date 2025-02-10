@@ -8,6 +8,26 @@ RGB values are in range [0,1]                          (when normalized)
 HSV values are in range [H: [0,360], S: [0,1], V: [0,1]] (when normalized)
 */
 
+Vector3 clampHSV(Vector3 hsv) {
+    return Vector3(clamp(0, 360.0f, hsv[0]), clamp(0, 1, hsv[1]), clamp(0, 1, hsv[2]));
+}
+
+Vector3 clampRGB(Vector3 rgb) {
+    return Vector3(clamp(0, 1, rgb[0]), clamp(0, 1, rgb[1]), clamp(0, 1, rgb[2]));
+}
+
+Vector4 clampHSV(Vector4 hsv) {
+    return Vector4(clamp(0, 360.0f, hsv[0]), clamp(0, 1, hsv[1]), clamp(0, 1, hsv[2]), clamp(0, 1, hsv[3]));
+}
+
+Vector4 clampRGB(Vector4 rgb) {
+    return Vector4(clamp(0, 1, rgb[0]), clamp(0, 1, rgb[1]), clamp(0, 1, rgb[2]), clamp(0, 1, rgb[3]));
+}
+
+
+
+
+
 Vector3 hsv2rgb(Vector3 in)
 {
     double      hh, p, q, t, ff;
