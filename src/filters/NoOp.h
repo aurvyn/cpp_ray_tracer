@@ -8,7 +8,11 @@ class NoOp : public Effect
 
     public:
         void _apply() override {
-            this->colorSpace = this->child->colorSpace;
+            if (!this->child) {
+                this->colorSpace = RGB;
+            } else {
+                this->colorSpace = this->child->colorSpace;
+            }
         }
 };
 
