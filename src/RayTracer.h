@@ -22,6 +22,8 @@ public:
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
 		MotionBuffer motionBuffer(resX, resY);
+		Buffer<Vector3> normalBuffer = Buffer<Vector3>(resX, resY);
+		Buffer<Vector3> depthBuffer = Buffer<Vector3>(resX, resY);
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		for(int y=0; y<resY; y++)
@@ -50,14 +52,18 @@ public:
 					Vector3 motion = hit.getMotion();
 					motion.projectToPlane(-scene.getCamera().getW());
 					motionBuffer.at(x,y) = motion;
+					normalBuffer.at(x,y) = hit.getNormal();
+					depthBuffer.at(x,y) = Vector3(hit.getParameter());
 				}
 				else {
 					floatBuffer.at(x,y) = rc;
 					motionBuffer.at(x,y) = Vector2(0.0f);
+					normalBuffer.at(x,y) = Vector3(0.0f);
+					depthBuffer.at(x,y) = Vector3(std::numeric_limits<float>::max());
 				}
 			}
 		}
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, motionBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, motionBuffer, &normalBuffer, &depthBuffer);
 		pp->process();
 
 		for(int y=0; y<resY; y++)
