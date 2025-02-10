@@ -10,7 +10,7 @@ class MotionBlur : public Effect
     int samples;
 public:
     MotionBlur *init(MotionBuffer motionBuffer, int samples = 32) {
-        motionBuffer.dilute();
+        motionBuffer.dilate();
         this->motionBuffer = motionBuffer;
         this->samples = samples;
         return this;

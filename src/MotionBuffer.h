@@ -9,17 +9,17 @@ public:
     using Buffer<Vector2>::Buffer;
 
     /**
-     * Bidirectionally dilutes the motion buffer to eliminate blur cut-offs.
+     * Bidirectionally dilates the motion buffer to eliminate blur cut-offs.
      * This function is mainly reserved for interal use by the MotionBlur effect.
      * @param samples The number of samples to take for each pixel.
      * This controls how smoothly the dilution of the motion buffer is.
      * Higher number of samples means more smoothing.
-     * @param chunkSize The size of the chunks to dilute, in pixels.
+     * @param chunkSize The size of the chunks to dilate, in pixels.
      * This should be scaled according to the movement of the entire scene.
      * If an object is too fast and the chunkSize is too small, the blur will appear to be cut out.
      * If the resolution is high, then this number might need to be increased.
      */
-    MotionBuffer *dilute(int samples = 32, int chunkSize = 32) {
+    MotionBuffer *dilate(int samples = 32, int chunkSize = 32) {
         int width = this->getWidth();
         int height = this->getHeight();
         MotionBuffer finalBuffer(width, height);
