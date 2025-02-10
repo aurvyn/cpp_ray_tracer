@@ -62,7 +62,7 @@ class DefaultPipeline: public Pipeline
             //     )))->init(60.0f)
             //     )))))->init(255.0f);
             // Effect *effect = (new RGBConvert((new Bound(new HSVConvert(imageBuffer)))->init(900.0f, 1500.0f, 2)));
-            Effect *effect = (new RGBMultiply (new BasicConvolution(new RGBConvert (new LinearHSVHDR( new HSVConvert(imageBuffer))))))->init(2.0f);
+            Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert(imageBuffer)))))->init(255.0f);
             // Effect *effect = new BasicConvolution(imageBuffer);
             return new PostProcessor(effect);
         }
