@@ -84,17 +84,18 @@ public:
 		bound = this->position + radius;
 		return bound;
 	}
+
+	Vector3 getPosition() const
+	{ return this->position; }
+	
+	float getRadius() const
+	{ return this->radius; }
 	
 private:
 	Vector3 position;
 	float radius;
 	size_t materialId;
 	
-	Vector3 getPosition() const
-	{ return this->position; }
-	
-	float getRadius() const
-	{ return this->radius; }
 };
 
 #endif
