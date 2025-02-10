@@ -9,6 +9,10 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 
+#include <vector>
+#include <cmath>
+#include <numbers>
+
 class Aliasing
 {
 public:
@@ -52,7 +56,6 @@ public:
     }
 
     void guassianAliasing(unsigned char *inputImage, unsigned char *outputImage, size_t resX, size_t resY)
-
     {
         size_t newResX = resX * 2;
         size_t newResY = resY * 2;
@@ -72,10 +75,11 @@ public:
             }
         }
 
-        const float gaussianKernel[3][3] = {
-            {1 / 16.0f, 1 / 8.0f, 1 / 16.0f},
-            {1 / 8.0f, 1 / 4.0f, 1 / 8.0f},
-            {1 / 16.0f, 1 / 8.0f, 1 / 16.0f}};
+        int kernelSize = 3; // Adjustable kernel size
+        float sigma = 1.0f; // Standard deviation for Gaussian
+        std::vector<std::vector<float>> gaussianKernel(kernelSize, std::vector<float>(kernelSize));
+
+        computeGaussianKernel(gaussianKernel, sigma, kernelSize);
 
         for (size_t y = 1; y < newResY - 1; y++)
         {
@@ -105,6 +109,97 @@ public:
             }
         }
     }
+
+    void computeGaussianKernel(std::vector<std::vector<float>> &kernel, float sigma, int size) {
+        constexpr float pi = static_cast<float>(M_PI);
+        float gauss_total = 0.0f;
+        int center = size / 2;
+    
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int dx = center - x;
+                int dy = center - y;
+    
+                float part1 = 1.0f / (2.0f * pi * sigma * sigma);
+                float part2 = std::exp(-(dx * dx + dy * dy) / (2.0f * sigma * sigma));
+                float weight = part1 * part2;
+    
+                kernel[y][x] = weight;
+                gauss_total += weight;
+            }
+        }
+    
+       //normalize the kernel
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                kernel[y][x] /= gauss_total;
+            }
+        }
+    }
+    
+    void aliasTraceGaussian(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage) {
+        Buffer<Color> imageBuffer(resX, resY);
+        Buffer<Vector3> floatBuffer(resX, resY);
+        RayGenerator generator(scene.getCamera(), resX, resY);
+    
+        int kernelSize = 3; // Adjustable kernel size
+        float sigma = 1.0f; // Standard deviation for Gaussian
+        std::vector<std::vector<float>> gaussianKernel(kernelSize, std::vector<float>(kernelSize));
+    
+        computeGaussianKernel(gaussianKernel, sigma, kernelSize);
+    
+        int halfSize = kernelSize / 2; // Offset for kernel positioning
+    
+        for (int y = 0; y < resY; y++) {
+            for (int x = 0; x < resX; x++) {
+                Vector3 totalColor(0, 0, 0);
+                float totalWeight = 0.0f;
+    
+                for (int sx = 0; sx < kernelSize; sx++) {
+                    for (int sy = 0; sy < kernelSize; sy++) {
+                        float offsetX = (sx - halfSize + 0.5f) / kernelSize;
+                        float offsetY = (sy - halfSize + 0.5f) / kernelSize;
+    
+                        Ray ray = generator.getRay(x + offsetX, y + offsetY);
+                        Hitpoint hit;
+                        Vector3 sampleColor(0, 0, 0);
+    
+                        if (scene.getRootPrimitive()->intersect(ray, hit)) {
+                            sampleColor = Shader::shade(ray, hit, scene);
+                        } else {
+                            Vector3 rc = ray.getDirection();
+                            sampleColor = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
+                        }
+    
+                        // Apply Gaussian weight
+                        float weight = gaussianKernel[sx][sy];
+                        totalColor += sampleColor * weight;
+                        totalWeight += weight;
+                    }
+                }
+    
+                // Normalize weighted sum
+               
+                floatBuffer.at(x, y) = totalColor/totalWeight;
+            }
+        }
+    
+        toneMap(floatBuffer, imageBuffer);
+    
+        for (int y = 0; y < resY; y++) {
+            for (int x = 0; x < resX; x++) {
+                Vector3 v = floatBuffer.at(x, y) * 255.0f;
+                Color c = Color(v[0], v[1], v[2]);
+                imageBuffer.at(x, y) = c;
+            }
+        }
+    
+        unsigned char *renderBuffer = (unsigned char *)&imageBuffer.at(0, 0);
+        for (int i = 0; i < resX * resY * 3; i++) {
+            outputImage[i] = renderBuffer[i];
+        }
+    }
+
 
     void aliasTrace(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage)
     {
@@ -145,7 +240,7 @@ public:
                         totalColor += sampleColor;
                     }
                 }
-
+                    
                 floatBuffer.at(x, y) = totalColor / samplesPerPixel;
             }
         }

@@ -137,24 +137,29 @@ int main(int argc, char **argv)
 	size_t newResY = resY * 2;
 	unsigned char *antiAliasedImageEnd = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
 	unsigned char *antiAliasedImagePerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
+	unsigned char *antiAliasedImageGuassianPerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
 	
 	Aliasing alias;
 	alias.averageAliasing(outputImage, antiAliasedImageEnd, resX, resY);
 	alias.aliasTrace(scene, newResX, newResY, antiAliasedImagePerPixel);
+	alias.aliasTraceGaussian(scene, newResX, newResY, antiAliasedImageGuassianPerPixel);
 
 	char antiAliasedOutputPath[256];
 	char antiAliasedOutputPathPP[256];
+	char antiAliasedOutputPathPPG[256];
 	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "aa_%s", outputPath);
 	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "aapp_%s", outputPath);
-	
+	snprintf(antiAliasedOutputPathPPG, sizeof(antiAliasedOutputPathPPG), "aappg_%s", outputPath);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
 	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImageEnd);
 	simplePNG_write(antiAliasedOutputPathPP, newResX, newResY, antiAliasedImagePerPixel);
+	simplePNG_write(antiAliasedOutputPathPPG, newResX, newResY, antiAliasedImageGuassianPerPixel);
 
 	free(outputImage);
 	free(antiAliasedImageEnd);
 	free(antiAliasedImagePerPixel);
+	free(antiAliasedImageGuassianPerPixel);
 
 	return 0;
 }
