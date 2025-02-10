@@ -51,7 +51,7 @@ public:
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 					Vector3 motion = hit.getMotion();
 					motion.projectToPlane(-scene.getCamera().getW());
-					motionBuffer.at(x,y) = motion;
+					motionBuffer.at(x,y) = motion * std::min(resX, resY);
 					normalBuffer.at(x,y) = hit.getNormal();
 					depthBuffer.at(x,y) = Vector3(hit.getParameter());
 				}
