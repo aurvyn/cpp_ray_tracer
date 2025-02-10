@@ -48,10 +48,11 @@ class DefaultPipeline: public Pipeline
             Buffer<Vector3>* imageBuffer,
             MotionBuffer motionBuffer
         ) override {
-            Effect *effect = (new MotionBlur((new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
-                (new HueShift(new HSVConvert(imageBuffer)))->init(60.0f)
-                )))))->init(1.0f)
-            ))->init(motionBuffer);
+            Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
+                (new HueShift(new HSVConvert(
+                (new MotionBlur(imageBuffer))->init(motionBuffer)
+                )))->init(60.0f)
+                )))))->init(255.0f);
 
             return new PostProcessor(effect);
         }
