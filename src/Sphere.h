@@ -91,7 +91,7 @@ private:
 	float radius;
 	size_t materialId;
 
-	Vector2 Sphere::sphericalMap(const Vector3 &point) const
+	Vector2 sphericalMap(const Vector3 &point) const
 	{
 		double theta = atan2(point.c[0], point.c[2]);
 

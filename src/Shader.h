@@ -51,6 +51,9 @@ public:
 	
 	size_t materialId() const
 	{ return hit.getMaterialId(); }
+
+	Vector2 surfaceCoords() const
+	{ return hit.getSurfaceCoords(); }
 };
 
 class Shader
@@ -151,7 +154,8 @@ private:
 		sCoef = clamp(0.0f, 1.0f, sCoef);
 		
 		// TODO: This needs to be updated I think
-		Vector3 Id = surfaceMat.getKd() * dCoef * lightMat.getKd();
+		Vector2 uv = hd.surfaceCoords();
+		Vector3 Id = surfaceMat.getKd(uv) * dCoef * lightMat.getKd();
 		Vector3 Is = surfaceMat.getKs() * sCoef * lightMat.getKs();
 		
 		Vector3 floatColor = (Ia + Id + Is);
