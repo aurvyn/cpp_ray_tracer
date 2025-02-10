@@ -36,9 +36,9 @@ class Pipeline
     public:
         virtual PostProcessor* buildPipeline(
             Buffer<Vector3>* imageBuffer,
-            MotionBuffer motionBuffer = MotionBuffer(0, 0),
             Buffer<Vector3>* normalBuffer,
-            Buffer<Vector3>* depthBuffer
+            Buffer<Vector3>* depthBuffer,
+            MotionBuffer motionBuffer = MotionBuffer(0, 0)
         ) = 0;
 };
 
@@ -49,9 +49,9 @@ class DefaultPipeline: public Pipeline
         // PostProcessor is responsible for making sure the image is in RGB255 format
         PostProcessor* buildPipeline(
             Buffer<Vector3>* imageBuffer,
-            MotionBuffer motionBuffer,
             Buffer<Vector3>* normalBuffer,
-            Buffer<Vector3>* depthBuffer
+            Buffer<Vector3>* depthBuffer,
+            MotionBuffer motionBuffer
         ) override {
             Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
                 (new HueShift(new HSVConvert(

@@ -63,7 +63,7 @@ public:
 				}
 			}
 		}
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, motionBuffer, &normalBuffer, &depthBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, motionBuffer);
 		pp->process();
 
 		for(int y=0; y<resY; y++)
