@@ -41,9 +41,29 @@ public:
 			a = objToGenVec(objData.vertexList[ o->vertex_index[0] ]);
 			b = objToGenVec(objData.vertexList[ o->vertex_index[1] ]);
 			c = objToGenVec(objData.vertexList[ o->vertex_index[2] ]);
-			
+
+			Vector2 uvA, uvB, uvC;
+			if (o->texture_index[0] != -1)
+			{
+				uvA = Vector2(objData.textureList[ o->texture_index[0] ]->e[0],
+								objData.textureList[ o->texture_index[0] ]->e[1]);
+			}
+
+			if (o->texture_index[1] != -1)
+			{
+				uvB = Vector2(objData.textureList[ o->texture_index[1] ]->e[0],
+								objData.textureList[ o->texture_index[1] ]->e[1]);
+			}
+
+			if (o->texture_index[2] != -1)
+			{
+				uvC = Vector2(objData.textureList[ o->texture_index[2] ]->e[0],
+								objData.textureList[ o->texture_index[2] ]->e[1]);
+			}
+
 			Triangle * tri = new Triangle(a, b, c);
 			tri->setMaterialId(o->material_index);
+			tri->setUV(uvA, uvB, uvC);
 			primitiveArray->add(tri);
 		}
 		
@@ -80,12 +100,11 @@ public:
 			//printf(" glossy: %i\n", mtl->glossy);
 			//printf(" refact: %.2f\n", mtl->refract_index);
 			
-			// printf(" texture: %s\n", mtl->texture_filename);
+			// printf(" texture: %s\n", mtl->diffuse_texture_filename);
 			if (mtl->diffuse_texture_filename)
 			{
 				mat.loadTexture(mtl->diffuse_texture_filename);
 			}
-			// mat.loadTexture(mtl->diffuse_texture_filename);
 
 			materials.push_back(mat);
 		}

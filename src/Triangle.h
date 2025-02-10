@@ -20,6 +20,13 @@ public:
 		this->bary = new Barycentric(vertexA, vertexB, vertexC);
 	}
 
+	void setUV(Vector2 uvA, Vector2 uvB, Vector2 uvC)
+    {
+        this->uv[0] = uvA;
+        this->uv[1] = uvB;
+        this->uv[2] = uvC;
+    }
+
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{
 		Vector3 pos = ray.getOrigin();
@@ -60,7 +67,8 @@ public:
 			return false;
 				
 		hit.setParameter(distance);
-		hit.setSurfaceCoords(Vector2(u, v));
+		hit.setSurfaceCoords(calcUV(location));
+		// hit.setBarycentricCoords(calcUV(location));
 		hit.setNormal(this->normal);
 		hit.setMaterialId( this->getMaterialId());
 		return true;
@@ -109,8 +117,21 @@ private:
 	Vector3 vertex[3];
 	Vector3 normal;
 	size_t materialId;
+	Vector2 uv[3];
 
 	Barycentric* bary;
+
+	Vector2 calcUV(Vector3 p) const
+	{
+		Vector3 baryCoord = this->bary->getFromP(p);
+
+		Vector2 uvPoint;
+
+		uvPoint.c[0] = uv[0].c[0] * baryCoord.c[0] + uv[1].c[0] * baryCoord.c[1] + uv[2].c[0] * baryCoord.c[2];
+		uvPoint.c[1] = uv[0].c[1] * baryCoord.c[0] + uv[1].c[1] * baryCoord.c[1] + uv[2].c[1] * baryCoord.c[2];
+
+		return uvPoint;
+	}
 };
 
 #endif

@@ -152,10 +152,10 @@ private:
 		float sCoef = pow((hd.view().dot(lr)),p);
 		dCoef = clamp(0.0f, 1.0f, dCoef);
 		sCoef = clamp(0.0f, 1.0f, sCoef);
-		
+
 		// TODO: This needs to be updated I think
 		Vector2 uv = hd.surfaceCoords();
-		Vector3 Id = surfaceMat.getKd(uv) * dCoef * lightMat.getKd();
+		Vector3 Id = surfaceMat.getKd(hd.surfaceCoords()) * dCoef * lightMat.getKd();
 		Vector3 Is = surfaceMat.getKs() * sCoef * lightMat.getKs();
 		
 		Vector3 floatColor = (Ia + Id + Is);
