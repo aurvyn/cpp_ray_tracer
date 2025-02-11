@@ -1,6 +1,5 @@
 .vscode/
-out.png
-test.png
+*.png
 
 *.dll
 *.exe
