@@ -24,7 +24,7 @@ public:
         this->colorSpace = this->child->colorSpace;
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
-        // Buffer<Vector3> tempBuffer(*imageBuffer);
+        Buffer<Vector3> tempBuffer(*imageBuffer);
 
         Vector3 blurSeperatedConvolution = Vector3(0.25f, 0.5f, 0.25f);
 
@@ -34,7 +34,7 @@ public:
                     Vector3 colors(0.0f);
                     int index = 0;
                     for (int j = x-1; j < x+2; j++){
-                        colors[index] = this->imageBuffer->at(j,y)[i];
+                        colors[index] = tempBuffer.at(j,y)[i];
                         index++;
                     }
 
@@ -42,19 +42,19 @@ public:
                     imageBuffer->at(x,y)[i] = combined;
                 }
             }
-            // for(int y=1; y<resY-1; y++) {
-            //     for(int x=0; x<resX; x++) {
-            //         Vector3 colors(0.0f);
-            //         int index = 0;
-            //         for (int k = y-1; k < y+2; y++){
-            //             colors[index] = this->imageBuffer->at(x,k)[i];
-            //             index++;
-            //         }
-            //
-            //         float combined = colors.dot(blurSeperatedConvolution) * imageBuffer->at(x,y)[i];
-            //         this->imageBuffer->at(x,y)[i] = combined;
-            //     }
-            // }
+            for(int y=1; y<resY-1; y++) {
+                for(int x=0; x<resX; x++) {
+                    Vector3 colors(0.0f);
+                    int index = 0;
+                    for (int k = y-1; k < y+2; k++){
+                        colors[index] = tempBuffer.at(x,k)[i];
+                        index++;
+                    }
+
+                    float combined = colors.dot(blurSeperatedConvolution) + imageBuffer->at(x,y)[i];
+                    this->imageBuffer->at(x,y)[i] = combined;
+                }
+            }
         }
 
     }
