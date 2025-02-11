@@ -1,0 +1,23 @@
+[33mcommit 2a75928da9bf920e317dee94634f967286d215d3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mpathtrace[m[33m, [m[1;31morigin/pathtrace[m[33m)[m
+Author: rhit-SPYCHAJR <spychajr@rose-hulman.edu>
+Date:   Thu Feb 6 22:38:53 2025 -0500
+
+    random reflections
+
+[33mcommit ab2e70b3aa1a2ab9abd78c5351b7afd873818d4e[m
+Author: rhit-frantzag <frantzag@rose-hulman.edu>
+Date:   Mon Feb 3 14:38:32 2025 -0500
+
+    Don't commit created pngs
+
+[33mcommit dae058d76df4ff1147b3c18cf166715790434210[m
+Author: seilerar <seilerar@rose-hulman.edu>
+Date:   Mon Feb 3 14:25:05 2025 -0500
+
+    Rays per pixel
+
+[33mcommit 1da3811a3560adfebbe3c96ae0cadcac01618bdc[m[33m ([m[1;31morigin/supersample[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Micah <micah@kixor.net>
+Date:   Wed Jan 29 12:14:39 2025 -0500
+
+    Initial tracer.
