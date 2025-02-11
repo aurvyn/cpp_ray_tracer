@@ -15,6 +15,8 @@
 #include "SDFUnion.h"
 #include "SDFDifference.h"
 #include "Metablob.h"
+#include "Mandelbulb.h"
+#include "JuliaSet.h"
 
 #define RES 100
 
@@ -192,9 +194,13 @@ int main(int argc, char **argv)
 	Primitive *inter = new SDFDifference(s1, s2);
 	inter->setMaterialId(1);
 	primArray->add(inter);
+//    Mandelbulb *mandelbulb = new Mandelbulb(2.f);
+//    primArray->add(mandelbulb);
+    JuliaSet *juliaSet = new JuliaSet({0.3,0.3,0.3,0.3});
+    primArray->add(juliaSet);
 
 
-	Camera cam = Camera(Vector3(1.3, 0, 1.3), Vector3(-.5, 0, 0), Vector3(0, 1, 0));
+	Camera cam = Camera(Vector3(-0.3, 0, 1.6), Vector3(0, 0, -1), Vector3(0, 1, 0));
 
 	scene.setRootPrimitive(primArray);
 	scene.setCamera(cam);
@@ -202,9 +208,9 @@ int main(int argc, char **argv)
 	// Scene scene = getDefaultScene();
 
 	RayTracer tracer;
-	tracer.march(scene, resX, resX, outputImage);
+	tracer.march(scene, resX, resY, outputImage);
 	if (sdfRendering)
-		tracer.march(scene, resX, resX, outputImage);
+		tracer.march(scene, resX, resY, outputImage);
 	else
 		tracer.trace(scene, resX, resY, outputImage, false);
 
