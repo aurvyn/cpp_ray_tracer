@@ -94,10 +94,9 @@ public:
 
 				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
 				{
-					float safeStepSize = ((PrimitiveArray *)scene.getRootPrimitive())->getSignedDistance(currentRay.getOrigin(), hit);
+					float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
 					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
 					{
-						// TODO: Record hit point and normal
 						hitSomething = true;
 						break;
 					}
@@ -109,6 +108,9 @@ public:
 					// use this instead of Shader::shade to show distance field
 					// float appox_dist = -1 * (origin - currentRay.getOrigin()).length();
 					// Vector3 floatColor = Vector3(appox_dist, appox_dist, appox_dist) ;
+
+					// Or use this to show normals
+					// Vector3 floatColor = Vector3(abs(hit.getNormal()[0]), abs(hit.getNormal()[1]), abs(hit.getNormal()[2]));
 
 					Vector3 floatColor = Shader::shade(currentRay, hit, scene, true);
 					floatBuffer.at(x, y) = floatColor;

@@ -24,6 +24,11 @@ public:
 		return center;
 	}
 
+	virtual float getSignedDistance(Vector3 rayOrigin, Hitpoint& hitpoint) const { 
+		LOG_WARN("The native getSignedDistance() function should never be called");
+		return 0.0f;
+	};
+
 	virtual float getSignedDistance(Vector3 rayOrigin) const { 
 		LOG_WARN("The native getSignedDistance() function should never be called");
 		return 0.0f;
