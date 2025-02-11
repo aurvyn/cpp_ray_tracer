@@ -12,14 +12,12 @@ class BVHNode : public AABB
 private:
 	bool leafNode;
 	void const * left;
-	void const * right;
 	
 public:
 	BVHNode()
 	{
 		leafNode = false;
 		left = NULL;
-		right = NULL;
 	}
 	
 	BVHNode const * getLeft() const
@@ -31,7 +29,7 @@ public:
 	BVHNode const * getRight() const
 	{
 		assert(this->leafNode == false);
-		return reinterpret_cast<BVHNode const *>(this->right);
+		return getLeft() + 1;
 	}
 	
 	Primitive const * getPrimitve() const
@@ -43,13 +41,12 @@ public:
 	bool isLeaf() const
 	{ return this->leafNode; }
 	
-	void setChildNodes(BVHNode const * left, BVHNode const * right)
+	void setChildNodes(BVHNode const * left)
 	{
 		this->encompass(*left);
-		this->encompass(*right);
+		this->encompass(*(left + 1));
 		
 		this->left = left;
-		this->right = right;
 		this->leafNode = false;
 	}
 	
@@ -67,6 +64,7 @@ class BVHTree : public Primitive
 public:
 	void setContents(PrimitiveArray const * primitives)
 	{
+		nodePool.reserve(primitives->size() * 2);
 		buildTree(*primitives, &root, 0);
 		//this->prims = *prims;
 		//this->root.encompass(prims->getBBMin(), prims->getBBMax());
@@ -86,6 +84,13 @@ private:
 	
 	PrimitiveArray prims;
 	BVHNode root;
+	std::vector<BVHNode> nodePool;
+
+	BVHNode* allocateNodePair() {
+		size_t index = nodePool.size();
+		nodePool.resize(nodePool.size() + 2);  // Allocate two at once
+		return &nodePool[index];  // Return pointer to left node
+	}
 	
 	void buildTree(PrimitiveArray const & primitives, BVHNode * parent, int level)
 	{
@@ -111,8 +116,8 @@ private:
 		bool reducingWorkspace = leftPrims.size() < primitives.size() && rightPrims.size() < primitives.size();
 		assert(reducingWorkspace);
 		
-		BVHNode * leftNode = new BVHNode();
-		BVHNode * rightNode = new BVHNode();
+		BVHNode * leftNode = allocateNodePair();
+		//BVHNode * rightNode = new BVHNode();
 		
 		/* tree vis
 		for(int i=0; i<level; i++) printf(" ");
@@ -123,9 +128,9 @@ private:
 		for(int i=0; i<level; i++) printf(" ");
 		printf("right %d", level);
 		*/
-		buildTree(rightPrims, rightNode, level+1);
+		buildTree(rightPrims, leftNode + 1, level+1);
 		
-		parent->setChildNodes(leftNode, rightNode);
+		parent->setChildNodes(leftNode);
 	}
 	
 	virtual bool traverse(Ray const & ray, Hitpoint & hitpoint, BVHNode const & node) const
