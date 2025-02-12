@@ -43,12 +43,6 @@ public:
 		return (thetaQuat * phiQuat) * axis;
 	}
     
-	Vector3 getRandomPointOnGreatArc(Vector3 const & axis, float maxTheta) {
-        // The bias towards pure reflection. 
-        float specularCoef = 1 - sqrt(Shader::RandomFloat(0, 1));
-		return getPointOnGreatArc(axis, specularCoef * maxTheta, Shader::RandomFloat(0, M_PI * 2));
-	}
-
     float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir) {
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
         reflectance = clamp(0, 1, reflectance);
@@ -90,9 +84,11 @@ public:
         
         Vector3 dir;
         if (Shader::RandomFloat(0, 1) < percentSpecular) {
-            dir = getRandomPointOnGreatArc(hd.reflection(), MAX_SPECULAR_THETA);
+            // The bias towards pure reflection. 
+            float specularCoef = 1 - sqrt(Shader::RandomFloat(0, 1));
+            dir = getPointOnGreatArc(hd.reflection(), specularCoef * MAX_SPECULAR_THETA, Shader::RandomFloat(0, M_PI * 2));
         } else {
-            dir = getRandomPointOnGreatArc(hd.normal(), M_PI/2);
+            dir = getPointOnGreatArc(hd.reflection(), Shader::RandomFloat(0, M_PI / 2), Shader::RandomFloat(0, M_PI * 2));
         }
         
         return Ray(dir, hd.position() + hd.normal() * RAY_JITTER_EPSILON);
@@ -113,6 +109,7 @@ public:
     
     Color getColor(std::vector<Path> paths) {
         //TODO trace the paths and accumulate lighting information, scaling for path strength (likelihood that path was taken)
+        return Color();
     }
     
 };
