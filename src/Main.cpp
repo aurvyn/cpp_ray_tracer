@@ -121,7 +121,6 @@ Scene loadWithSimpleLoader(char const *path)
 	return scene;
 }
 
-
 int main(int argc, char **argv)
 {
 	getArgs(argc, argv);
@@ -132,34 +131,39 @@ int main(int argc, char **argv)
 	RayTracer tracer;
 	tracer.trace(scene, resX, resY, outputImage);
 
-
 	size_t newResX = resX * 2;
 	size_t newResY = resY * 2;
 	unsigned char *antiAliasedImageEnd = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
 	unsigned char *antiAliasedImagePerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
 	unsigned char *antiAliasedImageGuassianPerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	
+	unsigned char *antiAliasedImageJitterBoxPP = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
+
 	Aliasing alias;
-	alias.averageAliasing(outputImage, antiAliasedImageEnd, resX, resY);
-	alias.aliasTrace(scene, newResX, newResY, antiAliasedImagePerPixel);
+	alias.boxFilterAliasing(outputImage, antiAliasedImageEnd, resX, resY);
+	alias.aliasTraceBoxFilter(scene, newResX, newResY, antiAliasedImagePerPixel);
 	alias.aliasTraceGaussian(scene, newResX, newResY, antiAliasedImageGuassianPerPixel);
+	alias.boxFilterWithJitter(scene, newResX, newResY, antiAliasedImageJitterBoxPP);
 
 	char antiAliasedOutputPath[256];
 	char antiAliasedOutputPathPP[256];
 	char antiAliasedOutputPathPPG[256];
-	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "aa_%s", outputPath);
-	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "aapp_%s", outputPath);
-	snprintf(antiAliasedOutputPathPPG, sizeof(antiAliasedOutputPathPPG), "aappg_%s", outputPath);
-	
+	char antiAliasedOutputPathJitterBox[256];
+	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "boxFilter_%s", outputPath);
+	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "traceBoxFilter_%s", outputPath);
+	snprintf(antiAliasedOutputPathPPG, sizeof(antiAliasedOutputPathPPG), "traceGaussian_%s", outputPath);
+	snprintf(antiAliasedOutputPathJitterBox, sizeof(antiAliasedOutputPathJitterBox), "jitterBox_%s", outputPath);
+
 	simplePNG_write(outputPath, resX, resY, outputImage);
 	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImageEnd);
 	simplePNG_write(antiAliasedOutputPathPP, newResX, newResY, antiAliasedImagePerPixel);
 	simplePNG_write(antiAliasedOutputPathPPG, newResX, newResY, antiAliasedImageGuassianPerPixel);
+	simplePNG_write(antiAliasedOutputPathJitterBox, newResX, newResY, antiAliasedImageJitterBoxPP);
 
 	free(outputImage);
 	free(antiAliasedImageEnd);
 	free(antiAliasedImagePerPixel);
 	free(antiAliasedImageGuassianPerPixel);
+	free(antiAliasedImageJitterBoxPP);
 
 	return 0;
 }
