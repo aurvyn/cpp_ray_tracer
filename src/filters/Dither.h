@@ -29,7 +29,8 @@ class Dither : public Effect
                 for(int g = 0; g < 8; g++) {
                     for(int b = 0; b < 8; b++) {
                         Vector3 c = Vector3((float)r * scl,(float)g * scl,(float)b * scl);
-                        p->push_back(c);
+                        p->push_back(Vector3((float)r * scl,(float)g * scl,(float)b * scl));
+                        
                     }
                 }
             }
@@ -54,9 +55,7 @@ class Dither : public Effect
             for(int i = 0; i < 16; i++) {
                 int x = i % 4;
                 int y = (i / 4);
-                float v = (map[i] - (0.5 * maxValue)) * n2;
-                target->at(x,y) = v;
-                printf("\t(%d,%d)=%f \n", x, y, v);
+                target->at(x,y) = (map[i] / n2) - (0.5 * maxValue);
             }
         }
 
@@ -98,9 +97,8 @@ class Dither : public Effect
                     // 2. calculate luminocity / brightness
                     // 3. calculate 
                     Vector3 color = this->imageBuffer->at(x,y);
-                    float thresholdVal = thresholdMap.at(x % 4, y % 4);
-                    Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
-                    // if(x == resX < 2) printColor(thresholdColor);
+                    Vector3 thresholdColor = color * thresholdMap.at(x % 4, y % 4);
+                    if(x == resX < 2) printColor(thresholdColor);
                     Vector3 closestColor = closestColorInPallette(thresholdColor);
 
                     this->imageBuffer->at(x,y) = closestColor;
