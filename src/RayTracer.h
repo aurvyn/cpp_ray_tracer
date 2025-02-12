@@ -23,7 +23,8 @@ public:
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
 		MotionBuffer motionBuffer(resX, resY);
 		Buffer<Vector3> normalBuffer = Buffer<Vector3>(resX, resY);
-		Buffer<Vector3> depthBuffer = Buffer<Vector3>(resX, resY);
+		Buffer<float> depthFloatBuffer = Buffer<float>(resX, resY);
+		float depthMax = 0.0f;
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		for(int y=0; y<resY; y++)
@@ -53,24 +54,40 @@ public:
 					motion.projectToPlane(-scene.getCamera().getW());
 					motionBuffer.at(x,y) = motion * std::min(resX, resY);
 					normalBuffer.at(x,y) = hit.getNormal();
-					depthBuffer.at(x,y) = Vector3(hit.getParameter());
+					depthFloatBuffer.at(x,y) = hit.getParameter();
+					if (hit.getParameter() > depthMax) {
+						depthMax = hit.getParameter();
+					}
 				}
 				else {
 					floatBuffer.at(x,y) = rc;
 					motionBuffer.at(x,y) = Vector2(0.0f);
 					normalBuffer.at(x,y) = Vector3(0.0f);
-					depthBuffer.at(x,y) = Vector3(std::numeric_limits<float>::max());
+					depthFloatBuffer.at(x,y) = -1.0f;
 				}
 			}
 		}
+
+		Buffer<Vector3> depthBuffer = Buffer<Vector3>(resX, resY);
+
+		for(int y=0; y<resY; y++) {
+			for(int x=0; x<resX; x++) {
+				if (depthFloatBuffer.at(x,y) < 0) {
+					depthBuffer.at(x,y) = Vector3(1.0f);
+				} else {
+					depthBuffer.at(x,y) = Vector3((depthFloatBuffer.at(x,y) / depthMax));
+				}
+			}
+		}
+
 		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, motionBuffer);
-		pp->process();
+		Buffer<Vector3> *ppBuffer = pp->process();
 
 		for(int y=0; y<resY; y++)
 		{
 			for(int x=0; x<resX; x++)
 			{
-				Vector3 v = floatBuffer.at(x,y);
+				Vector3 v = ppBuffer->at(x,y);
 				Color c = Color(v[0], v[1], v[2]);
 				imageBuffer.at(x,y) = c;
 			}

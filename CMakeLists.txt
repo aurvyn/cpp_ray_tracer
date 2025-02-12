@@ -7,6 +7,7 @@ endif()
 # (you can also set it on the command line: -D CMAKE_BUILD_TYPE=Release)
 
 set(EXECUTABLE_NAME "tracer")
+
 project(${EXECUTABLE_NAME})
 
 add_definitions ( -DEXEC_NAME="${EXECUTABLE_NAME}" )

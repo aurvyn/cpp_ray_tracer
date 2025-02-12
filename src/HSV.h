@@ -35,7 +35,7 @@ Vector3 hsv2rgb(Vector3 in)
     Vector3     out;
 
     if(in[1] <= 0.0) {       // < is bogus, just shuts up warnings
-        float v = in[2] * 255;
+        float v = in[2];
         out = Vector3(v, v, v);
         return out;
     }
