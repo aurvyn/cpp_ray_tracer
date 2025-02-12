@@ -42,11 +42,15 @@ class BasicEffect : public Effect {
         this->func = func;
     }
 
+    BasicEffect(PixelEffect func, Buffer<Vector3> *base_image, COLORSPACE ColorSpace=RGB) : Effect(base_image, RGB) {
+        this->func = func;
+    }
+
     void _apply() override
     {
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
-        this->colorSpace = this->child->colorSpace;
+        if (this->child != NULL) this->colorSpace = this->child->colorSpace;
 
         for(int y=0; y<resY; y++) {
             for(int x=0; x<resX; x++) {
@@ -162,6 +166,24 @@ BasicBlendMode *HardLight(Effect *layer1, Effect *layer2)  {
             (b[2] < 0.5) ? (2*a[2]*b[2]) : (1 - 2*(1 - a[2])*(1 - b[2]))
         );
     }, layer1, layer2);
+}
+
+BasicEffect *Negative(Effect *layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return Vector3(1.0) - a;
+    }, layer1);
+}
+
+BasicEffect *NoOp(Effect *layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return a;
+    }, layer1);
+}
+
+BasicEffect *NoOp(Buffer<Vector3>* layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return a;
+    }, layer1);
 }
 
 // BasicEffect *ConstantMultiply(Effect *layer1, float cutoff)  {
