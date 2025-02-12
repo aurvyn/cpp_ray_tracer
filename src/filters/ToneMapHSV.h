@@ -3,7 +3,7 @@
 #include "Effect.h"
 #include "HSV.h"
 
-class LinearHSVHDR : public Effect
+class ToneMapHSV : public Effect
 {
     using Effect::Effect;
     

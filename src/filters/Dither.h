@@ -114,12 +114,8 @@ class Dither : public Effect
             this->thresholdMap4x4(&thresholdMap);
             this->colorSpace = RGB;
 
-
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
-                    // 1. subsample imageBuffer and dither texture
-                    // 2. calculate luminocity / brightness
-                    // 3. calculate 
                     Vector3 color = this->imageBuffer->at(x,y);
                     float thresholdVal = thresholdMap.at(x % 4, y % 4);
                     Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
