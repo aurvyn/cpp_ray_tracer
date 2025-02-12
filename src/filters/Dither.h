@@ -24,21 +24,40 @@ class Dither : public Effect
 
         std::vector<Vector3>* basicPallette() {
             std::vector<Vector3> *p = new std::vector<Vector3>(512); // 8^3
-            float scl = 1.0f / 7.0f; // scales [0,7] -> [0,1]
-            for(int r = 0; r < 8; r++) {
-                for(int g = 0; g < 8; g++) {
-                    for(int b = 0; b < 8; b++) {
+            float scl = 1.0f / 3.0f; // scales [0,7] -> [0,1]
+            for(int r = 0; r < 3; r++) {
+                for(int g = 0; g < 3; g++) {
+                    for(int b = 0; b < 3; b++) {
                         Vector3 c = Vector3((float)r * scl,(float)g * scl,(float)b * scl);
                         p->push_back(Vector3((float)r * scl,(float)g * scl,(float)b * scl));
-                        
                     }
                 }
             }
         }
 
-        void ditherBuffer(Buffer<Vector3> *target) {
-            size_t resX = target->getWidth();
-            size_t resY = target->getHeight();
+        std::vector<Vector3>* coolerPallette() {
+            std::vector<Vector3> *p = new std::vector<Vector3>();
+            p->push_back(fromHex("4b296b"));
+            p->push_back(fromHex("a72608"));
+            p->push_back(fromHex("8F5644"));
+            p->push_back(fromHex("77867f"));
+            p->push_back(fromHex("87b37a"));
+            p->push_back(fromHex("9ce37d"));
+            return p;
+        }
+
+        Vector3 fromHex(char* hex) {
+            int r = hexVal(hex[1]) + 16 * hexVal(hex[0]);
+            int g = hexVal(hex[3]) + 16 * hexVal(hex[2]);
+            int b = hexVal(hex[5]) + 16 * hexVal(hex[4]);
+            return Vector3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
+        }
+
+        int hexVal(char hexVal) {
+            if(hexVal >= 'a') return hexVal - 'a' + 10;
+            else if(hexVal >= 'A') return hexVal - 'A' + 10;
+            else if(hexVal >= '0') return hexVal - '0';
+            else return 0;
         }
 
         // 0 8 2 10
@@ -55,7 +74,8 @@ class Dither : public Effect
             for(int i = 0; i < 16; i++) {
                 int x = i % 4;
                 int y = (i / 4);
-                target->at(x,y) = (map[i] / n2) - (0.5 * maxValue);
+                float v = (map[i] - (0.5 * maxValue)) * n2;
+                target->at(x,y) = v;
             }
         }
 
@@ -81,9 +101,13 @@ class Dither : public Effect
                 // TODO: convert automatically
                 printf("Convert to RGB before calling dither!\n");
             }
-            if(this->pallette == NULL) this->pallette = basicPallette();
+            if(this->pallette == NULL) this->pallette = coolerPallette();
             printColor(closestColorInPallette(Vector3(0.85f, 0.12f, 0.12f)));
             printf("\n");
+            printColor(fromHex("cd0000"));
+            // printColor(closestColorInPallette(fromHex("cd0000")));
+            printf("\n");
+
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
             Buffer<float> thresholdMap = Buffer<float>(4,4);
@@ -97,8 +121,8 @@ class Dither : public Effect
                     // 2. calculate luminocity / brightness
                     // 3. calculate 
                     Vector3 color = this->imageBuffer->at(x,y);
-                    Vector3 thresholdColor = color * thresholdMap.at(x % 4, y % 4);
-                    if(x == resX < 2) printColor(thresholdColor);
+                    float thresholdVal = thresholdMap.at(x % 4, y % 4);
+                    Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
                     Vector3 closestColor = closestColorInPallette(thresholdColor);
 
                     this->imageBuffer->at(x,y) = closestColor;
