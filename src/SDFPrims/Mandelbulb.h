@@ -38,20 +38,7 @@ public:
         return 0.5 * log(r) * r / dr;
     }
 
-    Vector3 getSDFNorm(Vector3 rayOrigin) const {
-        float epsilon = 0.00001f;
-        Vector3 v1 = {
-                getSignedDistance({rayOrigin[0] + epsilon, rayOrigin[1], rayOrigin[2]}),
-                getSignedDistance({ rayOrigin[0], rayOrigin[1] + epsilon, rayOrigin[2] }),
-                getSignedDistance({ rayOrigin[0], rayOrigin[1], rayOrigin[2] + epsilon })
-        };
-        Vector3 v2 = {
-                getSignedDistance({rayOrigin[0] - epsilon, rayOrigin[1], rayOrigin[2]}),
-                getSignedDistance({ rayOrigin[0], rayOrigin[1] - epsilon, rayOrigin[2] }),
-                getSignedDistance({ rayOrigin[0], rayOrigin[1], rayOrigin[2] - epsilon })
-        };
-        return (v1 - v2).normalize();
-    }
+    bool isSDF() const override { return true; };
 
 private:
     float power;

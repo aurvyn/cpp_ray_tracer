@@ -11,16 +11,16 @@
 #include "PrimitiveArray.h"
 #include "Shader.h"
 #include "RayTracer.h"
-#include "SDFIntersect.h"
-#include "SDFUnion.h"
-#include "SDFDifference.h"
-#include "Metablob.h"
-#include "Mandelbulb.h"
-#include "JuliaSet.h"
-#include "Helix.h"
+#include "SDFPrims/SDFIntersect.h"
+#include "SDFPrims/SDFUnion.h"
+#include "SDFPrims/SDFDifference.h"
+#include "SDFPrims/Metablob.h"
+#include "SDFPrims/Mandelbulb.h"
+#include "SDFPrims/JuliaSet.h"
+#include "SDFPrims/Helix.h"
 #include "Donut.h"
 #include "Displacer.h"
-#include "Twister.h"
+#include "SDFPrims/Twister.h"
 #include "SDFSceneLoader.h"
 
 #define RES 100
@@ -140,18 +140,15 @@ int main(int argc, char **argv)
 
 	unsigned char *outputImage = (unsigned char *)malloc(resX * resY * 3 * sizeof(unsigned char));
 	Scene scene;
-	if (!sdfRendering) {
-		reportArgs();
-		scene = loadWithOBJLoader(scenePath);
-	} else {
-		scene = loadWithSDFLoader(scenePath);
-	}
-
 	RayTracer tracer;
-	if (sdfRendering)
-		tracer.march(scene, resX, resY, outputImage);
-	else
-		tracer.trace(scene, resX, resY, outputImage, false);
+	if (sdfRendering){
+        scene = loadWithSDFLoader(scenePath);
+        tracer.march(scene, resX, resY, outputImage);
+    } else {
+        reportArgs();
+        scene = loadWithOBJLoader(scenePath);
+        tracer.trace(scene, resX, resY, outputImage);
+    }
 
 	simplePNG_write(outputPath, resX, resY, outputImage);
 

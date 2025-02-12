@@ -56,7 +56,7 @@ public:
 class Shader
 {
 public:
-	static Vector3 shade(Ray const & ray, Hitpoint const & hit, Scene const & scene, bool march, size_t recurs=0)
+	static Vector3 shade(Ray const & ray, Hitpoint const & hit, Scene const & scene, size_t recurs=0)
 	{
 		Vector3 color;
 		HitDetails hd = HitDetails(ray, hit);
@@ -105,12 +105,9 @@ public:
 			reflectRay.setDirection( hd.reflection() );
 			
 			bool hitSomething = false;
-			if (march)
-				hitSomething = ((PrimitiveArray*)scene.getRootPrimitive())->intersectSDF(reflectRay, reflectHit);
-			else
-				hitSomething = scene.getRootPrimitive()->intersect(reflectRay, reflectHit);
+            hitSomething = scene.getRootPrimitive()->intersect(reflectRay, reflectHit);
 			if(hitSomething)
-				reflectColor = Shader::shade(reflectRay, reflectHit, scene, march, recurs+1);
+				reflectColor = Shader::shade(reflectRay, reflectHit, scene, recurs+1);
 			else
 				reflectColor = Vector3(0.0f);
 			

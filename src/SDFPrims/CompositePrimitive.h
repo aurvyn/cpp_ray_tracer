@@ -24,19 +24,7 @@ public:
         return Vector3(std::max(maxA[0], maxB[0]), std::max(maxA[1], maxB[1]), std::max(maxA[2], maxB[2]));
     }
 
-    Vector3 getSDFNorm(Vector3 rayOrigin) const override
-    {
-        const float h = 0.0001;
-        const Vector3 xyy = Vector3(1, -1, -1);
-        const Vector3 yyx = Vector3(-1, -1, 1);
-        const Vector3 yxy = Vector3(-1, 1, -1);
-        const Vector3 xxx = Vector3(1, 1, 1);
-        return (xyy * getSignedDistance(rayOrigin + xyy * h) +
-                yyx * getSignedDistance(rayOrigin + yyx * h) +
-                yxy * getSignedDistance(rayOrigin + yxy * h) +
-                xxx * getSignedDistance(rayOrigin + xxx * h))
-            .normalize();
-    }
+    bool isSDF() const override { return true; };
 
 protected:
     Primitive *primA, *primB;

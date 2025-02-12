@@ -35,12 +35,22 @@ public:
 	}
 	
 	virtual Vector3 getSDFNorm(Vector3 rayOrigin) const {
-		LOG_WARN("The native getSDFNorm() function should never be called");
-		return Vector3(0, 0, 0);
+        const float h = 0.0001;
+        const Vector3 xyy = Vector3(1, -1, -1);
+        const Vector3 yyx = Vector3(-1, -1, 1);
+        const Vector3 yxy = Vector3(-1, 1, -1);
+        const Vector3 xxx = Vector3(1, 1, 1);
+        return (xyy * getSignedDistance(rayOrigin + xyy * h) +
+                yyx * getSignedDistance(rayOrigin + yyx * h) +
+                yxy * getSignedDistance(rayOrigin + yxy * h) +
+                xxx * getSignedDistance(rayOrigin + xxx * h))
+                .normalize();
 	}
 
 	void setMaterialId(size_t materialId) { this->materialId = materialId; }
 	size_t getMaterialId() const { return this->materialId; }
+
+    virtual bool isSDF()const{return false;};
 protected:
 	size_t materialId = 0;
 };

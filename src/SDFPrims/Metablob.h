@@ -19,6 +19,7 @@ public:
     return std::min(aDist, bDist) - h * h * k * (1.0 / 4.0);
   }
 
+    bool isSDF() const override { return true; };
 private:
   float tolerance;
 };

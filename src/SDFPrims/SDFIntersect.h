@@ -1,7 +1,7 @@
 #ifndef __SDFINTERSECT
 #define __SDFINTERSECT
 
-#include "CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitive.h"
 
 class SDFIntersect : public CompositePrimitive
 {
@@ -12,6 +12,7 @@ public:
   {
     return std::max(primA->getSignedDistance(rayOrigin), primB->getSignedDistance(rayOrigin));
   };
+  bool isSDF() const override { return true; };
 };
 
 #endif

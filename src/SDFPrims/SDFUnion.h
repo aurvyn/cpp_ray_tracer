@@ -1,7 +1,7 @@
 #ifndef __SDFUNION
 #define __SDFUNION
 
-#include "CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitive.h"
 
 class SDFUnion : public CompositePrimitive
 {
@@ -12,6 +12,7 @@ public:
   {
     return std::min(primA->getSignedDistance(rayOrigin), primB->getSignedDistance(rayOrigin));
   };
+  bool isSDF() const override { return true; };
 };
 
 #endif

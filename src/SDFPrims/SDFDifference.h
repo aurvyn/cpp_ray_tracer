@@ -1,7 +1,7 @@
 #ifndef __SDFDIFFERENCE
 #define __SDFDIFFERENCE
 
-#include "CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitive.h"
 
 class SDFDifference : public CompositePrimitive
 {
@@ -12,6 +12,7 @@ public:
   {
     return std::max(primA->getSignedDistance(rayOrigin), -primB->getSignedDistance(rayOrigin));
   };
+  bool isSDF() const override { return true; };
 };
 
 #endif

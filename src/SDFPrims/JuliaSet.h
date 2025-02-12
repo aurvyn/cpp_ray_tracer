@@ -133,6 +133,8 @@ public:
         return Vector3(rez.x, rez.y, rez.z).normalize();
     }
 
+    bool isSDF() const override { return true; };
+
 private:
     vec4 c;
 
