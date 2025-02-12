@@ -67,6 +67,26 @@ BasicBlendMode *Multiply(Effect *layer1, Effect *layer2)  {
     }, layer1, layer2);
 }
 
+BasicBlendMode *Overlay(Effect *layer1, Effect *layer2)  {
+    return new BasicBlendMode([](Vector3 a, Vector3 b) {
+        return Vector3(
+            (a[0] < 0.5) ? (2*a[0]*b[0]) : (1 - 2*(1 - a[0])*(1 - b[0])),
+            (a[1] < 0.5) ? (2*a[1]*b[1]) : (1 - 2*(1 - a[1])*(1 - b[1])),
+            (a[2] < 0.5) ? (2*a[2]*b[2]) : (1 - 2*(1 - a[2])*(1 - b[2]))
+        );
+    }, layer1, layer2);
+}
+
+BasicBlendMode *HardLight(Effect *layer1, Effect *layer2)  {
+    return new BasicBlendMode([](Vector3 a, Vector3 b) {
+        return Vector3(
+            (b[0] < 0.5) ? (2*a[0]*b[0]) : (1 - 2*(1 - a[0])*(1 - b[0])),
+            (b[1] < 0.5) ? (2*a[1]*b[1]) : (1 - 2*(1 - a[1])*(1 - b[1])),
+            (b[2] < 0.5) ? (2*a[2]*b[2]) : (1 - 2*(1 - a[2])*(1 - b[2]))
+        );
+    }, layer1, layer2);
+}
+
 BasicEffect *CMultiply(Effect *layer1, float cutoff)  {
     auto mul = [](Vector3 a) {
         return a*25.0f;
