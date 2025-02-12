@@ -8,13 +8,13 @@ class Material
 public:
 	Material()
 	{
-		ka = Vector3(0.2);
+		ka = Vector3(0.5);
 		kd = Vector3(0.5);
-		kd = Vector3(0.5);
+		ks = Vector3(0.5);
 		reflectance = 0.0;
 		translucency = 0.0;
+		shininess = 1.0;
 	}
-	
 	void setKa(Vector3 c) { this->ka = c; }
 	void setKd(Vector3 c) { this->kd = c; }
 	void setKs(Vector3 c) { this->ks = c; }

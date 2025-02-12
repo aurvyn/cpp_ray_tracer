@@ -17,6 +17,11 @@
 #include "Metablob.h"
 #include "Mandelbulb.h"
 #include "JuliaSet.h"
+#include "Helix.h"
+#include "Donut.h"
+#include "Displacer.h"
+#include "Twister.h"
+#include "SDFSceneLoader.h"
 
 #define RES 100
 
@@ -129,86 +134,20 @@ Scene loadWithSimpleLoader(char const *path)
 	return scene;
 }
 
-Scene getDefaultScene() {
-	Scene scene;
-
-	// FIXME: A lot of this stuff is never deleted
-	// Memory leaks! YAY!!!!
-	// Also shading doesn't work
-	// This thing kinda sucks
-	std::vector<Material> materials;
-	Material testMat;
-	testMat.setKa(0.2);
-	testMat.setKd(0.5);
-	testMat.setKs(0.1);
-	testMat.setReflectance(0.0f);
-	testMat.setTranslucency(0.0f);
-	testMat.setShininess(0.0f);
-	materials.push_back(testMat);
-	Material testLight;
-	testLight.setKa(10);
-	testLight.setKd(10);
-	testLight.setKs(10);
-	testLight.setReflectance(0.0f);
-	testLight.setTranslucency(0.0f);
-	testLight.setShininess(0.0f);
-	materials.push_back(testLight);
-	scene.setMaterials(materials);
-
-	std::vector<Light *> lights;
-	Light *light = new Light();
-	light->setPosition(Vector3(1, 0, 2));
-	light->setMaterialId(1);
-	scene.setLights(lights);
-
-	PrimitiveArray *primArray = new PrimitiveArray();
-	Sphere *s1 = new Sphere(Vector3(-.5, 0, 0), 1);
-	s1->setMaterialId(0);
-	Sphere *s2 = new Sphere(Vector3(.5, 0, 0), 1);
-	s2->setMaterialId(0);
-	Primitive *inter = new SDFDifference(s1, s2);
-	inter->setMaterialId(0);
-	primArray->add(inter);
-
-	Camera cam = Camera(Vector3(0, 0, 3), Vector3(0, 0, 0), Vector3(0, 1, 0));
-
-	scene.setRootPrimitive(primArray);
-	scene.setCamera(cam);
-
-	return scene;
-}
-
 int main(int argc, char **argv)
 {
 	getArgs(argc, argv);
-	reportArgs();
 
 	unsigned char *outputImage = (unsigned char *)malloc(resX * resY * 3 * sizeof(unsigned char));
-	Scene scene = loadWithOBJLoader(scenePath);
-
-	PrimitiveArray *primArray = new PrimitiveArray();
-	Sphere *s1 = new Sphere(Vector3(-.5, 0, 0), 1);
-	s1->setMaterialId(0);
-	Sphere *s2 = new Sphere(Vector3(.5, 0, 0), 1);
-	s2->setMaterialId(0);
-	Primitive *inter = new SDFDifference(s1, s2);
-	inter->setMaterialId(1);
-	primArray->add(inter);
-//    Mandelbulb *mandelbulb = new Mandelbulb(2.f);
-//    primArray->add(mandelbulb);
-    JuliaSet *juliaSet = new JuliaSet({0.3,0.3,0.3,0.3});
-    primArray->add(juliaSet);
-
-
-	Camera cam = Camera(Vector3(-0.3, 0, 1.6), Vector3(0, 0, -1), Vector3(0, 1, 0));
-
-	scene.setRootPrimitive(primArray);
-	scene.setCamera(cam);
-
-	// Scene scene = getDefaultScene();
+	Scene scene;
+	if (!sdfRendering) {
+		reportArgs();
+		scene = loadWithOBJLoader(scenePath);
+	} else {
+		scene = loadWithSDFLoader(scenePath);
+	}
 
 	RayTracer tracer;
-	tracer.march(scene, resX, resY, outputImage);
 	if (sdfRendering)
 		tracer.march(scene, resX, resY, outputImage);
 	else

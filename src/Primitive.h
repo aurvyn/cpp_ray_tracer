@@ -27,17 +27,17 @@ public:
 	virtual float getSignedDistance(Vector3 rayOrigin, Hitpoint& hitpoint) const { 
 		LOG_WARN("The native getSignedDistance() function should never be called");
 		return 0.0f;
-	};
+	}
 
 	virtual float getSignedDistance(Vector3 rayOrigin) const { 
 		LOG_WARN("The native getSignedDistance() function should never be called");
 		return 0.0f;
-	};
+	}
 	
 	virtual Vector3 getSDFNorm(Vector3 rayOrigin) const {
 		LOG_WARN("The native getSDFNorm() function should never be called");
 		return Vector3(0, 0, 0);
-	};
+	}
 
 	void setMaterialId(size_t materialId) { this->materialId = materialId; }
 	size_t getMaterialId() const { return this->materialId; }
