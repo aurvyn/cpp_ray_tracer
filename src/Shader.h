@@ -76,20 +76,19 @@ public:
 	}
 
 	static Vector3 getRandomPointOnSphere(const Sphere & lightSphere) {
-    float u = RandomFloat(0.0f, 1.0f);
-    float v = RandomFloat(0.0f, 1.0f);
-    float theta = 2.0f * M_PI * u;
-    float phi = acos(2.0f * v - 1.0f);
-    float x = sin(phi) * cos(theta);
-    float y = sin(phi) * sin(theta);
-    float z = cos(phi);
-    Vector3 sampleDir(x, y, z);
-    sampleDir.normalize();
-    sampleDir *= lightSphere.getRadius();
-    return lightSphere.getPosition() + sampleDir;
-}
-
-
+	    float u = RandomFloat(0.0f, 1.0f);
+	    float v = RandomFloat(0.0f, 1.0f);
+	    float theta = 2.0f * M_PI * u;
+	    float phi = acos(2.0f * v - 1.0f);
+	    float x = sin(phi) * cos(theta);
+	    float y = sin(phi) * sin(theta);
+	    float z = cos(phi);
+	    Vector3 sampleDir(x, y, z);
+	    sampleDir.normalize();
+	    sampleDir *= lightSphere.getRadius();
+	    return lightSphere.getPosition() + sampleDir;
+	}
+	
 	static Vector3 shade(Ray const & ray, Hitpoint const & hit, Scene const & scene, size_t recurs=0)
 	{
 		Vector3 color;

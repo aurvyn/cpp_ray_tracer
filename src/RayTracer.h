@@ -10,6 +10,8 @@
 #include "Shader.h"
 #include <omp.h>
 
+#include "PathTracer.h"
+
 class RayTracer
 {
 public:
@@ -17,6 +19,9 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
+		
+		//TODO use this to trace each ray and accumulate the paths
+		PathTracer pathTracer;
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		#pragma omp parallel for
@@ -39,10 +44,8 @@ public:
 				int hits = 1;
 				Vector3 color = rc;
 				for (int i = 0; i < rpp; i++) {
-					bool hitSomething = false;
 					Hitpoint hit;
-					hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
-					if(hitSomething) {
+					if(scene.getRootPrimitive()->intersect(ray, hit)) {
 						color += Shader::shade(ray, hit, scene);
 						hits++;
 					}
@@ -50,6 +53,12 @@ public:
 				floatBuffer.at(x,y) = color / hits;
 			}
 		}
+		
+		//TODO for each light, trace a bunch of points on it and accumulate those too
+		
+		//TODO stitch the camera and light paths together n-to-n, using PathTracer::combine.
+		
+		//TODO compute the color for each path and accumulate it into the output buffer
 
 		toneMap(floatBuffer, imageBuffer);
 

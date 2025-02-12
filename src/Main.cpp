@@ -68,7 +68,7 @@ void reportArgs()
 	printf("%s: ", scenePath);
 			   
 	//if(resX != RES || resY != RES)
-		printf("res %ix%i ", resX, resY);
+		printf("res %lix%li ", resX, resY);
 	if(usePrimitiveArray)
 		printf("linear ray intersect (slow) ");
 	printf("\n");
