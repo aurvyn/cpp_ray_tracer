@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Effect.h"
-#define clamp(a,b,v) (v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) )
+#define clamp(a,b,v) ((v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) ))
 #define lerp(a, b, t) (a + ((b - a) * t))
 
 class Vignette : public Effect

@@ -195,3 +195,28 @@ BasicEffect *ConstMultiply(Effect *layer1, float cutoff)  {
     };
     return new BasicEffect(mul, layer1);
 }
+
+enum ThresholdOptions {
+    RED   = 0,
+    GREEN = 1,
+    BLUE  = 2,
+    AVG   = 3,
+    MAX   = 4,
+};
+
+BasicEffect *Threshold(Effect *layer1, float cutoff, ThresholdOptions on)  {
+    if (on < 3) {
+        return new BasicEffect([on, cutoff](Vector3 a) {
+            return Vector3(a[on] > cutoff);
+        }, layer1);
+    } else if (on == AVG) {
+        return new BasicEffect([cutoff](Vector3 a) {
+            return Vector3((a[0] + a[1] + a[2])/3 > cutoff);
+        }, layer1);
+    } else if (on == MAX) {
+        return new BasicEffect([cutoff](Vector3 a) {
+            return Vector3(std::max(std::max(a[0], a[1]), a[2]) > cutoff);
+        }, layer1);
+    }
+    // TODO what here
+}
