@@ -19,21 +19,21 @@ public:
      * If an object is too fast and the chunkSize is too small, the blur will appear to be cut out.
      * If the resolution is high, then this number might need to be increased.
      */
-    MotionBuffer *dilute(int samples = 32, int chunkSize = 32) {
+    MotionBuffer *dilate(int samples = 32, int chunkSize = 16) {
         int width = this->getWidth();
         int height = this->getHeight();
+        Buffer<Vector2> neighborBuffer(width/chunkSize + 1, height/chunkSize + 1);
         MotionBuffer finalBuffer(width, height);
-        for (int i = 0; i <= width/chunkSize; ++i) {
-            for (int j = 0; j <= height/chunkSize; ++j) {
+        for (int i = 0; i < neighborBuffer.getWidth(); ++i) {
+            for (int j = 0; j < neighborBuffer.getHeight(); ++j) {
                 int offset_x = i*chunkSize;
                 int offset_y = j*chunkSize;
                 int chunkWidth = std::min(chunkSize, width - offset_x);
                 int chunkHeight = std::min(chunkSize, height - offset_y);
                 float highestMagnitude = 0.0f;
                 Vector2 guidingVelocity = this->at(offset_x, offset_y);
-                int m, n;
-                for (m = 0; m < chunkWidth; ++m) {
-                    for (n = 0; n < chunkHeight; ++n) {
+                for (int m = 0; m < chunkWidth; ++m) {
+                    for (int n = 0; n < chunkHeight; ++n) {
                         Vector2 motion = this->at(offset_x+m, offset_y+n);
                         float magnitude = motion.length();
                         if (magnitude > highestMagnitude) {
@@ -42,8 +42,41 @@ public:
                         }
                     }
                 }
-                for (m = 0; m < chunkWidth; ++m) {
-                    for (n = 0; n < chunkHeight; ++n) {
+                neighborBuffer.at(i, j) = guidingVelocity;
+            }
+        }
+        Buffer<Vector2> neighborHood(neighborBuffer.getWidth(), neighborBuffer.getHeight());
+        for (int i = 0; i < neighborBuffer.getWidth(); ++i) {
+            for (int j = 0; j < neighborBuffer.getHeight(); ++j) {
+                Vector2 guidingVelocity = neighborBuffer.at(i, j);
+                Vector2 neighborVelocity = Vector2(0.0f);
+                float highestMagnitude = 0.0f;
+                for (int k = -1; k <= 1; ++k) {
+                    for (int l = -1; l <= 1; ++l) {
+                        int sx = i + k;
+                        int sy = j + l;
+                        if (sx >= 0 && sx < neighborBuffer.getWidth()
+                         && sy >= 0 && sy < neighborBuffer.getHeight()) {
+                            float magnitude = neighborBuffer.at(sx, sy).length();
+                            if (magnitude > highestMagnitude) {
+                                highestMagnitude = magnitude;
+                                neighborVelocity = neighborBuffer.at(sx, sy);
+                            }
+                        }
+                    }
+                }
+                neighborHood.at(i, j) = neighborVelocity;
+            }
+        }
+        for (int i = 0; i < neighborHood.getWidth(); ++i) {
+            for (int j = 0; j < neighborHood.getHeight(); ++j) {
+                int offset_x = i*chunkSize;
+                int offset_y = j*chunkSize;
+                int chunkWidth = std::min(chunkSize, width - offset_x);
+                int chunkHeight = std::min(chunkSize, height - offset_y);
+                Vector2 guidingVelocity = neighborHood.at(i, j);
+                for (int m = 0; m < chunkWidth; ++m) {
+                    for (int n = 0; n < chunkHeight; ++n) {
                         int x = offset_x+m;
                         int y = offset_y+n;
                         Vector2 velocity(0.0f);
