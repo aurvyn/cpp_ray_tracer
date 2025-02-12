@@ -1,12 +1,15 @@
 #pragma once
 
+#include <functional>
 #include "Effect.h"
 
-// typedef std::function<Vector3(Vector3, Vector3)> PixelBlend;
-typedef Vector3 (*PixelBlend)(Vector3, Vector3);
-typedef Vector3 (*PixelEffect)(Vector3);
+typedef std::function<Vector3(Vector3, Vector3)> PixelBlend;
+typedef std::function<Vector3(Vector3)> PixelEffect;
+typedef std::function<Vector3(int, int)> PixelGenerator;
+// typedef Vector3 (*PixelBlend)(Vector3, Vector3);
+// typedef Vector3 (*PixelEffect)(Vector3);
 // typedef std::function<Vector3(Vector3)> PixelEffect;
-typedef Vector3 (*PixelGenerator)(int x, int y);
+// typedef Vector3 (*PixelGenerator)(int x, int y);
 
 class GeneratorEffect : public Effect {
     private: 
@@ -186,9 +189,9 @@ BasicEffect *NoOp(Buffer<Vector3>* layer1) {
     }, layer1);
 }
 
-// BasicEffect *ConstantMultiply(Effect *layer1, float cutoff)  {
-//     auto mul = [cutoff](Vector3 a) {
-//         return a*cutoff;
-//     };
-//     return new BasicEffect(mul, layer1);
-// }
+BasicEffect *ConstMultiply(Effect *layer1, float cutoff)  {
+    auto mul = [cutoff](Vector3 a) {
+        return a*cutoff;
+    };
+    return new BasicEffect(mul, layer1);
+}
