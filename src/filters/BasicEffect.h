@@ -1,12 +1,15 @@
 #pragma once
 
+#include <functional>
 #include "Effect.h"
 
-// typedef std::function<Vector3(Vector3, Vector3)> PixelBlend;
-typedef Vector3 (*PixelBlend)(Vector3, Vector3);
-typedef Vector3 (*PixelEffect)(Vector3);
+typedef std::function<Vector3(Vector3, Vector3)> PixelBlend;
+typedef std::function<Vector3(Vector3)> PixelEffect;
+typedef std::function<Vector3(int, int)> PixelGenerator;
+// typedef Vector3 (*PixelBlend)(Vector3, Vector3);
+// typedef Vector3 (*PixelEffect)(Vector3);
 // typedef std::function<Vector3(Vector3)> PixelEffect;
-typedef Vector3 (*PixelGenerator)(int x, int y);
+// typedef Vector3 (*PixelGenerator)(int x, int y);
 
 class GeneratorEffect : public Effect {
     private: 
@@ -42,11 +45,15 @@ class BasicEffect : public Effect {
         this->func = func;
     }
 
+    BasicEffect(PixelEffect func, Buffer<Vector3> *base_image, COLORSPACE ColorSpace=RGB) : Effect(base_image, RGB) {
+        this->func = func;
+    }
+
     void _apply() override
     {
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
-        this->colorSpace = this->child->colorSpace;
+        if (this->child != NULL) this->colorSpace = this->child->colorSpace;
 
         for(int y=0; y<resY; y++) {
             for(int x=0; x<resX; x++) {
@@ -164,9 +171,52 @@ BasicBlendMode *HardLight(Effect *layer1, Effect *layer2)  {
     }, layer1, layer2);
 }
 
-// BasicEffect *ConstantMultiply(Effect *layer1, float cutoff)  {
-//     auto mul = [cutoff](Vector3 a) {
-//         return a*cutoff;
-//     };
-//     return new BasicEffect(mul, layer1);
-// }
+BasicEffect *Negative(Effect *layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return Vector3(1.0) - a;
+    }, layer1);
+}
+
+BasicEffect *NoOp(Effect *layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return a;
+    }, layer1);
+}
+
+BasicEffect *NoOp(Buffer<Vector3>* layer1) {
+    return new BasicEffect([](Vector3 a) {
+        return a;
+    }, layer1);
+}
+
+BasicEffect *ConstMultiply(Effect *layer1, float cutoff)  {
+    auto mul = [cutoff](Vector3 a) {
+        return a*cutoff;
+    };
+    return new BasicEffect(mul, layer1);
+}
+
+enum ThresholdOptions {
+    RED   = 0,
+    GREEN = 1,
+    BLUE  = 2,
+    AVG   = 3,
+    MAX   = 4,
+};
+
+BasicEffect *Threshold(Effect *layer1, float cutoff, ThresholdOptions on)  {
+    if (on < 3) {
+        return new BasicEffect([on, cutoff](Vector3 a) {
+            return Vector3(a[on] > cutoff);
+        }, layer1);
+    } else if (on == AVG) {
+        return new BasicEffect([cutoff](Vector3 a) {
+            return Vector3((a[0] + a[1] + a[2])/3 > cutoff);
+        }, layer1);
+    } else if (on == MAX) {
+        return new BasicEffect([cutoff](Vector3 a) {
+            return Vector3(std::max(std::max(a[0], a[1]), a[2]) > cutoff);
+        }, layer1);
+    }
+    // TODO what here
+}
