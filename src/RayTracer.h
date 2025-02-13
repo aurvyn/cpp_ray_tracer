@@ -84,21 +84,21 @@ public:
 			{
 				Ray currentRay = generator.getRay(x, y);
 				Vector3 rc = currentRay.getDirection();
-				Vector3 origin = currentRay.getOrigin();
 				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
+
 				bool hitSomething = false;
 				Hitpoint hit;
-
-				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
-				{
-					float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
-					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
-					{
-						hitSomething = true;
-						break;
-					}
-					currentRay = rayStep(currentRay, safeStepSize);
-				}
+                marchLoop(currentRay, scene, hitSomething, hit);
+//				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
+//				{
+//					float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
+//					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
+//					{
+//						hitSomething = true;
+//						break;
+//					}
+//					currentRay = rayStep(currentRay, safeStepSize);
+//				}
 
 				if (hitSomething)
 				{
@@ -175,6 +175,19 @@ private:
 			}
 		}
 	}
+
+    void marchLoop(Ray& currentRay, const Scene& scene, bool& hitSomething, Hitpoint& hit){
+        for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
+        {
+            float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
+            if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
+            {
+                hitSomething = true;
+                break;
+            }
+            currentRay = rayStep(currentRay, safeStepSize);
+        }
+    }
 };
 
 #endif

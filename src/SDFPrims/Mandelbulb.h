@@ -14,8 +14,14 @@ class Mandelbulb : public Primitive {
 public:
     Mandelbulb(float power) : power(power) {}
 
-    virtual Vector3 getBBMin() const {return Vector3 (0,0,0);}
-    virtual Vector3 getBBMax() const {return Vector3 (0,0,0);}
+    virtual Vector3 getBBMin() const {
+        LOG_WARN("Mandelbulb getBBMin is not implemented");
+        return {0,0,0};
+    }
+    virtual Vector3 getBBMax() const {
+        LOG_WARN("Mandelbulb getBBMax is not implemented");
+        return {0,0,0};
+    }
 
     float getSignedDistance(Vector3 rayOrigin) const override {
         Vector3 z = rayOrigin;

@@ -59,8 +59,14 @@ private:
 public:
     JuliaSet(vec4 c) : c(c) {}
 
-    virtual Vector3 getBBMin() const {return Vector3 (0,0,0);}
-    virtual Vector3 getBBMax() const {return Vector3 (0,0,0);}
+    virtual Vector3 getBBMin() const {
+        LOG_WARN("Julia Set getBBMin is not implemented");
+        return {0,0,0};
+    }
+    virtual Vector3 getBBMax() const {
+        LOG_WARN("Julia Set getBBMax is not implemented");
+        return {0,0,0};
+    }
 
     float map(vec3 p, vec4 &oTrap, vec4 c) const {
         vec4 z = vec4(p.x, p.y, p.z, 0.0);

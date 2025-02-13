@@ -10,21 +10,29 @@
 #include "sdf_scenes/SDFSharkEgg.h"
 #include "sdf_scenes/SDFDonut.h"
 #include "PrettyLogger.h"
-#include <string>
 
-Scene loadWithSDFLoader(const char* scene) {
-    std::string name(scene);
-    if (name == "julia") return loadSDFJuliaScene();
-    if (name == "mandelbulb") return loadSDFMandelbulbScene();
-    if (name == "doohickey") return loadSDFDoohickeyScene();
-    if (name == "peanut") return loadSDFPeanutScene();
-    if (name == "helix") return loadSDFHelixScene();
-    if (name == "morph") return loadSDFMorphScene();
-    if (name == "sharkegg") return loadSDFSharkEggScene();
-    if (name == "donut") return loadSDFDonutScene();
-    LOG_FATAL("No sdf scene with name \"%s\" has been implemented", scene);
-    Scene deadscene;
-    return deadscene;
+
+using namespace std;
+
+initializer_list<pair<const char*, Scene(*)()>>
+options = {
+    {"julia", loadSDFJuliaScene},
+    {"mandel", loadSDFMandelbulbScene},
+    {"doohickey", loadSDFDoohickeyScene},
+    {"helix", loadSDFHelixScene},
+    {"morph", loadSDFMorphScene},
+    {"sharkegg", loadSDFSharkEggScene},
+    {"donut", loadSDFDonutScene}
+};
+
+Scene loadWithSDFLoader(const char *scene) {
+    for (const auto& option: options)
+        if(option.first == scene)
+            return option.second();
+    printf("SDF option not found available sdf options:\n");
+    for (const auto& option : options)
+        printf("\t%s\n", option.first);
+    LOG_FATAL("No sdf scene with name \"%s\" has been implemented", scene)
 }
 
 #endif
