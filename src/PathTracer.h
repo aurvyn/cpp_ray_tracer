@@ -9,6 +9,7 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "GenQuaternion.h"
+#include "math.h"
 
 #define MAX_SPECULAR_THETA (M_PI/16)
 #define DIFFUSE_GRANULARITY (50)

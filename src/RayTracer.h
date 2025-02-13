@@ -12,6 +12,10 @@
 
 #include "PathTracer.h"
 
+using namespace std;
+
+#define MAX_TRACE_DEPTH (20)
+
 class RayTracer
 {
 public:
@@ -19,38 +23,22 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
+		Buffer<vector<vector<Path>>*> pathsBuffer = Buffer<vector<vector<Path>>*>(resX, resY);
 		
 		//TODO use this to trace each ray and accumulate the paths
 		PathTracer pathTracer;
-		
+	
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
+		
 		#pragma omp parallel for
 		for(int y=0; y<resY; y++)
 		{
 			for(int x=0; x<resX; x++)
 			{
+				vector<vector<Path>>* pixelPaths = new vector<vector<Path>>;
 				Ray ray = generator.getRay(x, y);
-
-				//Day2
-				//Ray r = generator.getRay(x, y);
-				//Vector3 d = r.getDirection()*255.0f;
-				//Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
-				//floatBuffer.at(x,y) = d;
-				//continue;
-				
-				Vector3 rc = ray.getDirection();
-				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
-
-				int hits = 1;
-				Vector3 color = rc;
-				for (int i = 0; i < rpp; i++) {
-					Hitpoint hit;
-					if(scene.getRootPrimitive()->intersect(ray, hit)) {
-						color += Shader::shade(ray, hit, scene);
-						hits++;
-					}
-				}
-				floatBuffer.at(x,y) = color / hits;
+				for(int i=0; i<rpp; i++) pixelPaths -> push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH));
+				pathsBuffer.at(x,y) = pixelPaths;
 			}
 		}
 		

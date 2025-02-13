@@ -1,6 +1,8 @@
 #ifndef __CAMERA
 #define __CAMERA
 
+#include "math.h"
+
 class Camera
 {
 public:
