@@ -10,7 +10,9 @@ public:
     virtual Vector3 getBBMin() const {
         LOG_WARN("Donut getBBMin is not implemented");
         return Vector3 (0,0,0);}
-    virtual Vector3 getBBMax() const {return Vector3 (0,0,0);}
+    virtual Vector3 getBBMax() const {
+        LOG_WARN("Donut getBBMax is not implemented");
+        return Vector3 (0,0,0);}
 
     float getSignedDistance(Vector3 rayOrigin) const override {
         float length_xz = sqrt(rayOrigin[0] * rayOrigin[0] + rayOrigin[2] * rayOrigin[2]);

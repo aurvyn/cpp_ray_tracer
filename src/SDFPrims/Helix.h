@@ -15,7 +15,10 @@ public:
     virtual Vector3 getBBMin() const {
         LOG_WARN("Helix getBBMin is not implemented");
         return Vector3 (0,0,0);}
-    virtual Vector3 getBBMax() const {return Vector3 (0,0,0);}
+    virtual Vector3 getBBMax() const {
+        LOG_WARN("Helix getBBMax is not implemented");
+        return Vector3 (0,0,0);
+    }
 
     float getSignedDistance(Vector3 rayOrigin) const override {
         // from https://www.shadertoy.com/view/ftyBRd

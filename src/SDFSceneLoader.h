@@ -1,6 +1,8 @@
 #ifndef __SDFSCENELOADER
 #define __SDFSCENELOADER
 
+#include <unordered_map>
+
 #include "sdf_scenes/SDFMandelbulb.h"
 #include "sdf_scenes/SDFJulia.h"
 #include "sdf_scenes/SDFDoohickey.h"
@@ -14,7 +16,7 @@
 
 using namespace std;
 
-initializer_list<pair<const char*, Scene(*)()>>
+unordered_map<const char*, Scene(*)()>
 options = {
     {"julia", loadSDFJuliaScene},
     {"mandel", loadSDFMandelbulbScene},
@@ -26,9 +28,8 @@ options = {
 };
 
 Scene loadWithSDFLoader(const char *scene) {
-    for (const auto& option: options)
-        if(option.first == scene)
-            return option.second();
+    if(options.find(scene)!=options.end())
+        return options[scene]();
     printf("SDF option not found available sdf options:\n");
     for (const auto& option : options)
         printf("\t%s\n", option.first);
