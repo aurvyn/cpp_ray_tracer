@@ -72,11 +72,85 @@ public:
         return diffuseChance + specularChance;
     }
 
-    std::vector<Path> combine(std::vector<Path> const &from, std::vector<Path> const &to) {
-        // TODO Combine from and to. Remember that to needs to be reversed
-        // If the path between the two is obstructed, return an empty vector.
-        // Otherwise, compute the chance that the path was taken via getPathChance() and use it as the strength.
-        return from;
+    std::vector<Path> combine(std::vector<Path> const &from, std::vector<Path> const &to, Scene const &scene, size_t lightMaterial) {
+        if (from.empty() || to.empty())
+            return std::vector<Path>();
+    
+        HitDetails fromHd = const_cast<Path&>(from.back()).hd();
+        HitDetails toHd = const_cast<Path&>(to.back()).hd();
+        Vector3 fromPos = fromHd.position();
+        Vector3 toPos = toHd.position();
+    
+        Ray connectionRay(toPos - fromPos, fromPos + fromHd.normal() * RAY_JITTER_EPSILON);
+        Vector3 dir = connectionRay.getDirection();
+
+        Hitpoint hit;
+        if (scene.getRootPrimitive()->intersect(connectionRay, hit))
+        {
+            float distance = (toPos - fromPos).length();
+            if (hit.getParameter() < distance - RAY_JITTER_EPSILON)
+                return std::vector<Path>();
+
+            float strength = getPathChance(scene, fromHd, dir);
+            std::vector<Path> newVec;
+
+            for (int i = 0; i < from.size(); i++)
+                newVec.push_back(from.at(i));
+
+            HitDetails hd(connectionRay, Hitpoint(distance, toHd.normal(), toHd.materialId()));
+
+            newVec.push_back(Path(hd, strength));
+
+            std::vector<Path> reversedTo = reversePath(to, scene, lightMaterial);
+
+            for (int i = 0; i < reversedTo.size(); i++)
+                newVec.push_back(reversedTo.at(i));
+
+            return newVec;
+        } 
+        else
+        {
+            return std::vector<Path>();
+        }
+    }
+
+    std::vector<Path> reversePath(std::vector<Path> const &to, Scene const &scene, size_t lightMaterial) {
+        std::vector<Path> newPathVector;
+
+        for (int i = to.size() - 1; i > 0; i--)
+        {
+            Path currentPath = to.at(i);
+            Path nextPath = to.at(i - 1);
+
+            HitDetails originalHd = currentPath.hd();
+            HitDetails nextHd = nextPath.hd();
+
+            Vector3 newDirection = originalHd.direction() * -1;
+            Ray newRay = Ray(newDirection, originalHd.position());
+
+            Hitpoint newHitpoint = Hitpoint(originalHd.getParameter(), nextHd.normal(), nextHd.materialId());
+
+            HitDetails newHd = HitDetails(newRay, newHitpoint);
+            Path newPath = Path(newHd, currentPath.strength());
+        }
+
+        Path lastPath = to.front();
+        HitDetails lastHd = lastPath.hd();
+
+        Vector3 lastDirection = lastHd.direction() * -1;
+        Ray lastRay = Ray(lastDirection, lastHd.position());
+        Hitpoint lastPoint;
+        
+        lastPoint.setParameter(lastHd.getParameter());
+        lastPoint.setMaterialId(lightMaterial);
+
+        HitDetails lastNewDetails = HitDetails(lastRay, lastPoint);
+
+        Path lastNewPath = Path(lastNewDetails, lastPath.strength());
+
+        newPathVector.push_back(lastNewPath);
+
+        return newPathVector;
     }
 
     Ray nextRay(HitDetails const &hd, Scene const &scene) {
@@ -108,9 +182,21 @@ public:
         return paths;
     }
     
-    Color getColor(std::vector<Path> paths) {
-        //TODO trace the paths and accumulate lighting information, scaling for path strength (likelihood that path was taken)
-        return Color();
+    Vector3 getColor(std::vector<Path> paths, Scene const &scene) {
+        if (paths.size() == 0) {
+            return Vector3(0, 0, 0);
+        }
+
+        Path lightPath = paths.back();
+        Vector3 newColor = scene.getMaterials().at(lightPath.hd().materialId()).getKd() * lightPath.strength();
+        
+        for (int i = paths.size() - 2; i >= 0; i--) {
+            Path currentPath = paths.at(i);
+            Material currentMaterial = scene.getMaterials().at(currentPath.hd().materialId());
+            newColor = (newColor * currentMaterial.getKd() * currentPath.strength());
+        }
+
+        return newColor;
     }
     
 };

@@ -53,6 +53,9 @@ public:
 	
 	size_t materialId() const
 	{ return hit.getMaterialId(); }
+
+	float getParameter() const
+	{ return hit.getParameter(); }
 };
 
 class Shader

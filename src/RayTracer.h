@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define MAX_TRACE_DEPTH (20)
+#define MAX_TRACE_DEPTH (5)
 #define TWO_PI 6.28318530718f
 
 class RayTracer
@@ -62,17 +62,16 @@ public:
 		// TODO for each light, trace a bunch of points on it and accumulate those too // added function below
 		vector<vector<Path>> globalLightPaths;
         vector<Light*> lights = scene.getLights();
-        for (auto light : lights)
+        for (int i = 0; i < lights.size(); i++)
         {
-            for (int i = 0; i < (int)rpp; i++)
+            for (int j = 0; j < (int)rpp; j++)
             {
+				Light* light = lights.at(i);
                 Ray lightRay = sampleLightRay(*light);
                 vector<Path> lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH);
                 globalLightPaths.push_back(lightPath);
             }
         }
-
-		// TODO stitch the camera and light paths together n-to-n, using PathTracer::combine. // added code for stitch 
 
 		#pragma omp parallel for
         for (int y = 0; y < resY; y++)
@@ -81,18 +80,15 @@ public:
             {
                 vector<vector<Path>>* pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
-                int count = 0;
                 for (auto &camPath : *pixelPaths)
                 {
-                    for (auto &lightPath : globalLightPaths)
+                    for (int i = 0; i < globalLightPaths.size(); i++)
                     {
-                        Vector3 combined = combinePaths(camPath, lightPath, scene);
-                		accumulatedColor += combined;
-                        count++;
+						vector<Path> lightPath = globalLightPaths.at(i);
+						vector<Path> combinedPaths = pathTracer.combine(camPath, lightPath, scene, lights.at(i / rpp)->getMaterialId());
+						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }
-                if (count > 0)
-                    accumulatedColor /= count;
                 floatBuffer.at(x, y) = accumulatedColor;
             }
         }
