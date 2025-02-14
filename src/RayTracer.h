@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define MAX_TRACE_DEPTH (5)
+#define MAX_TRACE_DEPTH (10)
 #define TWO_PI 6.28318530718f
 
 class RayTracer
@@ -31,19 +31,7 @@ public:
 
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 
-// #pragma omp parallel for
-// 		for (int y = 0; y < resY; y++)
-// 		{
-// 			for (int x = 0; x < resX; x++)
-// 			{
-// 				vector<vector<Path>> *pixelPaths = new vector<vector<Path>>;
-// 				Ray ray = generator.getRay(x, y);
-// 				for (int i = 0; i < rpp; i++)
-// 					pixelPaths->push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH));
-// 				pathsBuffer.at(x, y) = pixelPaths;
-// 			}
-// 		}
-#pragma omp parallel for
+		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
 		{
 			for (int x = 0; x < resX; x++)
@@ -157,38 +145,6 @@ private:
 			}
 		}
 	}
-
-
-//added
- // Helper: combine two paths.
- Vector3 combinePaths(const vector<Path> &camPath, const vector<Path> &lightPath, Scene const &scene)
- {
-	 if (camPath.empty() || lightPath.empty())
-		 return Vector3(0, 0, 0);
-	 
-		 HitDetails camHd = const_cast<Path&>(camPath.back()).hd();
-	 HitDetails lightHd = const_cast<Path&>(lightPath.back()).hd();
-	 Vector3 camPos = camHd.position();
-	 Vector3 lightPos = lightHd.position();
-	 Vector3 dir = (lightPos - camPos).normalize();
-	 
-	 Ray connectionRay(dir, camPos + camHd.normal() * RAY_JITTER_EPSILON);
-	 Hitpoint hit;
-	 if (scene.getRootPrimitive()->intersect(connectionRay, hit))
-	 {
-		 float distance = (lightPos - camPos).length();
-		 if (hit.getParameter() < distance - RAY_JITTER_EPSILON)
-			 return Vector3(0, 0, 0);  
-	 }
-	 
-
-	 Vector3 camKd = scene.getMaterials()[camHd.materialId()].getKd();
-	 Vector3 lightKd = scene.getMaterials()[lightHd.materialId()].getKd();
-	 float alignment = max(0.0f, dir.dot(camHd.normal()));
-	 
-	 Vector3 combined = camKd * lightKd * alignment;
-	 return combined;
- }
 
     Ray sampleLightRay(const Light &light)
     {
