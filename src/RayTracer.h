@@ -37,9 +37,9 @@ public:
 			for (int x = 0; x < resX; x++)
 			{
 				vector<vector<Path>> *pixelPaths = new vector<vector<Path>>;
+				Ray ray = generator.getRay(x, y);
 				for (int i = 0; i < (int)rpp; i++)
 				{
-					Ray ray = generator.getRay(x, y); //a new ray for each sample
 					vector<Path> camPath = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH);
 					pixelPaths->push_back(camPath);
 				}
