@@ -41,7 +41,6 @@ class FloydDither : public Effect
             p->push_back(rgbFromHex("4b296b"));
             p->push_back(rgbFromHex("a72608"));
             p->push_back(rgbFromHex("8F5644"));
-            p->push_back(rgbFromHex("77867f"));
             p->push_back(rgbFromHex("87b37a"));
             p->push_back(rgbFromHex("9ce37d"));
             return p;
@@ -89,7 +88,7 @@ class FloydDither : public Effect
                     Vector3 color = this->imageBuffer->at(x,y);
                     Vector3 quantizedColor = closestColorInPallette(color);
                     this->imageBuffer->at(x,y) = quantizedColor;
-                    Vector3 err = quantizedColor - color;
+                    Vector3 err = color - quantizedColor;
                     if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
                     if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
                     if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
