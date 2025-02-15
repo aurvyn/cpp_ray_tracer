@@ -23,10 +23,11 @@ class BayerianDither : public Effect
 
         std::vector<Vector3>* basicPallette() {
             std::vector<Vector3> *p = new std::vector<Vector3>(512); // 8^3
-            float scl = 1.0f / 3.0f; // scales [0,7] -> [0,1]
-            for(int r = 0; r < 3; r++) {
-                for(int g = 0; g < 3; g++) {
-                    for(int b = 0; b < 3; b++) {
+            int colors_per_channel = 8;
+            float scl = 1.0f / (float) colors_per_channel; // scales [0,7] -> [0,1]
+            for(int r = 0; r < colors_per_channel; r++) {
+                for(int g = 0; g < colors_per_channel; g++) {
+                    for(int b = 0; b < colors_per_channel; b++) {
                         Vector3 c = Vector3((float)r * scl,(float)g * scl,(float)b * scl);
                         p->push_back(Vector3((float)r * scl,(float)g * scl,(float)b * scl));
                     }
@@ -87,7 +88,7 @@ class BayerianDither : public Effect
                 // TODO: convert automatically
                 printf("Convert to RGB before calling dither!\n");
             }
-            if(this->pallette == NULL) this->pallette = coolerPallette();
+            if(this->pallette == NULL) this->pallette = basicPallette();
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
             Buffer<float> thresholdMap = Buffer<float>(4,4);
