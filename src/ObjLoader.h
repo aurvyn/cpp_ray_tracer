@@ -22,26 +22,32 @@ public:
 		
 		for(int i=0; i<objData.sphereCount; i++)
 		{
-			Vector3 pos, up, side;
+			Vector3 pos, up, side, motion;
 			obj_sphere *o = objData.sphereList[i];
 			pos = objToGenVec(objData.vertexList[ o->pos_index ]);
 			up = objToGenVec(objData.normalList[ o->up_normal_index ]);
 			side = objToGenVec(objData.normalList[ o->equator_normal_index ]);
+			if (!strcmp(objData.materialList[o->material_index]->name, "grey")) {
+				motion = Vector3(.05);
+			}
 			
-			Sphere * sphere = new Sphere(pos, up.length());
+			Sphere * sphere = new Sphere(pos, up.length(), motion);
 			sphere->setMaterialId(o->material_index);
 			primitiveArray->add(sphere);
 		}
 		
 		for(int i=0; i<objData.faceCount; i++)
 		{
-			Vector3 a, b, c, norm;
+			Vector3 a, b, c, motion;
 			obj_face *o = objData.faceList[i];
 			a = objToGenVec(objData.vertexList[ o->vertex_index[0] ]);
 			b = objToGenVec(objData.vertexList[ o->vertex_index[1] ]);
 			c = objToGenVec(objData.vertexList[ o->vertex_index[2] ]);
+			if (!strcmp(objData.materialList[o->material_index]->name, "grey")) {
+				motion = Vector3(.05);
+			}
 			
-			Triangle * tri = new Triangle(a, b, c);
+			Triangle * tri = new Triangle(a, b, c, motion);
 			tri->setMaterialId(o->material_index);
 			primitiveArray->add(tri);
 		}

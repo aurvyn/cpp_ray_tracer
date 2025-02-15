@@ -21,6 +21,7 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
+		Buffer<Vector3> visualMotions(resX, resY);
 		MotionBuffer motionBuffer(resX, resY);
 		Buffer<Vector3> normalBuffer = Buffer<Vector3>(resX, resY);
 		Buffer<float> depthFloatBuffer = Buffer<float>(resX, resY);
@@ -52,6 +53,8 @@ public:
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 					Vector3 motion = hit.getMotion();
 					motion.projectToPlane(-scene.getCamera().getW());
+					Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
+					visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;
 					motionBuffer.at(x,y) = motion * std::min(resX, resY);
 					normalBuffer.at(x,y) = hit.getNormal();
 					depthFloatBuffer.at(x,y) = hit.getParameter();
