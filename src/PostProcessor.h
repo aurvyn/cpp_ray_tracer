@@ -15,6 +15,7 @@
 #include "filters/Vignette.h"
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
+#include "filters/ToneMapHSV.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
@@ -62,7 +63,7 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR(new HSVConvert((new BasicConvolution (new NoOp(imageBuffer)))->init(2))))))->init(255.0f);
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert((new NoOp(imageBuffer)))))))->init(255.0f);
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
-            Effect *effect = (new RGBMultiply(new RGBConvert(new HSVConvert(depthBuffer))))->init(255.0f);
+            Effect *effect = (new RGBMultiply(new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer)))))->init(255.0f);
             // Effect *effect = new NoOp(imageBuffer);
             return new PostProcessor(effect);
         }
