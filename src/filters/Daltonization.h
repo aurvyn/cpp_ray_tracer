@@ -8,7 +8,7 @@ class Daltonization : public Effect
     
 public:
     // References:
-    // - https://d1qx31qr3h6wln.cloudfront.net/publications/LuminancePreservingTemporallyStableDaltonization.pdf
+    // - https://research.nvidia.com/publication/2023-05_daltonization
     // - https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion
     void _apply() override
     {
