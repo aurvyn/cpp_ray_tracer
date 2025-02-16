@@ -67,7 +67,7 @@ public:
 			pos = this->rootPrimitive->getBBMax();
 			lookAt = this->rootPrimitive->getCenter();
 		}
-		camera = Camera(pos, lookAt, up);
+		camera = Camera(pos, lookAt, up, Vector3(0.0f));
 	}
 	
 	void addDefaultMaterial()

@@ -1,7 +1,6 @@
 #ifndef __RAYTRACER_H
 #define __RAYTRACER_H
 
-#include <iostream>
 #include "GenVector.h"
 #include "Buffer.h"
 #include "MotionBuffer.h"
@@ -54,7 +53,7 @@ public:
 					floatBuffer.at(x,y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 					float depth = hit.getParameter();
-					Vector3 motion = hit.getMotion();
+					Vector3 motion = hit.getMotion() - scene.getCamera().getMotion();
 					motion.projectToPlane(ray.getDirection());
 					//Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
 					//visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;

@@ -1,6 +1,7 @@
 #ifndef __OBJ_LOADER
 #define __OBJ_LOADER
 
+#include <iostream>
 #include "obj_loader/objLoader.h"
 #include "Scene.h"
 #include "BVHTree.h"
@@ -118,7 +119,7 @@ public:
 			Vector3 pos = objToGenVec( objData.vertexList[ objData.camera->camera_pos_index ] );
 			Vector3 lookAt = objToGenVec( objData.vertexList[ objData.camera->camera_look_point_index ] );
 			Vector3 up = objToGenVec( objData.normalList[ objData.camera->camera_up_norm_index ] );
-			camera = Camera(pos, lookAt, up);
+			camera = Camera(pos, lookAt, up, Vector3(0, 50, 0));
 			scene.setCamera(camera);
 		}
 		else
