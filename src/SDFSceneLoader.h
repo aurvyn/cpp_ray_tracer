@@ -11,12 +11,13 @@
 #include "sdf_scenes/SDFMorph.h"
 #include "sdf_scenes/SDFSharkEgg.h"
 #include "sdf_scenes/SDFDonut.h"
+#include "sdf_scenes/SDFCoolS.h"
 #include "PrettyLogger.h"
 
 
 using namespace std;
 
-unordered_map<const char*, Scene(*)()>
+unordered_map<const char *, Scene(*)()>
 options = {
     {"julia", loadSDFJuliaScene},
     {"mandel", loadSDFMandelbulbScene},
@@ -24,15 +25,20 @@ options = {
     {"helix", loadSDFHelixScene},
     {"morph", loadSDFMorphScene},
     {"sharkegg", loadSDFSharkEggScene},
-    {"donut", loadSDFDonutScene}
+    {"donut", loadSDFDonutScene},
+    {"cools", loadSDFCoolSScene}
 };
 
 Scene loadWithSDFLoader(const char *scene) {
-    if(options.find(scene)!=options.end())
+    if (options.find(scene) != options.end())
         return options[scene]();
     printf("SDF option not found available sdf options:\n");
-    for (const auto& option : options)
+    for (const auto &option: options) {
         printf("\t%s\n", option.first);
+        if (strequal(option.first, scene)) {
+            return option.second();
+        }
+    }
     LOG_FATAL("No sdf scene with name \"%s\" has been implemented", scene)
 }
 
