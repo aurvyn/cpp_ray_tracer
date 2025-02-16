@@ -1,6 +1,7 @@
 #ifndef __RAYTRACER_H
 #define __RAYTRACER_H
 
+#include <iostream>
 #include "GenVector.h"
 #include "Buffer.h"
 #include "MotionBuffer.h"
@@ -21,11 +22,12 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
-		Buffer<Vector3> visualMotions(resX, resY);
+		//Buffer<Vector3> visualMotions(resX, resY);
 		MotionBuffer motionBuffer(resX, resY);
 		Buffer<Vector3> normalBuffer = Buffer<Vector3>(resX, resY);
 		Buffer<float> depthFloatBuffer = Buffer<float>(resX, resY);
 		float depthMax = 0.0f;
+		float focal_len = resY / 2 * tan(scene.getCamera().getFov() / 2);
 		
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		for(int y=0; y<resY; y++)
@@ -51,15 +53,16 @@ public:
 					Vector3 floatColor = Shader::shade(ray, hit, scene);
 					floatBuffer.at(x,y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
+					float depth = hit.getParameter();
 					Vector3 motion = hit.getMotion();
 					motion.projectToPlane(ray.getDirection());
-					Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
-					visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;
-					motionBuffer.at(x,y) = motion * std::min(resX, resY);
+					//Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
+					//visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;
+					motionBuffer.at(x,y) = motion * focal_len / depth;
 					normalBuffer.at(x,y) = hit.getNormal();
-					depthFloatBuffer.at(x,y) = hit.getParameter();
-					if (hit.getParameter() > depthMax) {
-						depthMax = hit.getParameter();
+					depthFloatBuffer.at(x,y) = depth;
+					if (depth > depthMax) {
+						depthMax = depth;
 					}
 				}
 				else {
@@ -83,7 +86,7 @@ public:
 			}
 		}
 
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, motionBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, &motionBuffer);
 		Buffer<Vector3> *ppBuffer = pp->process();
 
 		for(int y=0; y<resY; y++)
