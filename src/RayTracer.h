@@ -52,7 +52,7 @@ public:
 					floatBuffer.at(x,y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 					Vector3 motion = hit.getMotion();
-					motion.projectToPlane(-scene.getCamera().getW());
+					motion.projectToPlane(ray.getDirection());
 					Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
 					visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;
 					motionBuffer.at(x,y) = motion * std::min(resX, resY);

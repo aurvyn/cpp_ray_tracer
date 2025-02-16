@@ -27,8 +27,8 @@ public:
 			pos = objToGenVec(objData.vertexList[ o->pos_index ]);
 			up = objToGenVec(objData.normalList[ o->up_normal_index ]);
 			side = objToGenVec(objData.normalList[ o->equator_normal_index ]);
-			if (!strcmp(objData.materialList[o->material_index]->name, "grey")) {
-				motion = Vector3(.05);
+			if (strequal(objData.materialList[o->material_index]->name, "green")) {
+				motion = Vector3(0, .1, 0);
 			}
 			
 			Sphere * sphere = new Sphere(pos, up.length(), motion);
@@ -43,8 +43,8 @@ public:
 			a = objToGenVec(objData.vertexList[ o->vertex_index[0] ]);
 			b = objToGenVec(objData.vertexList[ o->vertex_index[1] ]);
 			c = objToGenVec(objData.vertexList[ o->vertex_index[2] ]);
-			if (!strcmp(objData.materialList[o->material_index]->name, "grey")) {
-				motion = Vector3(.05);
+			if (strequal(objData.materialList[o->material_index]->name, "short_box")) {
+				motion = Vector3(.1, 0, 0);
 			}
 			
 			Triangle * tri = new Triangle(a, b, c, motion);
