@@ -20,7 +20,13 @@ class DepthOfField : public BlendMode {
 
     float focalPoint = 0.59f;
     float focalWidth = 0.07f;
+    int res = 30;
 public:
+    DepthOfField *init(int res) {
+        this->res = res;
+        return this;
+    }
+
     DepthOfField *init(float focalPoint, float focalWidth) {
         this->focalPoint = focalPoint;
         this->focalWidth = focalWidth;
@@ -33,48 +39,44 @@ public:
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
 
-        Buffer<Vector3> near (*imageBuffer2);
-        Buffer<Vector3> focus (*imageBuffer2);
-        Buffer<Vector3> far (*imageBuffer2);
+        float width = 1.0f / res;
 
-        Effect* nearFiltered = new RGBConvert((new Bound(new ToneMapHSV(new HSVConvert(&near))))->init(0.0f, focalPoint-focalWidth, 2));
-        nearFiltered->applyEffect();
-        Effect* focusFiltered = new RGBConvert((new Bound(new ToneMapHSV(new HSVConvert(&focus))))->init(focalPoint-focalWidth, focalPoint+focalWidth, 2));
-        focusFiltered->applyEffect();
-        Effect* farFiltered = new RGBConvert((new Bound(new ToneMapHSV(new HSVConvert(&far))))->init(focalPoint+focalWidth, 1.0f, 2));
-        farFiltered->applyEffect();
+        Buffer<Vector3> combined (resX, resY);
 
-        for (int y = 0; y < resY; y++){
-            for (int x = 0; x < resX; x++){
-                if (near.at(x,y).squaredLength() != 0) {
-                    near.at(x,y) = Vector3(1.0f);
-                }
-                if (focus.at(x,y).squaredLength() != 0) {
-                    focus.at(x,y) = Vector3(1.0f);
-                }
-                if (far.at(x,y).squaredLength() != 0) {
-                    far.at(x,y) = Vector3(1.0f);
+        for (int pass = 0; pass < res; pass++) {
+            Buffer<Vector3> d (*imageBuffer2);
+
+            Effect* nearFiltered = new RGBConvert((new Bound(new ToneMapHSV(new HSVConvert(&d))))->init(width*pass, (width*pass + width), 2));
+            nearFiltered->applyEffect();
+
+            for (int y = 0; y < resY; y++){
+                for (int x = 0; x < resX; x++){
+                    if (d.at(x,y).squaredLength() != 0) {
+                        d.at(x,y) = Vector3(1.0f);
+                    }
                 }
             }
+
+            Buffer<Vector3> i (*imageBuffer);
+
+            Effect* focusImageBlur = Multiply((new BasicConvolution(NoOp(&i)))->init(pass-(res/2)), NoOp(&d));
+            focusImageBlur->applyEffect();
+
+            // if (pass == 2) {
+            //     for (int y = 0; y < resY; y++){
+            //         for (int x = 0; x < resX; x++){
+            //             this->imageBuffer->at(x,y) = d.at(x,y);
+            //         }
+            //     }
+            // }
+
+            Effect* image = Add(NoOp(&combined), NoOp(&i));
+            image->applyEffect();
         }
-
-        Buffer<Vector3> nearImage (*imageBuffer);
-        Buffer<Vector3> focusImage (*imageBuffer);
-        Buffer<Vector3> farImage (*imageBuffer);
-
-        Effect* nearImageBlur = Multiply(NoOp(&nearImage), NoOp(&near));
-        nearImageBlur->applyEffect();
-        Effect* focusImageBlur = Multiply((new BasicConvolution(NoOp(&focusImage)))->init(2), NoOp(&focus));
-        focusImageBlur->applyEffect();
-        Effect* farImageBlur = Multiply((new BasicConvolution(NoOp(&farImage)))->init(5), NoOp(&far));
-        farImageBlur->applyEffect();
-
-        Effect* image = Add(NoOp(&nearImage), Add(NoOp(&focusImage), NoOp(&farImage)));
-        image->applyEffect();
 
         for (int y = 0; y < resY; y++){
             for (int x = 0; x < resX; x++){
-                this->imageBuffer->at(x,y) = nearImage.at(x,y);
+                this->imageBuffer->at(x,y) = combined.at(x,y);
             }
         }
 
