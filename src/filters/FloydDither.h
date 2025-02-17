@@ -105,13 +105,12 @@ class FloydDither : public Effect
                     Vector3 color = this->imageBuffer->at(x,y);
                     Vector3 quantizedColor = closestColorInPallette(color);
                     this->imageBuffer->at(x,y) = quantizedColor;
-
                     if(!useGlitch) {
                         Vector3 err = quantizedColor - color;
                         if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
-                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
-                        if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
-                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];    
+                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x-1, y+1) += err * correctionKernel[1];
+                        if(y + 1 < resY) this->imageBuffer->at(x, y+1) += err * correctionKernel[2];
+                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y+1) += err * correctionKernel[3];    
                     } else {
                         Vector3 err = color - quantizedColor;
                         if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
