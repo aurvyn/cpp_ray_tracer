@@ -88,10 +88,11 @@ class FloydDither : public Effect
 
             if(this->pallette == NULL) this->pallette = coolerPallette2();
             float correctionKernel[4] = {0.0f};
-            correctionKernel[0] = 7.0f/16.0f;
-            correctionKernel[1] = 3.0f/16.0f;
-            correctionKernel[2] = 5.0f/16.0f;
-            correctionKernel[3] = 1.0f/16.0f;
+            float correctionScl = 0.5f;
+            correctionKernel[0] = correctionScl * 7.0f/16.0f;
+            correctionKernel[1] = correctionScl * 3.0f/16.0f;
+            correctionKernel[2] = correctionScl * 5.0f/16.0f;
+            correctionKernel[3] = correctionScl * 1.0f/16.0f;
 
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
@@ -106,13 +107,13 @@ class FloydDither : public Effect
                     Vector3 quantizedColor = closestColorInPallette(color);
                     this->imageBuffer->at(x,y) = quantizedColor;
                     if(!useGlitch) {
-                        Vector3 err = quantizedColor - color;
+                        Vector3 err = color - quantizedColor;
                         if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
                         if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x-1, y+1) += err * correctionKernel[1];
                         if(y + 1 < resY) this->imageBuffer->at(x, y+1) += err * correctionKernel[2];
                         if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y+1) += err * correctionKernel[3];    
                     } else {
-                        Vector3 err = color - quantizedColor;
+                        Vector3 err = quantizedColor - color;
                         if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
                         if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
                         if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
