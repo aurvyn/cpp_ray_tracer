@@ -211,6 +211,18 @@ BasicEffect *ConstAdd(Effect *layer1, float val)  {
     return new BasicEffect(add, layer1);
 }
 
+BasicEffect *ConstSet(Effect *layer1, int componentMask, Vector3 val)  {
+    // e.g. componentMask = 1 | 2 | 4 = "set all components of all pixels = val"
+    // e.g. componentMask = 2 = "set the 2nd component of all pixels = val[1]"
+    auto add = [val, componentMask](Vector3 a) {
+        if(componentMask & 0x1) a[0] = val[0];
+        if(componentMask & 0x2) a[1] = val[1];
+        if(componentMask & 0x4) a[2] = val[2];
+        return a;
+    };
+    return new BasicEffect(add, layer1);
+}
+
 
 BasicEffect *ColorAdd(Effect *layer1, Vector3 val)  {
     auto add = [val](Vector3 a) {
