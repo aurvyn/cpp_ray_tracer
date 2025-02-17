@@ -9,8 +9,8 @@
 #include "SimpleLoader.h"
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
-#include "Shader.h"
 #include "RayTracer.h"
+#include "Shader.h"
 #include "SDFPrims/SDFIntersect.h"
 #include "SDFPrims/SDFUnion.h"
 #include "SDFPrims/SDFDifference.h"
@@ -56,7 +56,10 @@ void getArgs(int argc, char **argv)
 		}
 		else if (strncmp(argv[i], "-sdf", 4) == 0 ||
 				 strncmp(argv[i], "-s", 2) == 0)
+		{
 			sdfRendering = true;
+			usePrimitiveArray = true;
+		}
 
 		else if (!foundScene)
 		{
@@ -146,14 +149,17 @@ int main(int argc, char **argv)
 	unsigned char *outputImage = (unsigned char *)malloc(resX * resY * 3 * sizeof(unsigned char));
 	Scene scene;
 	RayTracer tracer;
-	if (sdfRendering){
-        scene = loadWithSDFLoader(scenePath);
-        tracer.march(scene, resX, resY, outputImage);
-    } else {
-        reportArgs();
-        scene = loadWithOBJLoader(scenePath);
-        tracer.trace(scene, resX, resY, outputImage);
-    }
+	if (sdfRendering)
+	{
+		scene = loadWithSDFLoader(scenePath);
+		tracer.march(scene, resX, resY, outputImage);
+	}
+	else
+	{
+		reportArgs();
+		scene = loadWithOBJLoader(scenePath);
+		tracer.trace(scene, resX, resY, outputImage);
+	}
 
 	simplePNG_write(outputPath, resX, resY, outputImage);
 

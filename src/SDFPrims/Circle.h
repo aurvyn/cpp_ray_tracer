@@ -6,7 +6,6 @@
 #define CIRCLE_H
 
 #include "Primitive2D.h"
-#define clamp(a,b,v) (v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) )
 #define sign(x) (x > 0) ? 1 : ((x < 0) ? -1 : 0)
 
 class Circle : public Primitive2D {

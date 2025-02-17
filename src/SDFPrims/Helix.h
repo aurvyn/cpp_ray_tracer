@@ -2,7 +2,9 @@
 #define __HELIX
 
 #include "Primitive.h"
-#include "AnthonyMath.h"
+#include "GLSLTypes.h"
+
+using namespace GLSLTypes;
 
 class Helix : public Primitive {
 private:

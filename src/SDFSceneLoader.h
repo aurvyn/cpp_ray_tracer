@@ -2,6 +2,7 @@
 #define __SDFSCENELOADER
 
 #include <unordered_map>
+#include <string>
 
 #include "sdf_scenes/SDFMandelbulb.h"
 #include "sdf_scenes/SDFJulia.h"
@@ -13,12 +14,12 @@
 #include "sdf_scenes/SDFDonut.h"
 #include "sdf_scenes/SDFCoolS.h"
 #include "sdf_scenes/SDFRevolvedCross.h"
+#include "sdf_scenes/SDFPeanut.h"
 #include "PrettyLogger.h"
-
 
 using namespace std;
 
-unordered_map<const char *, Scene(*)()>
+unordered_map<string, Scene(*)()>
 options = {
     {"julia", loadSDFJuliaScene},
     {"mandel", loadSDFMandelbulbScene},
@@ -28,20 +29,18 @@ options = {
     {"sharkegg", loadSDFSharkEggScene},
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
-    {"rcross", loadSDFRevolvedCrossScene}
+    {"rcross", loadSDFRevolvedCrossScene},
+    {"peanut", loadSDFPeanutScene}
 };
 
-Scene loadWithSDFLoader(const char *scene) {
+Scene loadWithSDFLoader(string scene) {
     if (options.find(scene) != options.end())
         return options[scene]();
     printf("SDF option not found available sdf options:\n");
     for (const auto &option: options) {
-        printf("\t%s\n", option.first);
-        if (strequal(option.first, scene)) {
-            return option.second();
-        }
+        printf("\t%s\n", option.first.c_str());
     }
-    LOG_FATAL("No sdf scene with name \"%s\" has been implemented", scene)
+    LOG_FATAL("No sdf scene with name \"%s\" has been implemented", scene.c_str())
 }
 
 #endif

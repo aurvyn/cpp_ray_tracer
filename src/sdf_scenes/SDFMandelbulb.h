@@ -7,6 +7,7 @@ Scene loadSDFMandelbulbScene() {
     Scene scene;
     scene.addDefaultLight();
     scene.addDefaultCamera();
+    
     std::vector<Material> materials;
     Material material;
     material.setKa(Vector3(0.65, 0.65, 0.65));
@@ -16,7 +17,7 @@ Scene loadSDFMandelbulbScene() {
     materials.push_back(material);
     scene.setMaterials(materials);
 	PrimitiveArray *primArray = new PrimitiveArray();
-    Mandelbulb *mandelbulb = new Mandelbulb(2.f);
+    Mandelbulb *mandelbulb = new Mandelbulb(2.1f);
     mandelbulb->setMaterialId(0);
     primArray->add(mandelbulb);
 	scene.setRootPrimitive(primArray);

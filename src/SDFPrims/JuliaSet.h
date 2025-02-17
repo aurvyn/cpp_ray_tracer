@@ -8,8 +8,10 @@
 #include <cstring>
 
 #include "GenVector.h"
-#include "AnthonyMath.h"
+#include "GLSLTypes.h"
 #include "Ray.h"
+
+using namespace GLSLTypes;
 
 const int numIterations = 11;
 

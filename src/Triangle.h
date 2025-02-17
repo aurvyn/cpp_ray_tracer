@@ -1,7 +1,6 @@
 #ifndef __TRIANGLE
 #define __TRIANGLE
 
-#define clamp(a,b,v) (v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) )
 #include "Ray.h"
 #include "Hitpoint.h"
 #include "Primitive.h"
@@ -105,23 +104,23 @@ public:
         return bound;
     }
 
-    float getSignedDistance(Vector3 rayOrigin) const {
-        Vector3 ba = this->vertex[1] - this->vertex[0];
-        Vector3 pa = rayOrigin - this->vertex[0];
-        Vector3 cb = this->vertex[2] - this->vertex[1];
-        Vector3 pb = rayOrigin - this->vertex[1];
-        Vector3 ac = this->vertex[0] - this->vertex[2];
-        Vector3 pc = rayOrigin - this->vertex[2];
-        Vector3 nor = ba.cross(ac);
-        return sqrt(((ba.cross(nor).dot(pa) > 0) +
-                     (cb.cross(nor).dot(pb) > 0) +
-                     (ac.cross(nor).dot(pc) > 0) < 2.0)
-                        ? (std::min(
-                            std::min((clamp(0.0f, 1.0f, (ba.dot(pa)/ba.squaredLength())) * ba - pa).squaredLength(),
-                                     (clamp(0.0f, 1.0f, (cb.dot(pb)/cb.squaredLength())) * cb - pb).squaredLength()),
-                            (clamp(0.0f, 1.0f, (ac.dot(pc)/ac.squaredLength())) * ac - pc).squaredLength()))
-                        : (nor.dot(pa) * nor.dot(pa) / nor.squaredLength()));
-    }
+    // float getSignedDistance(Vector3 rayOrigin) const {
+    //     Vector3 ba = this->vertex[1] - this->vertex[0];
+    //     Vector3 pa = rayOrigin - this->vertex[0];
+    //     Vector3 cb = this->vertex[2] - this->vertex[1];
+    //     Vector3 pb = rayOrigin - this->vertex[1];
+    //     Vector3 ac = this->vertex[0] - this->vertex[2];
+    //     Vector3 pc = rayOrigin - this->vertex[2];
+    //     Vector3 nor = ba.cross(ac);
+    //     return sqrt(((ba.cross(nor).dot(pa) > 0) +
+    //                  (cb.cross(nor).dot(pb) > 0) +
+    //                  (ac.cross(nor).dot(pc) > 0) < 2.0)
+    //                     ? (std::min(
+    //                         std::min((clamp(0.0f, 1.0f, (ba.dot(pa)/ba.squaredLength())) * ba - pa).squaredLength(),
+    //                                  (clamp(0.0f, 1.0f, (cb.dot(pb)/cb.squaredLength())) * cb - pb).squaredLength()),
+    //                         (clamp(0.0f, 1.0f, (ac.dot(pc)/ac.squaredLength())) * ac - pc).squaredLength()))
+    //                     : (nor.dot(pa) * nor.dot(pa) / nor.squaredLength()));
+    // }
 
     Vector3 getSDFNorm(Vector3 rayOrigin) const {
         return this->normal;

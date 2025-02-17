@@ -1,6 +1,7 @@
 #ifndef __RAYTRACER_H
 #define __RAYTRACER_H
 
+
 #include "GenVector.h"
 #include "Buffer.h"
 #include "Camera.h"
@@ -8,9 +9,12 @@
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
 #include "Shader.h"
+#include "GLSLTypes.h"
+
 
 #define MIN_RAYMARCH_STEP_SIZE 0.00001
 #define MAX_RAYMARCH_STEPS 100
+
 
 class RayTracer
 {
@@ -42,7 +46,7 @@ public:
                 hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
 				if (hitSomething)
 				{
-					Vector3 floatColor = Shader::shade(ray, hit, scene, true);
+					Vector3 floatColor = Shader::shade(ray, hit, scene);
 					floatBuffer.at(x, y) = floatColor;
 					// floatBuffer.at(x,y) = Vector3(0.0f);
 				}
@@ -70,8 +74,6 @@ public:
 		}
 	}
 
-	// TODO: Bisection
-	// TODO: BVH
 	void march(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage)
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
@@ -86,20 +88,8 @@ public:
 				Vector3 rc = currentRay.getDirection();
 				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
 
-				bool hitSomething = false;
 				Hitpoint hit;
-                marchLoop(currentRay, scene, hitSomething, hit);
-//				for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
-//				{
-//					float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
-//					if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
-//					{
-//						hitSomething = true;
-//						break;
-//					}
-//					currentRay = rayStep(currentRay, safeStepSize);
-//				}
-
+                bool hitSomething = GLSLTypes::marchLoop(currentRay, scene, hit);
 				if (hitSomething)
 				{
 					// use this instead of Shader::shade to show distance field
@@ -136,11 +126,6 @@ public:
 		}
 	}
 
-	Ray rayStep(Ray ray, float stepSize)
-	{
-		return Ray(ray.getDirection(), ray.pointAtParameter(stepSize));
-	}
-
 private:
 	void toneMap(Buffer<Vector3> &floatBuffer, Buffer<Color> &imageBuffer) const
 	{
@@ -175,19 +160,6 @@ private:
 			}
 		}
 	}
-
-    void marchLoop(Ray& currentRay, const Scene& scene, bool& hitSomething, Hitpoint& hit){
-        for (int i = 0; i < MAX_RAYMARCH_STEPS; i++)
-        {
-            float safeStepSize = scene.getRootPrimitive()->getSignedDistance(currentRay.getOrigin(), hit);
-            if (safeStepSize < MIN_RAYMARCH_STEP_SIZE)
-            {
-                hitSomething = true;
-                break;
-            }
-            currentRay = rayStep(currentRay, safeStepSize);
-        }
-    }
 };
 
 #endif

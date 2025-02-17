@@ -37,7 +37,7 @@ public:
             float zr = pow(r, power);
             dr = pow(r, power - 1) * power * dr + 1;
 
-            z = zr * Vector3(sin(theta) * cos(phi), sin(phi) * sin(theta));
+            z = zr * Vector3(sin(theta) * cos(phi), sin(phi) * sin(theta), cos(theta));
             z += rayOrigin;
         }
 
