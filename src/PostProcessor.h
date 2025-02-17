@@ -15,6 +15,8 @@
 #include "filters/Vignette.h"
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
+#include "filters/ToneMapHSV.h"
+#include "filters/Daltonization.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
@@ -38,7 +40,7 @@ class Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer motionBuffer = MotionBuffer(0, 0)
+            MotionBuffer* motionBuffer
         ) = 0;
 };
 
@@ -55,7 +57,7 @@ class DefaultPipeline: public Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer motionBuffer
+            MotionBuffer* motionBuffer
         ) override {
             // Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
             //     (new HueShift(new HSVConvert(

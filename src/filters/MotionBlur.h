@@ -6,11 +6,11 @@ class MotionBlur : public Effect
 {
     using Effect::Effect; // uses super constructor
     
-    MotionBuffer motionBuffer;
+    MotionBuffer *motionBuffer;
     int samples;
 public:
-    MotionBlur *init(MotionBuffer motionBuffer, int samples = 32) {
-        motionBuffer.dilate();
+    MotionBlur *init(MotionBuffer *motionBuffer, int samples = 32) {
+        motionBuffer->dilate();
         this->motionBuffer = motionBuffer;
         this->samples = samples;
         return this;
@@ -25,7 +25,7 @@ public:
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                Vector2 velocity = this->motionBuffer.at(x, y);
+                Vector2 velocity = this->motionBuffer->at(x, y);
                 Vector3 color(0.0f);
                 for (int i = 1-samples/2; i < samples/2; ++i) {
                     Vector2 samplePos = Vector2(x, y) + velocity * i / samples;

@@ -4,6 +4,7 @@
 #define OBJ_LOADER_H
 
 #include "obj_parser.h"
+#include "ishihara_svg_parser.h"
 
 class objLoader
 {
@@ -60,7 +61,11 @@ private:
 int objLoader::load(char const * filename)
 {
 	int no_error = 1;
-	no_error = parse_obj_scene(&data, filename);
+	if (strequal(&filename[strlen(filename) - 4], ".svg")) {
+		no_error = parse_ishihara_svg_scene(&data, filename);
+	} else {
+		no_error = parse_obj_scene(&data, filename);
+	}
 	if(no_error)
 		assign();
 	return no_error;
