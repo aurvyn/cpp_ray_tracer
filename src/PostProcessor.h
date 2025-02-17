@@ -16,6 +16,7 @@
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
 #include "filters/ToneMapHSV.h"
+#include "filters/Daltonization.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
