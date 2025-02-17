@@ -67,6 +67,63 @@ public:
 		
 		return false;
 	}
+
+	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	{	
+		std::array<bool, N> rets;
+		for (int i = 0; i < N; i++){
+			bool intersect = false;
+			Vector3 d = rays.getDirections()[0];
+			Vector3 e = rays.getOrigin();
+			Vector3 c = this->getPosition();
+			float r = this->getRadius();
+			
+			//from:
+			//ray = e + t*d
+			//sphere = (p-c)^2 -r^2 = 0
+			
+			//quadratic equation
+			//(-b +- sqrt(b^2 - 4ac))  / (2a)
+			float A, B, C;
+			A = d.dot(d);
+			B = 2*d.dot(e-c);
+			//C = e.dot(e) -2*e.dot(c) + c.dot(c) - r*r;
+			C = (e-c).dot(e-c) - r*r;
+			
+			float discriminant = B*B - 4.0f*A*C;
+			if(discriminant < 0.0f)
+				intersect = false;
+			
+			float t1, t2;
+			t1 = (-B + sqrt(discriminant)) / (2.0f*A);
+			t2 = (-B - sqrt(discriminant)) / (2.0f*A);
+			
+			if(t1 < 0.0f && t2 < 0.0f)
+				intersect = false;
+			
+			float closestT;
+			if(t2 < 0.0f)
+				closestT = t1;
+			else if(t1 < 0.0f)
+				closestT = t2;
+			else if(t1 < t2)
+				closestT = t1;
+			else
+				closestT = t2;
+			
+			if(closestT < hits[i].getParameter())
+			{
+				hits[i].setParameter(closestT);
+				
+				Vector3 normal = rays.pointAtParameter(i, closestT) - c;
+				hits[i].setNormal(normal.normalize());
+				hits[i].setMaterialId( this->getMaterialId());
+				intersect = true;
+			}
+			rets[i] = intersect;
+		}
+		return rets;
+	}
 	
 	void setMaterialId(size_t materialId) { this->materialId = materialId; }
 	size_t getMaterialId() const { return this->materialId; }

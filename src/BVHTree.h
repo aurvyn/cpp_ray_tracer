@@ -76,6 +76,11 @@ public:
 	{
 		return traverse(ray, hitpoint, root);
 	}
+
+	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	{	
+		return packetTraverse(rays, hits, root);
+	}
 	
 	virtual Vector3 getBBMin() const
 	{ return this->root.getBBMin(); }
@@ -144,6 +149,47 @@ private:
 		bool hitRight = traverse(ray, hitpoint, *node.getRight());
 		
 		return hitLeft || hitRight;
+	}
+
+	virtual std::array<bool, N> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
+	{
+		std::array<bool, N> hitNodes = node.packetIntersectNoUpdate(rays, hitpoints);
+		
+		// bool allHit = true;
+		// for (int i = 0; i < N; i++){
+		// 	if(!hitNodes[i]){
+		// 		allHit = false;
+		// 	}
+		// }
+		// if(!allHit){
+		// 	for (int i = 0; i < N; i++){
+		// 		if(hitNodes[i]){
+		// 			Ray ray = Ray(rays.getDirections()[i],rays.getOrigin());
+		// 			if(node.isLeaf())
+		// 			{
+		// 				hitNodes[i] = node.getPrimitve()->intersect(ray, hitpoints[i]);
+		// 			}
+					
+		// 			bool hitLeft  = traverse(ray, hitpoints[i], *node.getLeft());
+		// 			bool hitRight = traverse(ray, hitpoints[i], *node.getRight());
+					
+		// 			hitNodes[i] = hitLeft || hitRight;
+		// 		}
+		// 	}
+		// 	return hitNodes;
+		// }else{
+			if(node.isLeaf())
+		{
+			return node.getPrimitve()->packetIntersect(rays, hitpoints);
+		}
+		
+		std::array<bool, N> hitLeft  = packetTraverse(rays, hitpoints, *node.getLeft());
+		std::array<bool, N> hitRight = packetTraverse(rays, hitpoints, *node.getRight());
+		for (int i = 0; i < N; i++){
+			hitLeft[i] = hitLeft[i] || hitRight[i];
+		}
+		return hitLeft;
+		// }	
 	}
 };
 

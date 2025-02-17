@@ -72,6 +72,12 @@ private:
 		}
 		return hitOne;
 	}
+
+	virtual std::array<bool, N> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
+	{
+		std::array<bool, N> val;
+		return val;
+	}
 };
 
 #endif

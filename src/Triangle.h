@@ -24,6 +24,65 @@ public:
 		return MöllerTrumboreIntersection(ray, hit);
 	}
 
+	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	{	
+		return packetMöllerTrumboreIntersection(rays, hits);
+	}
+
+	std::array<bool, N> packetMöllerTrumboreIntersection(RayPacket const & rays, Hitpoint* hits) const
+	{
+		std::array<bool, N> rets;
+		for (int i = 0; i < N; i++){
+			bool intersect = true;
+			Vector3 e1 = vertex[1] - vertex[0];
+			Vector3 e2 = vertex[2] - vertex[0];
+			Vector3 cross = rays.getDirections()[i].cross(e2);
+			float det = e1.dot(cross);
+
+			if (det > -EPSILON && det < EPSILON){
+				rets[i] = false;
+				continue;
+			}
+
+			float invDet = 1.0 / det;
+			Vector3 s = rays.getOrigin() - vertex[0];
+			float u = invDet * s.dot(cross);
+
+			if ((u < 0 && abs(u) > EPSILON) || (u > 1 && abs(u-1) > EPSILON)){
+				rets[i] = false;
+				continue;
+			}
+
+			Vector3 sCross = s.cross(e1);
+			float v = invDet * rays.getDirections()[i].dot(sCross);
+
+			if ((v < 0 && abs(v) > EPSILON) || (u + v > 1 && abs(u + v - 1) > EPSILON)){
+				rets[i] = false;
+				continue;
+			}
+
+			float t = invDet * e2.dot(sCross);
+
+			if (t > EPSILON)
+			{
+				bool isCloser = t < hits[i].getParameter();
+				if(!isCloser){
+					rets[i] = false;
+					continue;
+				}
+				
+					
+				hits[i].setParameter(t);
+				hits[i].setNormal(this->normal);
+				hits[i].setMaterialId( this->getMaterialId());
+				rets[i] = intersect;
+			}else{
+				rets[i] = false;
+			}
+		}
+		return rets;
+	}
+
 	bool MöllerTrumboreIntersection(Ray const & ray, Hitpoint & hit) const
 	{
 		Vector3 e1 = vertex[1] - vertex[0];

@@ -43,6 +43,33 @@ public:
 		
 		return ray;
 	}
+
+	RayPacket getRayPacket(size_t const & x, size_t const & y) const
+	{
+		int nx = w;
+		int ny = h;
+		float l, r, b, t;
+		l = -(w/2.0f);
+		r =  w/2.0f;
+		b =  h/2.0f;
+		t = -(h/2.0f);
+		
+		float d = h/2.0f * sin(camera.getFov());
+		Vector3 dirs[4];
+		for (int i = 0; i < 4; i++){
+
+		float u = l + (r - l)*((x*4)+i+0.5)/nx;
+		float v = b + (t - b)*(y+0.5)/ny;
+		
+		Vector3 s = u*camera.getU() + v*camera.getV() - d*camera.getW();
+		dirs[i] = s;
+		}
+		RayPacket rays;
+		rays.setDirection(dirs);
+		rays.setOrigin(camera.getPos());
+		
+		return rays;
+	}
 	
 private:
 	Camera camera;
