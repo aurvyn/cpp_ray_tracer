@@ -12,6 +12,7 @@
 #include "sdf_scenes/SDFSharkEgg.h"
 #include "sdf_scenes/SDFDonut.h"
 #include "sdf_scenes/SDFCoolS.h"
+#include "sdf_scenes/SDFRevolvedCross.h"
 #include "PrettyLogger.h"
 
 
@@ -26,7 +27,8 @@ options = {
     {"morph", loadSDFMorphScene},
     {"sharkegg", loadSDFSharkEggScene},
     {"donut", loadSDFDonutScene},
-    {"cools", loadSDFCoolSScene}
+    {"cools", loadSDFCoolSScene},
+    {"rcross", loadSDFRevolvedCrossScene}
 };
 
 Scene loadWithSDFLoader(const char *scene) {

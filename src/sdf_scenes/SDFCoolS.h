@@ -21,7 +21,7 @@ Scene loadSDFCoolSScene() {
     scene.setMaterials(materials);
     PrimitiveArray *primArray = new PrimitiveArray();
     auto s = new CoolS(0.2);
-    Primitive* ext = new SDFExtrude(s, 5);
+    Primitive* ext = new SDFExtrude(s, Vector3(0,0,-2), 2);
     ext->setMaterialId(0);
     primArray->add(ext);
     scene.setRootPrimitive(primArray);
