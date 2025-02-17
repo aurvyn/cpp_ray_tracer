@@ -25,8 +25,6 @@ class ToneMapHSV : public Effect
                 }
             }
 
-            printf("maxValue = %f\n", maxValue);
-
             if(maxValue <= 1.0f)
                 maxValue = 1.0f;
             

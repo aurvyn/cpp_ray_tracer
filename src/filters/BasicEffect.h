@@ -189,9 +189,9 @@ BasicEffect *NoOp(Buffer<Vector3>* layer1) {
     }, layer1);
 }
 
-BasicEffect *ConstMultiply(Effect *layer1, float cutoff)  {
-    auto mul = [cutoff](Vector3 a) {
-        return a*cutoff;
+BasicEffect *ConstMultiply(Effect *layer1, float val)  {
+    auto mul = [val](Vector3 a) {
+        return a*val;
     };
     return new BasicEffect(mul, layer1);
 }
@@ -201,6 +201,22 @@ BasicEffect *ColorMultiply(Effect *layer1, Vector3 color)  {
         return a*color;
     };
     return new BasicEffect(mul, layer1);
+}
+
+
+BasicEffect *ConstAdd(Effect *layer1, float val)  {
+    auto add = [val](Vector3 a) {
+        return a+val;
+    };
+    return new BasicEffect(add, layer1);
+}
+
+
+BasicEffect *ColorAdd(Effect *layer1, Vector3 val)  {
+    auto add = [val](Vector3 a) {
+        return a+val;
+    };
+    return new BasicEffect(add, layer1);
 }
 
 enum ThresholdOptions {
