@@ -33,7 +33,8 @@ int hexVal(char hexVal) {
     else return 0;
 }
 
-Vector3 rgbFromHex(char* hex) {
+Vector3 rgbFromHex(std::string hexStr) {
+    const char* hex = hexStr.c_str();
     int r = hexVal(hex[1]) + 16 * hexVal(hex[0]);
     int g = hexVal(hex[3]) + 16 * hexVal(hex[2]);
     int b = hexVal(hex[5]) + 16 * hexVal(hex[4]);
