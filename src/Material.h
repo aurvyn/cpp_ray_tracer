@@ -27,11 +27,7 @@ public:
 	
 	Vector3 getKa() const { return this->ka; }
 	Vector3 getKd() const { return this->kd; }
-	Vector3 getKd(const float u, const float v) const
-	{
-		return ( texture != nullptr ) ? this->texture->getUV(u, v) : this->kd;
-	}
-	Vector3 getKd(const Vector2& uv) const { return this->texture->getUV(uv.c[0], uv.c[1]); }
+	Vector3 getKd(const Vector2& uv) const { return (texture != nullptr) ? this->texture->getUV(uv.c[0], uv.c[1]) : this->kd; }
 	Vector3 getKs() const { return this->ks; }
 	float getReflectance() const { return this->reflectance; }
 	float getTranslucency() const { return this->translucency; }
