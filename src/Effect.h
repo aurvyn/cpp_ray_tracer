@@ -57,7 +57,7 @@ class Effect
         }
 
         virtual Buffer<Vector3> *applyEffect() {
-            if(this->imageBuffer == NULL) {
+            if(this->imageBuffer == NULL && this->child != NULL) {
                 this->imageBuffer = this->child->applyEffect();
             }
             this->_apply();

@@ -8,9 +8,9 @@
 #include "filters/HSVConvert.h"
 #include "filters/HueShift.h"
 #include "filters/RGBConvert.h"
-#include "filters/Add.h"
 #include "filters/MotionBlur.h"
 #include "filters/RGBMultiply.h"
+#include "filters/ToneMapHSV.h"
 #include "filters/Bound.h"
 #include "filters/Vignette.h"
 #include "filters/BasicEffect.h"
@@ -42,6 +42,10 @@ class Pipeline
         ) = 0;
 };
 
+Effect *FixingAndrewsMess(Effect *e) {
+    return new RGBConvert(new ToneMapHSV(new HSVConvert(e)));
+}
+
 class DefaultPipeline: public Pipeline
 {
     public:
@@ -62,8 +66,7 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR(new HSVConvert((new BasicConvolution (new NoOp(imageBuffer)))->init(2))))))->init(255.0f);
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert((new NoOp(imageBuffer)))))))->init(255.0f);
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
-            Effect *effect = (new RGBMultiply(new RGBConvert(new HSVConvert(depthBuffer))))->init(255.0f);
-            // Effect *effect = new NoOp(imageBuffer);
-            return new PostProcessor(effect);
+            Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
+            return new PostProcessor(ConstMultiply(effect, 255.0f));
         }
 };
