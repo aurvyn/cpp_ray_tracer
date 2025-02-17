@@ -4,6 +4,7 @@
 #include "obj_loader/objLoader.h"
 #include "Scene.h"
 #include "BVHTree.h"
+#include <string>
 
 
 class ObjLoader
@@ -101,7 +102,7 @@ public:
 			//printf(" refact: %.2f\n", mtl->refract_index);
 			
 			// printf(" texture: %s\n", mtl->diffuse_texture_filename);
-			if (mtl->diffuse_texture_filename)
+			if (std::string(mtl->diffuse_texture_filename).length() > 0)
 			{
 				mat.loadTexture(mtl->diffuse_texture_filename);
 			}
