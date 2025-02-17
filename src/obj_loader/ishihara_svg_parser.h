@@ -24,16 +24,19 @@ int parse_ishihara_svg_scene(obj_scene_data *data_out, char const *file_name)
 	}
     std::ofstream mtl_file("../../tests/ishihara.mtl");
     std::ofstream obj_file("../../tests/ishihara.obj");
+    mtl_file << "newmtl background\nKa 255 255 255\n" << std::endl;
     obj_file << "mtllib ishihara.mtl" << std::endl;
     char token[32], fill[32], *fill_ptr;
-    int centerX, centerY;
+    int width, height, centerX, centerY;
 	while (file >> token)
     {
         if (strequal(token, "<svg")) {
             file >> token;
-            centerX = atoi(get_number(token, 7)) / 2;
+            width = atoi(get_number(token, 7));
+            centerX = width / 2;
             file >> token;
-            centerY = atoi(get_number(token, 8)) / 2;
+            height = atoi(get_number(token, 8));
+            centerY = height / 2;
         }
         else if (strequal(token, "<circle")) {
             obj_file << "v ";
@@ -54,9 +57,12 @@ int parse_ishihara_svg_scene(obj_scene_data *data_out, char const *file_name)
             int r, g, b;
             sscanf(fill_ptr, "%2x%2x%2x", &r, &g, &b);
             obj_file << "\nusemtl " << fill_ptr << "\n" << std::endl;
-            mtl_file << "newmtl " << fill_ptr << "\nKa " << r << " " << g << " " << b << "\nKd 0 0 0\nKs 0 0 0\n" << std::endl;
+            mtl_file << "newmtl " << fill_ptr << "\nKa " << r << " " << g << " " << b << "\n" << std::endl;
         }
     }
+    // background
+    obj_file << "\nv 0 0 0\nv " << width << " 0 0\nv 0 " << height << " 0\nv " << width << " " << height << " 0\nusemtl background\nf -4 -3 -2\nf -3 -2 -1" << std::endl;
+    // camera
     obj_file << "\nv " << centerX << " " << centerY << " " << -centerY <<  "\nv " << centerX << " " << centerY << " 0\nvn 0 -1 0\ng Camera\nc -2 -1 -1" << std::endl;
     file.close();
     mtl_file.close();
