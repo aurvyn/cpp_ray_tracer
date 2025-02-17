@@ -25,18 +25,9 @@ class Funky : public Pipeline {
             float scl = 360.0f / (1 - minDepth);
             printf("min/max = %f/%f\n", minDepth, 1);
             // Effect *depthHueOverlay = (new Bound((new Bound(ConstMultiply(ConstAdd(NoOp(depthBuffer), -minDepth), scl)))->init(1.0f, 0.0f, 1, 1.0f, 1.0f)))->init(1.0f, 1.0f, 2, 1.0f, 1.0f);
-            Effect *depthHueOverlay = ConstSet(ConstMultiply(ConstAdd(NoOp(depthBuffer), -minDepth), scl), 2 | 4, Vector3(0.0f, 1.0f, 1.0f));
-            Effect *base = new HSVConvert(new Vignette(imageBuffer));
-            
-            // Effect *result = ConstMultiply(new RGBConvert(new ToneMapHSV(Add(depthHueOverlay, base))), 255.0f);
-
-            Effect *result = ConstMultiply((new FloydDither(new RGBConvert(new ToneMapHSV(base))))->init(true), 255.0f);
-            // recommended threshold values: 
-            //  bunny-scene: 0.995
-            
-            // Effect *redMaskBase = ColorMultiply(Threshold(NoOp(imageBuffer2), 0.995, AVG), Vector3(127.0f/255.0f, 0.0f, 0.0f));
-            // Effect *redMask = Multiply(sinOverlay, redMaskBase);
-            // Effect *base = new Vignette(imageBuffer);
+            Effect *depthHueOverlay = (new HueShift(ConstSet(ConstMultiply(ConstAdd(NoOp(depthBuffer), -minDepth), scl), 2 | 4, Vector3(0.0f, 0.3f, 0.3f))))->init(40.0f);
+            Effect *idk = new HSVConvert(Multiply(new RGBConvert(depthHueOverlay), NoOp(normalBuffer)));
+            Effect *result = ConstMultiply(new FloydDither(new RGBConvert(new ToneMapHSV(idk))), 255.0f);
             return new PostProcessor(result);
         }
 };

@@ -8,7 +8,7 @@ class FloydDither : public Effect
 {
     using Effect::Effect;
     
-    float amount;
+    bool useGlitch;
     std::vector<Vector3> *pallette = NULL;
 
     // https://en.wikipedia.org/wiki/Ordered_dithering
@@ -17,7 +17,11 @@ class FloydDither : public Effect
     // "r is the amount of spread in color space. Assuming an RGB palette with 23N evenly distanced colors where each color (a triple of red, green and blue values) is represented by an octet from 0 to 255, one would typically choose r ≈ 255 N {\textstyle r\approx {\frac {255}{N}}}. (1⁄2 is again the normalizing term.) "
 
     public:
-        FloydDither *init(std::vector<Vector3> *pallette) {
+        FloydDither *init(bool useGlitch) {
+            this->useGlitch = useGlitch;
+            return this;
+        }
+        FloydDither *setPallette(std::vector<Vector3> *pallette) {
             this->pallette = pallette;
             return this;
         }
@@ -82,7 +86,7 @@ class FloydDither : public Effect
                 printf("Convert to RGB before calling dither!\n");
             }
 
-            if(this->pallette == NULL) this->pallette = coolerPallette();
+            if(this->pallette == NULL) this->pallette = coolerPallette2();
             float correctionKernel[4] = {0.0f};
             correctionKernel[0] = 7.0f/16.0f;
             correctionKernel[1] = 3.0f/16.0f;
@@ -101,12 +105,22 @@ class FloydDither : public Effect
                     Vector3 color = this->imageBuffer->at(x,y);
                     Vector3 quantizedColor = closestColorInPallette(color);
                     this->imageBuffer->at(x,y) = quantizedColor;
-                    Vector3 err = quantizedColor - color;
-                    if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
-                    if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
-                    if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
-                    if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];
 
+                    if(!useGlitch) {
+                        Vector3 err = quantizedColor - color;
+                        if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
+                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
+                        if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
+                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];    
+                    } else {
+                        Vector3 err = color - quantizedColor;
+                        if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
+                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
+                        if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
+                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];
+
+                    }
+                    
                     // Vector3 
                     // Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
                     // Vector3 closestColor = closestColorInPallette(thresholdColor);
