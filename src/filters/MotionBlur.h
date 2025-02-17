@@ -22,6 +22,8 @@ public:
         unsigned int width = imageBuffer->getWidth();
         unsigned int height = imageBuffer->getHeight();
         Buffer<Vector3> finalBuffer(width, height);
+        if(this->child != NULL) this->colorSpace = this->child->colorSpace;
+        else this->colorSpace = RGB;
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {

@@ -89,15 +89,15 @@ class BasicBlendMode : public BlendMode {
     }
 };
 
-GeneratorEffect *VSin(const Buffer<Vector3> * reference_buf) {
-    return new GeneratorEffect([](int x, int y) {
-        return Vector3((1 + sin(y/5.0))/2);
+GeneratorEffect *VSin(const Buffer<Vector3> * reference_buf, float freq=5.0f) {
+    return new GeneratorEffect([freq](int x, int y) {
+        return Vector3((1 + sin(y/freq))/2);
     }, reference_buf);
 }
 
-GeneratorEffect *HSin(const Buffer<Vector3> * reference_buf) {
-    return new GeneratorEffect([](int x, int y) {
-        return Vector3((1 + sin(x/5.0))/2);
+GeneratorEffect *HSin(const Buffer<Vector3> * reference_buf, float freq=5.0f) {
+    return new GeneratorEffect([freq](int x, int y) {
+        return Vector3((1 + sin(x/freq))/2);
     }, reference_buf);
 }
 
@@ -196,6 +196,13 @@ BasicEffect *ConstMultiply(Effect *layer1, float cutoff)  {
     return new BasicEffect(mul, layer1);
 }
 
+BasicEffect *ColorMultiply(Effect *layer1, Vector3 color)  {
+    auto mul = [color](Vector3 a) {
+        return a*color;
+    };
+    return new BasicEffect(mul, layer1);
+}
+
 enum ThresholdOptions {
     RED   = 0,
     GREEN = 1,
@@ -204,18 +211,25 @@ enum ThresholdOptions {
     MAX   = 4,
 };
 
-BasicEffect *Threshold(Effect *layer1, float cutoff, ThresholdOptions on)  {
+BasicEffect *Threshold(Effect *layer1, float cutoff, ThresholdOptions on, bool above=true)  {
+    // above=true: include pixels above cutoff
+    // above=false: include pixels below cutoff
+    bool below = !above;
     if (on < 3) {
-        return new BasicEffect([on, cutoff](Vector3 a) {
-            return Vector3(a[on] > cutoff);
+        return new BasicEffect([on, cutoff, below](Vector3 a) {
+            return Vector3((a[on] > cutoff) ^ below);
         }, layer1);
     } else if (on == AVG) {
-        return new BasicEffect([cutoff](Vector3 a) {
-            return Vector3((a[0] + a[1] + a[2])/3 > cutoff);
+        return new BasicEffect([cutoff, below](Vector3 a) {
+            return Vector3(((a[0] + a[1] + a[2])/3 > cutoff) ^ below);
         }, layer1);
     } else if (on == MAX) {
-        return new BasicEffect([cutoff](Vector3 a) {
-            return Vector3(std::max(std::max(a[0], a[1]), a[2]) > cutoff);
+        return new BasicEffect([cutoff, below](Vector3 a) {
+            return Vector3((std::max(std::max(a[0], a[1]), a[2]) > cutoff) ^ below);
+        }, layer1);
+    } else {
+        return new BasicEffect([cutoff, below](Vector3 a) {
+            return Vector3((std::max(std::max(a[0], a[1]), a[2]) > cutoff) ^ below);
         }, layer1);
     }
     // TODO what here
