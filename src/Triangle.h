@@ -68,7 +68,6 @@ public:
 				
 		hit.setParameter(distance);
 		hit.setSurfaceCoords(calcUV(location));
-		// hit.setBarycentricCoords(calcUV(location));
 		hit.setNormal(this->normal);
 		hit.setMaterialId( this->getMaterialId());
 		return true;

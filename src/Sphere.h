@@ -58,7 +58,6 @@ public:
 		if(closestT < hit.getParameter())
 		{
 			hit.setParameter(closestT);
-			
 			Vector3 normal = ray.pointAtParameter(closestT) - c;
 			hit.setNormal(normal.normalize());
 			hit.setMaterialId( this->getMaterialId());
