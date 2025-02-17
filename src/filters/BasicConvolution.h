@@ -15,6 +15,11 @@ class BasicConvolution : public Effect {
     Vector3 yKernel = Vector3(0.25f, 0.5f, 0.25f);
     int steps = 1;
 public:
+    BasicConvolution *init(int steps) {
+        this->steps = steps;
+        return this;
+    }
+
     BasicConvolution *init(int steps, Vector3 xK, Vector3 yK) {
         this->steps = steps;
         this->xKernel = xK;
