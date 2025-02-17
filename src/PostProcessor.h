@@ -8,13 +8,17 @@
 #include "filters/HSVConvert.h"
 #include "filters/HueShift.h"
 #include "filters/RGBConvert.h"
-#include "filters/Add.h"
 #include "filters/MotionBlur.h"
 #include "filters/RGBMultiply.h"
+#include "filters/ToneMapHSV.h"
 #include "filters/Bound.h"
 #include "filters/Vignette.h"
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
+#include "filters/ToneMapHSV.h"
+#include "filters/FloydDither.h"
+#include "filters/BayerianDither.h"
+#include "filters/Daltonization.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
 class PostProcessor
@@ -38,9 +42,19 @@ class Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer motionBuffer = MotionBuffer(0, 0)
+            MotionBuffer* motionBuffer
         ) = 0;
 };
+
+Buffer<Vector3> *copyBuffer(Buffer<Vector3> *src) {
+    Buffer<Vector3> *dest = new Buffer<Vector3>(src->getWidth(), src->getHeight());
+    for(int x = 0; x < src->getWidth(); x++) {
+        for(int y = 0; y < src->getHeight(); y++) {
+            dest->at(x,y) = Vector3(src->at(x,y));
+        }
+    }
+    return dest;
+}
 
 class DefaultPipeline: public Pipeline
 {
@@ -51,7 +65,7 @@ class DefaultPipeline: public Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer motionBuffer
+            MotionBuffer* motionBuffer
         ) override {
             // Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
             //     (new HueShift(new HSVConvert(
@@ -62,8 +76,9 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR(new HSVConvert((new BasicConvolution (new NoOp(imageBuffer)))->init(2))))))->init(255.0f);
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert((new NoOp(imageBuffer)))))))->init(255.0f);
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
-            Effect *effect = (new RGBMultiply(new RGBConvert(new HSVConvert(depthBuffer))))->init(255.0f);
-            // Effect *effect = new NoOp(imageBuffer);
-            return new PostProcessor(effect);
+            // Effect *effect = (new RGBMultiply(new FloydDither(new RGBConvert(new ToneMapHSV( new HSVConvert(imageBuffer))))))->init(255.0f);
+            Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
+            return new PostProcessor(ConstMultiply(effect, 255.0f));
         }
+        
 };

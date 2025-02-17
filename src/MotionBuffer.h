@@ -11,6 +11,8 @@ public:
     /**
      * Bidirectionally dilutes the motion buffer to eliminate blur cut-offs.
      * This function is mainly reserved for interal use by the MotionBlur effect.
+     * 
+     * Inspired by: https://casual-effects.com/research/McGuire2012Blur/McGuire12Blur.pdf
      * @param samples The number of samples to take for each pixel.
      * This controls how smoothly the dilution of the motion buffer is.
      * Higher number of samples means more smoothing.
@@ -19,7 +21,7 @@ public:
      * If an object is too fast and the chunkSize is too small, the blur will appear to be cut out.
      * If the resolution is high, then this number might need to be increased.
      */
-    MotionBuffer *dilate(int samples = 32, int chunkSize = 16) {
+    MotionBuffer *dilate(int samples = 32, int chunkSize = 8) {
         int width = this->getWidth();
         int height = this->getHeight();
         Buffer<Vector2> neighborHood = getNeighborhood(chunkSize);
@@ -38,8 +40,8 @@ public:
                         Vector2 velocity(0.0f);
                         for (int k = 1-samples/2; k < samples/2; ++k) {
                             Vector2 samplePos = Vector2(x, y) + guidingVelocity * k / samples;
-                            unsigned int sx = clamp(0, width - 1, samplePos[0]);
-                            unsigned int sy = clamp(0, height - 1, samplePos[1]);
+                            int sx = clamp(0, width - 1, samplePos[0]); // sample x
+                            int sy = clamp(0, height - 1, samplePos[1]); // sample y
                             velocity += this->at(sx, sy);
                         }
                         finalBuffer.at(x, y) = velocity / samples;
@@ -90,8 +92,8 @@ private:
                 float highestMagnitude = 0.0f;
                 for (int k = -1; k <= 1; ++k) {
                     for (int l = -1; l <= 1; ++l) {
-                        int sx = i + k;
-                        int sy = j + l;
+                        int sx = i + k; // sample x
+                        int sy = j + l; // sample y
                         if (sx >= 0 && sx < neighborBuffer.getWidth()
                          && sy >= 0 && sy < neighborBuffer.getHeight()) {
                             float magnitude = neighborBuffer.at(sx, sy).length();

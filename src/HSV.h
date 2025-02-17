@@ -26,6 +26,21 @@ Vector4 clampRGB(Vector4 rgb) {
 
 
 
+int hexVal(char hexVal) {
+    if(hexVal >= 'a') return hexVal - 'a' + 10;
+    else if(hexVal >= 'A') return hexVal - 'A' + 10;
+    else if(hexVal >= '0') return hexVal - '0';
+    else return 0;
+}
+
+Vector3 rgbFromHex(char* hex) {
+    int r = hexVal(hex[1]) + 16 * hexVal(hex[0]);
+    int g = hexVal(hex[3]) + 16 * hexVal(hex[2]);
+    int b = hexVal(hex[5]) + 16 * hexVal(hex[4]);
+    return Vector3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
+}
+
+
 
 
 Vector3 hsv2rgb(Vector3 in)

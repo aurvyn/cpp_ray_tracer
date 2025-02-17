@@ -1,6 +1,7 @@
 #ifndef __OBJ_LOADER
 #define __OBJ_LOADER
 
+#include <iostream>
 #include "obj_loader/objLoader.h"
 #include "Scene.h"
 #include "BVHTree.h"
@@ -22,26 +23,32 @@ public:
 		
 		for(int i=0; i<objData.sphereCount; i++)
 		{
-			Vector3 pos, up, side;
+			Vector3 pos, up, side, motion;
 			obj_sphere *o = objData.sphereList[i];
 			pos = objToGenVec(objData.vertexList[ o->pos_index ]);
 			up = objToGenVec(objData.normalList[ o->up_normal_index ]);
 			side = objToGenVec(objData.normalList[ o->equator_normal_index ]);
+			if (strequal(objData.materialList[o->material_index]->name, "green")) {
+				motion = Vector3(0, 1, 0);
+			}
 			
-			Sphere * sphere = new Sphere(pos, up.length());
+			Sphere * sphere = new Sphere(pos, up.length(), motion);
 			sphere->setMaterialId(o->material_index);
 			primitiveArray->add(sphere);
 		}
 		
 		for(int i=0; i<objData.faceCount; i++)
 		{
-			Vector3 a, b, c, norm;
+			Vector3 a, b, c, motion;
 			obj_face *o = objData.faceList[i];
 			a = objToGenVec(objData.vertexList[ o->vertex_index[0] ]);
 			b = objToGenVec(objData.vertexList[ o->vertex_index[1] ]);
 			c = objToGenVec(objData.vertexList[ o->vertex_index[2] ]);
+			if (strequal(objData.materialList[o->material_index]->name, "short_box")) {
+				motion = Vector3(0, 50, 0);
+			}
 			
-			Triangle * tri = new Triangle(a, b, c);
+			Triangle * tri = new Triangle(a, b, c, motion);
 			tri->setMaterialId(o->material_index);
 			primitiveArray->add(tri);
 		}
@@ -112,7 +119,7 @@ public:
 			Vector3 pos = objToGenVec( objData.vertexList[ objData.camera->camera_pos_index ] );
 			Vector3 lookAt = objToGenVec( objData.vertexList[ objData.camera->camera_look_point_index ] );
 			Vector3 up = objToGenVec( objData.normalList[ objData.camera->camera_up_norm_index ] );
-			camera = Camera(pos, lookAt, up);
+			camera = Camera(pos, lookAt, up, Vector3(0, 50, 0));
 			scene.setCamera(camera);
 		}
 		else

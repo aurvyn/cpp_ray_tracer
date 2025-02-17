@@ -7,6 +7,8 @@ endif()
 # (you can also set it on the command line: -D CMAKE_BUILD_TYPE=Release)
 
 set(EXECUTABLE_NAME "tracer")
+set (CMAKE_CXX_STANDARD 20)
+
 
 project(${EXECUTABLE_NAME})
 

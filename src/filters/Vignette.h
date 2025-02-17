@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Effect.h"
-#define clamp(a,b,v) ((v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) ))
 #define lerp(a, b, t) (a + ((b - a) * t))
 
 class Vignette : public Effect
@@ -29,14 +28,15 @@ class Vignette : public Effect
 
         void _apply() override
         {
-            this->colorSpace = this->child->colorSpace;
+            if(this->child != NULL) this->colorSpace = this->child->colorSpace;
+            else this->colorSpace = RGB;
             // 100,100 - 50,50 = 50,50
             size_t resX = this->imageBuffer->getWidth();
             size_t resY = this->imageBuffer->getHeight();
             Vector2 res = Vector2((float)resX, (float)resY);
             Vector2 center = res / 2.0f;
             float scaleFactor = intensity / (center.length());
-
+            
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
                     Vector2 d = (Vector2(x,y) - center) * scaleFactor; // normalized to [0,intensity]

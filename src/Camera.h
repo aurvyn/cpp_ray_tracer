@@ -7,10 +7,11 @@ public:
 	Camera()
 	{ }
 
-	Camera(Vector3 const & pos, Vector3 const & focusPoint, Vector3 const & up)
+	Camera(Vector3 const & pos, Vector3 const & focusPoint, Vector3 const & up, Vector3 const & motion)
 	{
 		setBasis(pos, focusPoint, up);
 		this->pos = pos;
+		this->motion = motion;
 		setFov(90.0f / 180.0f * M_PI);
 	}
 
@@ -26,6 +27,7 @@ public:
 	Vector3 getV() const { return this->v; }
 	Vector3 getW() const { return this->w; }
 	Vector3 getPos() const { return this->pos; }
+	Vector3 getMotion() const { return this->motion; }
 	float getFov() const { return this->fov; }
 
 	void setFov(float const & fov)
@@ -33,7 +35,7 @@ public:
 
 private:
 
-	Vector3 pos, u, v, w;
+	Vector3 pos, u, v, w, motion;
 	float fov;
 	float aspectRatio;
 };
