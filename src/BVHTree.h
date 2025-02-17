@@ -65,7 +65,10 @@ public:
 	void setContents(PrimitiveArray const * primitives)
 	{
 		nodePool.reserve(primitives->size() * 2);
+
+		//nodePool.resize(primitives->size() * 2);
 		buildTree(*primitives, &root, 0);
+		//nodePool.clear();
 		//this->prims = *prims;
 		//this->root.encompass(prims->getBBMin(), prims->getBBMax());
 	}
