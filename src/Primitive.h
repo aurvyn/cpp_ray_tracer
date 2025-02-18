@@ -9,14 +9,13 @@
 class Primitive
 {
 public:
-	static const int N = 4;
 
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{ return false; }
 
-	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
 	{	
-		std::array<bool, N> val;
+		std::array<bool, N*N> val;
 		return val;
 	}
 	

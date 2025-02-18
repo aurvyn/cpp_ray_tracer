@@ -24,15 +24,15 @@ public:
 		return MöllerTrumboreIntersection(ray, hit);
 	}
 
-	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
 	{	
 		return packetMöllerTrumboreIntersection(rays, hits);
 	}
 
-	std::array<bool, N> packetMöllerTrumboreIntersection(RayPacket const & rays, Hitpoint* hits) const
+	std::array<bool, N*N> packetMöllerTrumboreIntersection(RayPacket const & rays, Hitpoint* hits) const
 	{
-		std::array<bool, N> rets;
-		for (int i = 0; i < N; i++){
+		std::array<bool, N*N> rets;
+		for (int i = 0; i < N*N; i++){
 			bool intersect = true;
 			Vector3 e1 = vertex[1] - vertex[0];
 			Vector3 e2 = vertex[2] - vertex[0];

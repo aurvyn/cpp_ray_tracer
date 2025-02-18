@@ -49,7 +49,7 @@ public:
 		if(useArray)
 			scene.setRootPrimitive(primitiveArray);
 		else {
-			BVHTree * tree = new BVHTree();
+			BVHTree * tree = new StackBVHTree();
 			tree->setContents(primitiveArray);
 			scene.setRootPrimitive(tree);
 		}

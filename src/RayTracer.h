@@ -18,26 +18,32 @@ public:
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
 		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
-		for(int y=0; y<resY; y++)
-		{
-			if (packets){
-				for(int x=0; x<resX / 4; x++)
+		if (packets){
+			for(int y=0; y<resY / N; y++)
+			{
+				for(int x=0; x<resX / N; x++)
 				{
 					RayPacket rays = generator.getRayPacket(x, y);
-					std::array<bool, N> hitSomething;
-					Hitpoint hits[4];
+					std::array<bool, N*N> hitSomething;
+					Hitpoint hits[N*N];
 					hitSomething = scene.getRootPrimitive()->packetIntersect(rays, hits);
-					for (int i = 0; i < 4; i++){
-						if(hitSomething[i]) {
-							Vector3 floatColor = Shader::shade(Ray(rays.getDirections()[i], rays.getOrigin()), hits[i], scene);
-							floatBuffer.at(x*4+i,y) = floatColor;
-							//floatBuffer.at(x,y) = Vector3(0.0f);
+					for (int j = 0; j < N; j++){
+						for (int i = 0; i < N; i++){
+							int index = i + j * N;
+							if(hitSomething[index]) {
+								Vector3 floatColor = Shader::shade(Ray(rays.getDirections()[index], rays.getOrigin()), hits[index], scene);
+								floatBuffer.at(x*N+i,y*N+j) = floatColor;
+								//floatBuffer.at(x,y) = Vector3(0.0f);
+							}
+							else
+								floatBuffer.at(x*N+i,y*N+j) = Vector3(0,0,0);
 						}
-						else
-							floatBuffer.at(x*4+i,y) = Vector3(0,0,0);
 					}
 				}
-			} else {
+			}
+		} else {
+			for(int y=0; y<resY; y++)
+			{
 				for(int x=0; x<resX; x++)
 				{
 					Ray ray = generator.getRay(x, y);
@@ -49,8 +55,8 @@ public:
 					//floatBuffer.at(x,y) = d;
 					//continue;
 					
-					Vector3 rc = ray.getDirection();
-					rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
+					// Vector3 rc = ray.getDirection();
+					// rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
 
 					bool hitSomething = false;
 					Hitpoint hit;
@@ -61,7 +67,7 @@ public:
 						//floatBuffer.at(x,y) = Vector3(0.0f);
 					}
 					else
-						floatBuffer.at(x,y) = rc;
+						floatBuffer.at(x,y) = Vector3(0.0f);
 
 					
 				}

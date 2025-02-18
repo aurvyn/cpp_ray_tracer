@@ -19,7 +19,7 @@ public:
 
 	void setInvDirection()
 	{
-		for (int i = 0; i < N; i++){
+		for (int i = 0; i < N*N; i++){
 			this->inv_dirs[i] = 1.0f / this->dirs[i];
 		}
 		
@@ -27,7 +27,7 @@ public:
 
 	void setDirection(const Vector3* dirs)
     {
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < N*N; i++) {
             this->dirs[i] = dirs[i];
             this->dirs[i].normalize();
         }
@@ -52,8 +52,8 @@ public:
 private:
 	
 	Vector3 origin;
-	Vector3 dirs[N];
-	Vector3 inv_dirs[N];
+	Vector3 dirs[N*N];
+	Vector3 inv_dirs[N*N];
 };
 
 #endif

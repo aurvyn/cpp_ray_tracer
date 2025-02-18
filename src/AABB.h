@@ -34,12 +34,12 @@ public:
 		return this->_intersect<false>(ray, const_cast<Hitpoint &>(hit));
 	}
 
-	virtual std::array<bool, N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
 	{
 		return this->_packetIntersect<true>(rays, hits);
 	}
 	
-	std::array<bool, N> packetIntersectNoUpdate(RayPacket const & rays, Hitpoint* const hits) const
+	std::array<bool, N*N> packetIntersectNoUpdate(RayPacket const & rays, Hitpoint* const hits) const
 	{
 		return this->_packetIntersect<false>(rays, const_cast<Hitpoint*>(hits));
 	}
@@ -77,15 +77,15 @@ protected:
 private:
 
 	template<bool updateHit>
-	std::array<bool, N> _packetIntersect(RayPacket const & rays, Hitpoint* const hits) const
+	std::array<bool, N*N> _packetIntersect(RayPacket const & rays, Hitpoint* const hits) const
 	{	
 		return _packetFastIntersect(rays, hits);
 	}
 
-	std::array<bool, N> _packetFastIntersect(RayPacket const & rays, Hitpoint* const hits) const
+	std::array<bool, N*N> _packetFastIntersect(RayPacket const & rays, Hitpoint* const hits) const
 	{	
-		std::array<bool, N> rets;
-		for (int i = 0; i < N; i++){
+		std::array<bool, N*N> rets;
+		for (int i = 0; i < N*N; i++){
 			float tmin, tmax, tymin, tymax;
 			float xInv = rays.getInvDirections()[i][0];
 			float xOr = rays.getOrigin()[0];
@@ -95,9 +95,10 @@ private:
 			if(tmax < tmin)
 					std::swap(tmax, tmin);
 	
-			if (tmin > hits[i].getParameter() || tmax < 0)
+			if (tmin > hits[i].getParameter() || tmax < 0){
 				rets[i] = false;
 				continue;
+			}
 			
 			float yInv = rays.getInvDirections()[i][1];
 			float yOr = rays.getOrigin()[1];
