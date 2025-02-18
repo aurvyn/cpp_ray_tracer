@@ -72,8 +72,7 @@ public:
 	{	
 		std::array<bool, N*N> rets;
 		for (int i = 0; i < N*N; i++){
-			bool intersect = false;
-			Vector3 d = rays.getDirections()[0];
+			Vector3 d = rays.getDirections()[i];
 			Vector3 e = rays.getOrigin();
 			Vector3 c = this->getPosition();
 			float r = this->getRadius();
@@ -91,15 +90,19 @@ public:
 			C = (e-c).dot(e-c) - r*r;
 			
 			float discriminant = B*B - 4.0f*A*C;
-			if(discriminant < 0.0f)
-				intersect = false;
+			if(discriminant < 0.0f){
+				rets[i] = false;
+				continue;
+			}
 			
 			float t1, t2;
 			t1 = (-B + sqrt(discriminant)) / (2.0f*A);
 			t2 = (-B - sqrt(discriminant)) / (2.0f*A);
 			
-			if(t1 < 0.0f && t2 < 0.0f)
-				intersect = false;
+			if(t1 < 0.0f && t2 < 0.0f){
+				rets[i] = false;
+				continue;
+			}
 			
 			float closestT;
 			if(t2 < 0.0f)
@@ -118,9 +121,10 @@ public:
 				Vector3 normal = rays.pointAtParameter(i, closestT) - c;
 				hits[i].setNormal(normal.normalize());
 				hits[i].setMaterialId( this->getMaterialId());
-				intersect = true;
+				rets[i] = true;
+				continue;
 			}
-			rets[i] = intersect;
+			rets[i] = false;
 		}
 		return rets;
 	}
