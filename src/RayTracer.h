@@ -8,6 +8,7 @@
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
 #include "Shader.h"
+#include <omp.h>
 
 class RayTracer
 {
@@ -19,6 +20,7 @@ public:
 		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		if (packets){
+			#pragma omp parallel for
 			for(int y=0; y<resY / N; y++)
 			{
 				for(int x=0; x<resX / N; x++)
@@ -42,6 +44,7 @@ public:
 				}
 			}
 		} else {
+			#pragma omp parallel for
 			for(int y=0; y<resY; y++)
 			{
 				for(int x=0; x<resX; x++)
