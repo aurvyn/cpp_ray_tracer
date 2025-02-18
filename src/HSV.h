@@ -44,6 +44,8 @@ Vector3 rgbFromHex(std::string hexStr) {
 
 
 
+
+
 Vector3 hsv2rgb(Vector3 in)
 {
     double      hh, p, q, t, ff;
@@ -125,3 +127,6 @@ Vector3 rgb2hsv(Vector3 in) {
     return Vector3(h,s,v);
 }
 
+Vector3 hsvFromHex(std::string hexStr) {
+    return rgb2hsv(rgbFromHex(hexStr));
+}

@@ -23,15 +23,16 @@ class FlatRedDither : public Pipeline {
             // for bunny scene:
             // Effect *redMaskBase = ColorMultiply(Threshold(NoOp(imageBuffer2), 0.995f, AVG, false), Vector3(127.0f/255.0f, 0.0f, 0.0f));
             // otherwise: 
-            // Effect *redMaskBase = ColorMultiply(Threshold(NoOp(depthBuffer), 0.9f, AVG, false), Vector3(127.0f/255.0f, 0.0f, 0.0f));
+            Effect *redMaskBase = ColorMultiply(Threshold(NoOp(depthBuffer), 0.995f, AVG, false), Vector3(127.0f/255.0f, 0.0f, 0.0f));
             // Effect *redMask = Multiply(sinOverlay, redMaskBase);
             // Effect *base = new Vignette(imageBuffer);
             // Effect *result = ConstMultiply(new FloydDither(new RGBConvert(new ToneMapHSV(new HSVConvert(Overlay(base, redMask))))), 255.0f);
 
-            Effect *redMaskBase = ColorMultiply(Threshold(NoOp(imageBuffer2), 0.995, AVG), Vector3(127.0f/255.0f, 0.0f, 0.0f));
+            // Effect *redMaskBase = ColorMultiply(Threshold(NoOp(imageBuffer2), 0.905, AVG), Vector3(127.0f/255.0f, 0.0f, 0.0f));
             Effect *redMask = Multiply(sinOverlay, redMaskBase);
             Effect *base = new Vignette(imageBuffer);
-            Effect *result = ConstMultiply(new FloydDither(new RGBConvert(new ToneMapHSV(new HSVConvert(Overlay(redMask, base))))), 255.0f);
+            // Effect *result = ConstMultiply(new FloydDither(new RGBConvert(new ToneMapHSV(new HSVConvert(Overlay(redMask, base))))), 255.0f);
+            Effect *result = ConstMultiply(new FloydDither(new RGBConvert(new ToneMapHSV(new HSVConvert(base)))), 255.0f);
             return new PostProcessor(result);
         }
 };

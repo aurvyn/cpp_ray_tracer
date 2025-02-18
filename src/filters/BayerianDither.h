@@ -82,6 +82,26 @@ class BayerianDither : public Effect
             return closestColor;
         }
 
+        Vector3 closestColorInPalletteHSV(Vector3 color) {
+            // assumes rgb
+            float minDist = 9999999999;
+            Vector3 closestColor = this->pallette->at(0);
+            for(int i = 0; i < this->pallette->size(); i++) {
+                Vector3 c = this->pallette->at(i);
+                float dist = hsvDist(color, c);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closestColor = c;
+                }
+            }
+            return closestColor;
+        }
+
+        float hsvDist(Vector3 a, Vector3 b) {
+            float hueDist = std::min(std::abs(a[0] - b[0]), 360 - std::abs(b[0] - a[0])); // angular distance is commutative, subtraction isnt.
+            return std::pow(hueDist / 360.0f, 2) + std::pow(b[1] - a[1], 2) + std::pow(b[2] - a[2], 2);
+        }
+
         void _apply() override
         {
             if(this->child->colorSpace != RGB) {
@@ -94,13 +114,18 @@ class BayerianDither : public Effect
             Buffer<float> thresholdMap = Buffer<float>(4,4);
             this->thresholdMap4x4(&thresholdMap);
             this->colorSpace = RGB;
-
+            
+            // float threshScl = 1.0f / std::sqrt(255.0f);
+            float threshScl = 1.0f;
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
                     Vector3 color = this->imageBuffer->at(x,y);
-                    float thresholdVal = thresholdMap.at(x % 4, y % 4);
+                    float thresholdVal = thresholdMap.at(x % 4, y % 4) * threshScl;
+                    // printf("%f\n", thresholdVal);
                     Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
-                    Vector3 closestColor = closestColorInPallette(thresholdColor);
+                    // Vector3 thresholdColor = color;
+                    // Vector3 closestColor = thresholdColor;
+                    Vector3 closestColor = closestColorInPalletteHSV(thresholdColor);
 
                     this->imageBuffer->at(x,y) = closestColor;
                 }

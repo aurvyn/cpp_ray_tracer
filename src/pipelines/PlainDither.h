@@ -1,0 +1,19 @@
+#pragma once
+
+#include "PostProcessor.h"
+#include "MotionBuffer.h"
+
+class PlainDither : public Pipeline {
+    public:
+        PostProcessor* buildPipeline(
+            Buffer<Vector3>* imageBuffer,
+            Buffer<Vector3>* normalBuffer,
+            Buffer<Vector3>* depthBuffer,
+            MotionBuffer* motionBuffer
+        ) override {
+            Effect *result = ConstMultiply(new RGBConvert((new BayerianDither(new ToneMapHSV(new HSVConvert(imageBuffer))))->init(spheresPallette())), 255.0f);
+            // Effect *result = ConstMultiply(new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer))), 255.0f);
+
+            return new PostProcessor(result);
+        }
+};
