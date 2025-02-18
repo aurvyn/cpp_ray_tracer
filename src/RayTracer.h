@@ -38,8 +38,10 @@ public:
 			{
 				std::vector<FullPath> *pixelPaths = new std::vector<FullPath>();
 				Ray ray = generator.getRay(x, y);
-				for (int i = 0; i < (int)rpp; i++)
-					pixelPaths->push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed));
+				for (int i = 0; i < (int)rpp; i++) {
+					std::vector<FullPath> pixels = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed);
+					pixelPaths->insert(pixelPaths->end(), pixels.begin(), pixels.end());
+				}
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
@@ -48,11 +50,12 @@ public:
 		std::vector<Light*> lights = scene.getLights();
         for (Light *light : lights)
         {
-            for (int j = 0; j < (int)rpp; j++)
+			globalLightPaths.push_back(FullPath(light->getPosition(), light->getMaterialId(), std::vector<HitDetails>(), std::vector<float>()));
+            for (int j = 0; j < ((int)rpp) * resX * resY; j++)
             {
                 Ray lightRay = pathTracer.sampleLightRay(*light, &seed);
-                FullPath lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, light->getMaterialId(), &seed);
-                globalLightPaths.push_back(lightPath);
+                std::vector<FullPath> lightPaths = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, light->getMaterialId(), &seed);
+                globalLightPaths.insert(globalLightPaths.end(), lightPaths.begin(), lightPaths.end());
             }
         }
 		

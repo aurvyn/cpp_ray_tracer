@@ -228,19 +228,26 @@ public:
         return Ray(dir, hd.position() + hd.normal() * RAY_JITTER_EPSILON);
     }
     
-    FullPath trace(Ray start, Scene const &scene, int maxDepth, size_t startingMaterial, unsigned int *seed) {
+    std::vector<FullPath> trace(Ray start, Scene const &scene, int maxDepth, size_t startingMaterial, unsigned int *seed) {
+        std::vector<FullPath> fullPaths;
+        
         std::vector<HitDetails> hits;
         std::vector<float> strengths;
+        Vector3 startingPos = start.getOrigin();
         
         Hitpoint hit;
         while (scene.getRootPrimitive()->intersect(start, hit) && hits.size() < maxDepth) {
+            if (hits.size() != 0)
+                fullPaths.push_back(FullPath(startingPos, startingMaterial, std::vector(hits), std::vector(strengths)));
             HitDetails hd(start, hit);
             hits.push_back(hd);
             strengths.push_back(1.0f);
             start = nextRay(hd, scene, seed);
         }
         
-        return FullPath(start.getOrigin(), startingMaterial, hits, strengths);
+        if (hits.size() != 0)
+            fullPaths.push_back(FullPath(startingPos, startingMaterial, hits, strengths));
+        return fullPaths;
     }
     
     Vector3 getColor(FullPath paths, Scene const &scene, Vector3 background) {
