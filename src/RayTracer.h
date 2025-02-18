@@ -10,6 +10,7 @@
 #include "RayGenerator.h"
 #include "PrimitiveArray.h"
 #include "Shader.h"
+#include "ToneMapper.h"
 #include <omp.h>
 
 #include "PathTracer.h"
@@ -20,7 +21,7 @@
 class RayTracer
 {
 public:
-	void trace(Scene &scene, size_t resX, size_t resY, size_t rpp, unsigned int seed, unsigned char *outputImage)
+	void trace(Scene &scene, size_t resX, size_t resY, size_t rpp, size_t rpl, unsigned int seed, unsigned char *outputImage)
 	{
 		Buffer<Color> imageBuffer(resX, resY);
 		Buffer<Vector3> floatBuffer(resX, resY);
@@ -48,7 +49,7 @@ public:
 		std::vector<Light*> lights = scene.getLights();
         for (Light *light : lights)
         {
-            for (int j = 0; j < (int)rpp; j++)
+            for (int j = 0; j < (int)rpl; j++)
             {
                 Ray lightRay = pathTracer.sampleLightRay(*light, &seed);
                 FullPath lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, light->getMaterialId(), &seed);
@@ -72,12 +73,19 @@ public:
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene, Vector3(198, 252, 255) * (1 / 255.0f / 4.0f));
                     }
                 }
-                floatBuffer.at(x, y) = accumulatedColor;
+                floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
             }
         }
 		
-		toneMap(floatBuffer, imageBuffer);
-
+		float maxWhite = -INFINITY;
+        for (int y = 0; y < resY; y++) {
+            for (int x = 0; x < resX; x++) {
+				Vector3 c = floatBuffer.at(x, y);
+				maxWhite = std::max(std::max(c[0], c[1]), std::max(c[2], maxWhite));
+			}
+		}
+		ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
+		
 		for (int y = 0; y < resY; y++)
 		{
 			for (int x = 0; x < resX; x++)
@@ -93,34 +101,6 @@ public:
 		{
 			outputImage[i] = renderBuffer[i];
 		}
-	}
-
-private:
-	void toneMap(Buffer<Vector3> &floatBuffer, Buffer<Color> &imageBuffer) const
-	{
-		float maxValue = 0.0f;
-		size_t resX = imageBuffer.getWidth();
-		size_t resY = imageBuffer.getHeight();
-
-		for (int y = 0; y < resY; y++)
-		{
-			for (int x = 0; x < resX; x++)
-			{
-				Vector3 floatColor = floatBuffer.at(x, y);
-				float maxComp = floatColor.c[floatColor.maxComponent()];
-				if (maxComp > maxValue)
-					maxValue = maxComp;
-			}
-		}
-
-		if (maxValue <= 0.0f)
-			maxValue = 1.0f;
-
-		float toneMappingScale = 1.0f / maxValue;
-
-		for (int y = 0; y < resY; y++)
-			for (int x = 0; x < resX; x++)
-				floatBuffer.at(x, y) *= toneMappingScale;
 	}
 };
 

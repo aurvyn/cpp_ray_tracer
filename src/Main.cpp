@@ -23,6 +23,7 @@ char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
 size_t rpp = 10;
+size_t rpl = 500;
 unsigned int seed = 42;
 
 void getArgs(int argc, char ** argv)
@@ -123,7 +124,7 @@ int main(int argc, char ** argv)
 	Scene scene = loadWithOBJLoader(scenePath);
 
 	RayTracer tracer;
-	tracer.trace(scene, resX, resY, rpp, seed, outputImage);
+	tracer.trace(scene, resX, resY, rpp, rpl, seed, outputImage);
 	
 	simplePNG_write(outputPath, resX, resY, outputImage);
 
