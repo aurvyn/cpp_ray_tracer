@@ -11,7 +11,8 @@ class PlainDither : public Pipeline {
             Buffer<Vector3>* depthBuffer,
             MotionBuffer* motionBuffer
         ) override {
-            Effect *result = ConstMultiply(new RGBConvert((new BayerianDither(new ToneMapHSV(new HSVConvert(imageBuffer))))->init(spheresPallette())), 255.0f);
+            // Effect *result = ConstMultiply((new BayerianDither( new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer)))))->init(spheresPallette()), 255.0f);
+            Effect *result = ConstMultiply((new FloydDither( new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer)))))->setPallette(spheresPallette()), 255.0f);
             // Effect *result = ConstMultiply(new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer))), 255.0f);
 
             return new PostProcessor(result);

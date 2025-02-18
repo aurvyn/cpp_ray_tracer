@@ -44,14 +44,14 @@ std::vector<Vector3>* coolerPallette2() {
 
 std::vector<Vector3>* spheresPallette() {
     std::vector<Vector3> *p = new std::vector<Vector3>();
-    p->push_back(hsvFromHex("E30000"));
-    p->push_back(hsvFromHex("606060"));
-    p->push_back(hsvFromHex("C65A5A"));
-    p->push_back(hsvFromHex("008900"));
-    p->push_back(hsvFromHex("598D59"));
-    p->push_back(hsvFromHex("17FB17"));
-    p->push_back(hsvFromHex("00020D"));
-    p->push_back(hsvFromHex("0000CC"));
+    p->push_back(rgbFromHex("E30000"));
+    p->push_back(rgbFromHex("606060"));
+    p->push_back(rgbFromHex("C65A5A"));
+    p->push_back(rgbFromHex("008900"));
+    p->push_back(rgbFromHex("598D59"));
+    p->push_back(rgbFromHex("17FB17"));
+    p->push_back(rgbFromHex("00020D"));
+    p->push_back(rgbFromHex("0000CC"));
     return p;
 }
 
@@ -102,7 +102,7 @@ class FloydDither : public Effect
 
             if(this->pallette == NULL) this->pallette = basicPallette();
             float correctionKernel[4] = {0.0f};
-            float correctionScl = 1.0f;
+            float correctionScl = 0.5f;
             correctionKernel[0] = correctionScl * 7.0f/16.0f;
             correctionKernel[1] = correctionScl * 3.0f/16.0f;
             correctionKernel[2] = correctionScl * 5.0f/16.0f;
@@ -114,13 +114,10 @@ class FloydDither : public Effect
             
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
-                    // c = c + correctionMap.at(1,1)
-                    // correctionMap.at(1,1) = correctionMap.at(1,2) + diff * correctionKernel[0]
-                    // ...
                     Vector3 color = this->imageBuffer->at(x,y);
                     Vector3 quantizedColor = closestColorInPallette(color);
                     this->imageBuffer->at(x,y) = quantizedColor;
-                    if(!useGlitch) {
+                    if(!this->useGlitch) {
                         Vector3 err = color - quantizedColor;
                         if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
                         if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x-1, y+1) += err * correctionKernel[1];
@@ -134,18 +131,8 @@ class FloydDither : public Effect
                         if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];
 
                     }
-                    
-                    // Vector3 
-                    // Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
-                    // Vector3 closestColor = closestColorInPallette(thresholdColor);
-
-                    // this->imageBuffer->at(x,y) = closestColor;
                 }
             }
             this->colorSpace = this->child->colorSpace;
-        }
-
-        void printColor(Vector3 color) {
-            printf("%f %f %f\n", color[0], color[1], color[2]);
         }
 };
