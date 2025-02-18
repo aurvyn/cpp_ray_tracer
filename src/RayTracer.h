@@ -24,7 +24,7 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
-		Buffer<vector<vector<Path>> *> pathsBuffer = Buffer<vector<vector<Path>> *>(resX, resY);
+		Buffer<vector<FullPath> *> pathsBuffer = Buffer<vector<FullPath> *>(resX, resY);
 
 		// TODO use this to trace each ray and accumulate the paths
 		PathTracer pathTracer;
@@ -36,11 +36,11 @@ public:
 		{
 			for (int x = 0; x < resX; x++)
 			{
-				vector<vector<Path>> *pixelPaths = new vector<vector<Path>>;
+				vector<FullPath> *pixelPaths = new vector<FullPath>;
 				Ray ray = generator.getRay(x, y);
 				for (int i = 0; i < (int)rpp; i++)
 				{
-					vector<Path> camPath = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH);
+					FullPath camPath = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1);
 					pixelPaths->push_back(camPath);
 				}
 				pathsBuffer.at(x, y) = pixelPaths;
@@ -48,7 +48,7 @@ public:
 		}
 
 		// TODO for each light, trace a bunch of points on it and accumulate those too // added function below
-		vector<vector<Path>> globalLightPaths;
+		vector<FullPath> globalLightPaths;
         vector<Light*> lights = scene.getLights();
         for (int i = 0; i < lights.size(); i++)
         {
@@ -56,7 +56,7 @@ public:
             {
 				Light* light = lights.at(i);
                 Ray lightRay = sampleLightRay(*light);
-                vector<Path> lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH);
+                FullPath lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, light->getMaterialId());
                 globalLightPaths.push_back(lightPath);
             }
         }
@@ -66,14 +66,14 @@ public:
         {
             for (int x = 0; x < resX; x++)
             {
-                vector<vector<Path>>* pixelPaths = pathsBuffer.at(x, y);
+                vector<FullPath>* pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
                 for (auto &camPath : *pixelPaths)
                 {
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
-						vector<Path> lightPath = globalLightPaths.at(i);
-						vector<Path> combinedPaths = pathTracer.combine(camPath, lightPath, scene, lights.at(i / rpp)->getMaterialId());
+						FullPath lightPath = globalLightPaths.at(i);
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene);
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }

@@ -22,7 +22,7 @@ char const * scenePath = defaultScene;
 char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
-size_t rpp = 500;
+size_t rpp = 100;
 
 void getArgs(int argc, char ** argv)
 {
