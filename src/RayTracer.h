@@ -17,35 +17,63 @@ public:
 	{
 		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
 		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
-		
+		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
-		#pragma omp parallel for
-		for(int y=0; y<resY; y++)
-		{
-			for(int x=0; x<resX; x++)
+		if (packets){
+			#pragma omp parallel for
+			for(int y=0; y<resY / N; y++)
 			{
-				Ray ray = generator.getRay(x, y);
-
-				//Day2
-				//Ray r = generator.getRay(x, y);
-				//Vector3 d = r.getDirection()*255.0f;
-				//Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
-				//floatBuffer.at(x,y) = d;
-				//continue;
-				
-				Vector3 rc = ray.getDirection();
-				rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
-
-				bool hitSomething = false;
-				Hitpoint hit;
-				hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
-				if(hitSomething) {
-					Vector3 floatColor = Shader::shade(ray, hit, scene);
-					floatBuffer.at(x,y) = floatColor;
-					//floatBuffer.at(x,y) = Vector3(0.0f);
+				for(int x=0; x<resX / N; x++)
+				{
+					RayPacket rays = generator.getRayPacket(x, y);
+					std::array<bool, N*N> hitSomething;
+					Hitpoint hits[N*N];
+					hitSomething = scene.getRootPrimitive()->packetIntersect(rays, hits);
+					for (int j = 0; j < N; j++){
+						for (int i = 0; i < N; i++){
+							int index = i + j * N;
+							if(hitSomething[index]) {
+								Vector3 floatColor = Shader::shade(Ray(rays.getDirections()[index], rays.getOrigin()), hits[index], scene);
+								floatBuffer.at(x*N+i,y*N+j) = floatColor;
+								//floatBuffer.at(x,y) = Vector3(0.0f);
+							}
+							else
+								floatBuffer.at(x*N+i,y*N+j) = Vector3(0,0,0);
+						}
+					}
 				}
-				else
-					floatBuffer.at(x,y) = rc;
+			}
+		} else {
+			#pragma omp parallel for
+			for(int y=0; y<resY; y++)
+			{
+				for(int x=0; x<resX; x++)
+				{
+					Ray ray = generator.getRay(x, y);
+
+					//Day2
+					//Ray r = generator.getRay(x, y);
+					//Vector3 d = r.getDirection()*255.0f;
+					//Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
+					//floatBuffer.at(x,y) = d;
+					//continue;
+					
+					// Vector3 rc = ray.getDirection();
+					// rc = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
+
+					bool hitSomething = false;
+					Hitpoint hit;
+					hitSomething = scene.getRootPrimitive()->intersect(ray, hit);
+					if(hitSomething) {
+						Vector3 floatColor = Shader::shade(ray, hit, scene);
+						floatBuffer.at(x,y) = floatColor;
+						//floatBuffer.at(x,y) = Vector3(0.0f);
+					}
+					else
+						floatBuffer.at(x,y) = Vector3(0.0f);
+
+					
+				}
 			}
 		}
 

@@ -3,12 +3,21 @@
 
 #include "Ray.h"
 #include "Hitpoint.h"
+#include "RayPacket.h"
+#include <array>
 
 class Primitive
 {
 public:
+
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{ return false; }
+
+	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	{	
+		std::array<bool, N*N> val;
+		return val;
+	}
 	
 	virtual Vector3 getBBMin() const = 0;
 	virtual Vector3 getBBMax() const = 0;

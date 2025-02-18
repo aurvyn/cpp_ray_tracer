@@ -72,6 +72,48 @@ private:
 		}
 		return hitOne;
 	}
+
+	virtual std::array<bool, N*N> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
+	{
+		Stack<BVHNode> stack;
+		std::array<bool, N*N> hitOne;
+		for (int i = 0; i < N*N; i++) {
+			hitOne[i] = false;
+		}
+		const BVHNode* currentNodePtr = &node;
+		
+		while(true){
+			if (currentNodePtr != nullptr){
+				
+				const BVHNode& currentNode = *currentNodePtr;
+				std::array<bool, N*N> hitNodes = currentNode.packetIntersectNoUpdate(rays, hitpoints);
+
+				bool hit = false;
+				for (int i = 0; i < N*N; i++) {
+					hit = hit || hitNodes[i];
+				}
+				if (hit){
+					if(currentNode.isLeaf())
+					{
+						std::array<bool, N*N> newHits = currentNode.getPrimitve()->packetIntersect(rays, hitpoints);
+						for (int i = 0; i < N*N; i++) {
+							hitOne[i] = newHits[i] || hitOne[i];
+						}
+					}else {
+						currentNodePtr = currentNode.getLeft();
+						stack.push(currentNode.getRight());
+						continue;
+					}
+				}
+			}
+			if (stack.hasNext()) {
+				currentNodePtr = stack.pop();
+			} else if (!stack.hasNext()){
+				break;
+			}
+		}
+		return hitOne;
+	}
 };
 
 #endif
