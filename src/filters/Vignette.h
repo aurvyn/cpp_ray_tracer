@@ -40,8 +40,7 @@ class Vignette : public Effect
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
                     Vector2 d = (Vector2(x,y) - center) * scaleFactor; // normalized to [0,intensity]
-                    d = Vector2(std::pow(d[0], roundness), std::pow(d[1], roundness));
-                    float f = clamp(0.0f, 1.0f, 1.0f - d.squaredLength());
+                    d = Vector2(std::pow(std::abs(d[0]), roundness), std::pow(std::abs(d[1]), roundness));
                     float vfactor = std::pow(
                         clamp(0, 1, 1.0f - d.squaredLength()),
                         smoothness);

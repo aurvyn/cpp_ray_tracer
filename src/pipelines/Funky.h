@@ -27,7 +27,7 @@ class Funky : public Pipeline {
             // Effect *depthHueOverlay = (new Bound((new Bound(ConstMultiply(ConstAdd(NoOp(depthBuffer), -minDepth), scl)))->init(1.0f, 0.0f, 1, 1.0f, 1.0f)))->init(1.0f, 1.0f, 2, 1.0f, 1.0f);
             Effect *depthHueOverlay = (new HueShift(ConstSet(ConstMultiply(ConstAdd(NoOp(depthBuffer), -minDepth), scl), 2 | 4, Vector3(0.0f, 0.3f, 0.3f))))->init(40.0f);
             Effect *idk = new HSVConvert(Multiply(new RGBConvert(depthHueOverlay), NoOp(normalBuffer)));
-            Effect *result = ConstMultiply((new FloydDither(new RGBConvert(new ToneMapHSV(idk))))->init(true), 255.0f);
+            Effect *result = ConstMultiply((new FloydDither(new RGBConvert(new ToneMapHSV(idk))))->init(true)->setPallette(coolerPallette2()), 255.0f);
             return new PostProcessor(result);
         }
 };

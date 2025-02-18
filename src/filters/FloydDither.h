@@ -55,6 +55,18 @@ std::vector<Vector3>* spheresPallette() {
     return p;
 }
 
+std::vector<Vector3>* RGBPallete() {
+    std::vector<Vector3> *p = new std::vector<Vector3>();
+    p->push_back(rgbFromHex("AA5533"));
+    p->push_back(rgbFromHex("33AA55"));
+    p->push_back(rgbFromHex("5533AA"));
+    p->push_back(rgbFromHex("331111"));
+    p->push_back(rgbFromHex("998888"));
+    // p->push_back(rgbFromHex("889988"));
+    // p->push_back(rgbFromHex("3300AA"));
+    return p;
+}
+
 class FloydDither : public Effect
 {
     using Effect::Effect;
@@ -125,10 +137,10 @@ class FloydDither : public Effect
                         if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y+1) += err * correctionKernel[3];    
                     } else {
                         Vector3 err = quantizedColor - color;
-                        if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0];
-                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1];
-                        if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2];
-                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3];
+                        if(x+1 < resX) this->imageBuffer->at(x+1, y) += err * correctionKernel[0] * 2;
+                        if(x-1 > 0 && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[1] * 2;
+                        if(y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[2] * 2;
+                        if(x+1 < resX && y + 1 < resY) this->imageBuffer->at(x+1, y) += err * correctionKernel[3] * 2;
 
                     }
                 }
