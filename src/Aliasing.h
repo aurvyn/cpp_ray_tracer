@@ -293,17 +293,21 @@ public:
     }
     void downsampleTrace(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage)
     {
-        Buffer<Vector3> floatBuffer(resX, resY);
-        RayGenerator generator(scene.getCamera(), resX, resY);
-
-        for (size_t y = 0; y < resY; y++)
+       
+        size_t highResX = resX * 2;
+        size_t highResY = resY * 2;
+        Buffer<Vector3> floatBuffer(highResX, highResY);
+        RayGenerator generator(scene.getCamera(), highResX, highResY);
+    
+        
+        for (size_t y = 0; y < highResY; y++)
         {
-            for (size_t x = 0; x < resX; x++)
+            for (size_t x = 0; x < highResX; x++)
             {
                 Ray ray = generator.getRay(x, y);
                 Hitpoint hit;
                 Vector3 color(0, 0, 0);
-
+    
                 if (scene.getRootPrimitive()->intersect(ray, hit))
                 {
                     color = Shader::shade(ray, hit, scene);
@@ -313,30 +317,54 @@ public:
                     Vector3 rc = ray.getDirection();
                     color = Vector3(fabs(rc[0]), fabs(rc[1]), fabs(rc[2]));
                 }
-
+    
                 floatBuffer.at(x, y) = color;
             }
         }
-
-        Buffer<Color> imageBuffer(resX, resY);
-        toneMap(floatBuffer, imageBuffer);
-
+    
+      
+        Buffer<Vector3> downsampledBuffer(resX, resY);
+    
+       
         for (size_t y = 0; y < resY; y++)
         {
             for (size_t x = 0; x < resX; x++)
             {
-                Vector3 v = floatBuffer.at(x, y) * 255.0f;
+                // Averaging blur 2x2
+                Vector3 avgColor = (
+                    floatBuffer.at(x * 2, y * 2) +
+                    floatBuffer.at(x * 2 + 1, y * 2) +
+                    floatBuffer.at(x * 2, y * 2 + 1) +
+                    floatBuffer.at(x * 2 + 1, y * 2 + 1)
+                ) * 0.25f; // Divide by 4 to get the mean
+    
+                downsampledBuffer.at(x, y) = avgColor;
+            }
+        }
+    
+      
+        Buffer<Color> imageBuffer(resX, resY);
+        toneMap(downsampledBuffer, imageBuffer);
+    
+     
+        for (size_t y = 0; y < resY; y++)
+        {
+            for (size_t x = 0; x < resX; x++)
+            {
+                Vector3 v = downsampledBuffer.at(x, y) * 255.0f;
                 Color c = Color(v[0], v[1], v[2]);
                 imageBuffer.at(x, y) = c;
             }
         }
-
+    
+ 
         unsigned char *renderBuffer = (unsigned char *)&imageBuffer.at(0, 0);
         for (size_t i = 0; i < resX * resY * 3; i++)
         {
             outputImage[i] = renderBuffer[i];
         }
     }
+    
     void aliasTraceGaussian(Scene &scene, size_t resX, size_t resY, unsigned char *outputImage)
     {
         Buffer<Color> imageBuffer(resX, resY);
