@@ -14,7 +14,7 @@
 
 #include "PathTracer.h"
 
-#define MAX_TRACE_DEPTH (10)
+#define MAX_TRACE_DEPTH 2
 #define TWO_PI 6.28318530718f
 
 class RayTracer
@@ -28,8 +28,6 @@ public:
 
 		PathTracer pathTracer;
 		RayGenerator generator(scene.getCamera(), resX, resY);
-
-		printf("1\n");
 
 		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
@@ -71,7 +69,7 @@ public:
                     {
 						FullPath &lightPath = globalLightPaths.at(i);
 						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene);
-						accumulatedColor += pathTracer.getColor(combinedPaths, scene, Vector3(198, 252, 255) * (1 / 255.0f / 2.0f));
+						accumulatedColor += pathTracer.getColor(combinedPaths, scene, Vector3(198, 252, 255) * (1 / 255.0f / 4.0f));
                     }
                 }
                 floatBuffer.at(x, y) = accumulatedColor;

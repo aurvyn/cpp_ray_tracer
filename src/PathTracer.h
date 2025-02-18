@@ -12,8 +12,8 @@
 #include "math.h"
 
 #define MAX_SPECULAR_THETA (M_PI/16)
-#define DIFFUSE_GRANULARITY (500)
-#define SPECULAR_GRANULARITY (50)
+#define DIFFUSE_GRANULARITY 500.0f
+#define SPECULAR_GRANULARITY 50.0f
 
 class Path {
 private:
@@ -95,7 +95,7 @@ public:
         if (reflectance == 0)
             return diffuseChance;
         diffuseChance *= 1 - reflectance;
-        
+
         // If the path is within the lobe, it's more likely to be closer to the reflection. Otherwise, 0.
         float specularChance = 0;
         float theta = acos(dir.dot(from.reflection()));
@@ -137,10 +137,12 @@ public:
         if (scene.getRootPrimitive()->intersect(connectionRay, hit))
         {
             float distance = (toPos - fromPos).length();
+            float strength;
             if (hit.getParameter() < distance - RAY_JITTER_EPSILON)
-                return from;
+                strength = 0.1 / distance;
+            else
+                strength = getPathChance(scene, fromHd, dir);
 
-            float strength = getPathChance(scene, fromHd, dir);
             std::vector<HitDetails> newHits;
             std::vector<float> newStrengths;
 
