@@ -12,8 +12,8 @@
 #include "math.h"
 
 #define MAX_SPECULAR_THETA (M_PI/16)
-#define DIFFUSE_GRANULARITY (50)
-#define SPECULAR_GRANULARITY (5)
+#define DIFFUSE_GRANULARITY (500)
+#define SPECULAR_GRANULARITY (50)
 
 class Path {
 private:
@@ -34,7 +34,20 @@ public:
 };
 
 class PathTracer {
+private:
+    float random(unsigned int *seed, float min, float max) {
+		float r = (float) rand_r(seed) / (float) RAND_MAX;
+		return min + r * (max - min);
+    }
+
 public:
+    Ray sampleLightRay(const Light &light, unsigned int *seed)
+    {
+        Vector3 dir(random(seed, -1, 1), random(seed, -1, 1), random(seed, -1, 1));
+		dir.normalize();
+        return Ray(dir, light.getPosition());
+    }
+
 	Vector3 getPointOnGreatArc(Vector3 const & axis, float theta, float phi) {
 		Vector3 normal = axis.cross(Vector3(0, 1, 0));
 		
@@ -153,30 +166,30 @@ public:
         return newPathVector;
     }
 
-    Ray nextRay(HitDetails const &hd, Scene const &scene) {
+    Ray nextRay(HitDetails const &hd, Scene const &scene, unsigned int *seed) {
         const Material &mat = scene.getMaterials()[hd.materialId()];
         float percentSpecular = clamp(0, 1, mat.getReflectance());
         
         Vector3 dir;
-        if (Shader::RandomFloat(0, 1) < percentSpecular) {
+        if (random(seed, 0, 1) < percentSpecular) {
             // The bias towards pure reflection. 
-            float specularCoef = 1 - sqrt(Shader::RandomFloat(0, 1));
-            dir = getPointOnGreatArc(hd.reflection(), specularCoef * MAX_SPECULAR_THETA, Shader::RandomFloat(0, M_PI * 2));
+            float specularCoef = 1 - sqrt(random(seed, 0, 1));
+            dir = getPointOnGreatArc(hd.reflection(), specularCoef * MAX_SPECULAR_THETA, random(seed, 0, M_PI * 2));
         } else {
-            dir = getPointOnGreatArc(hd.reflection(), Shader::RandomFloat(0, M_PI / 2), Shader::RandomFloat(0, M_PI * 2));
+            dir = getPointOnGreatArc(hd.reflection(), random(seed, 0, M_PI / 2), random(seed, 0, M_PI * 2));
         }
         
         return Ray(dir, hd.position() + hd.normal() * RAY_JITTER_EPSILON);
     }
     
-    std::vector<Path> trace(Ray start, Scene const &scene, int maxDepth) {
+    std::vector<Path> trace(Ray start, Scene const &scene, int maxDepth, unsigned int *seed) {
         std::vector<Path> paths;
         
         Hitpoint hit;
         while (scene.getRootPrimitive()->intersect(start, hit) && paths.size() < maxDepth) {
             HitDetails hd(start, hit);
             paths.push_back(Path(hd, 1.0f));
-            start = nextRay(hd, scene);
+            start = nextRay(hd, scene, seed);
         }
         
         return paths;

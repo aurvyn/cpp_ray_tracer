@@ -1,8 +1,6 @@
 #ifndef __SHADER
 #define __SHADER
 
-#include <random>
-
 #define clamp(a,b,v) (v) < (a) ? (a) : ( (v) > (b) ? (b) : (v) )
 #define RAY_JITTER_EPSILON 0.0001f
 #define MAX_RECURS 100
@@ -62,36 +60,6 @@ class Shader
 {
 public:
 
-	static float RandomFloat(float min, float max){
-		float r = (float) rand() / (float) RAND_MAX;
-		return min + r * (max - min);
-	}
-
-	static Ray getRandomReflection(Hitpoint const & hit, Vector3 const & loc){
-		Vector3 normal = hit.getNormal();
-		Vector3 randDir = Vector3(RandomFloat(-1,1), RandomFloat(-1,1), RandomFloat(-1,1));
-		randDir.normalize();
-		if (randDir.dot(normal) < 0) randDir *= -1;
-		Ray r;
-		r.setOrigin(loc);
-		r.setDirection(randDir);
-		return r;
-	}
-
-	static Vector3 getRandomPointOnSphere(const Sphere & lightSphere) {
-	    float u = RandomFloat(0.0f, 1.0f);
-	    float v = RandomFloat(0.0f, 1.0f);
-	    float theta = 2.0f * M_PI * u;
-	    float phi = acos(2.0f * v - 1.0f);
-	    float x = sin(phi) * cos(theta);
-	    float y = sin(phi) * sin(theta);
-	    float z = cos(phi);
-	    Vector3 sampleDir(x, y, z);
-	    sampleDir.normalize();
-	    sampleDir *= lightSphere.getRadius();
-	    return lightSphere.getPosition() + sampleDir;
-	}
-	
 	static Vector3 shade(Ray const & ray, Hitpoint const & hit, Scene const & scene, size_t recurs=0)
 	{
 		Vector3 color;

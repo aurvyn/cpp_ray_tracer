@@ -1,6 +1,8 @@
 #ifndef __RAYTRACER_H
 #define __RAYTRACER_H
 
+#include <random>
+
 #include "GenVector.h"
 #include "Buffer.h"
 #include "Camera.h"
@@ -12,51 +14,44 @@
 
 #include "PathTracer.h"
 
-using namespace std;
-
 #define MAX_TRACE_DEPTH (10)
 #define TWO_PI 6.28318530718f
 
 class RayTracer
 {
 public:
-	void trace(Scene &scene, size_t resX, size_t resY, size_t rpp, unsigned char *outputImage)
+	void trace(Scene &scene, size_t resX, size_t resY, size_t rpp, unsigned int seed, unsigned char *outputImage)
 	{
-		Buffer<Color> imageBuffer = Buffer<Color>(resX, resY);
-		Buffer<Vector3> floatBuffer = Buffer<Vector3>(resX, resY);
-		Buffer<vector<vector<Path>> *> pathsBuffer = Buffer<vector<vector<Path>> *>(resX, resY);
+		Buffer<Color> imageBuffer(resX, resY);
+		Buffer<Vector3> floatBuffer(resX, resY);
+		Buffer<std::vector<std::vector<Path>>> pathsBuffer(resX, resY);
 
-		// TODO use this to trace each ray and accumulate the paths
 		PathTracer pathTracer;
-
-		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
+		RayGenerator generator(scene.getCamera(), resX, resY);
 
 		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
 		{
+			unsigned localseed = seed ^ ((y + resY) * 0x5E7B);
+			
 			for (int x = 0; x < resX; x++)
 			{
-				vector<vector<Path>> *pixelPaths = new vector<vector<Path>>;
+				std::vector<std::vector<Path>> pixelPaths;
 				Ray ray = generator.getRay(x, y);
 				for (int i = 0; i < (int)rpp; i++)
-				{
-					vector<Path> camPath = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH);
-					pixelPaths->push_back(camPath);
-				}
+					pixelPaths.push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, &localseed));
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
 
-		// TODO for each light, trace a bunch of points on it and accumulate those too // added function below
-		vector<vector<Path>> globalLightPaths;
-        vector<Light*> lights = scene.getLights();
-        for (int i = 0; i < lights.size(); i++)
+		std::vector<std::vector<Path>> globalLightPaths;
+		std::vector<Light*> lights = scene.getLights();
+        for (Light *light : lights)
         {
             for (int j = 0; j < (int)rpp; j++)
             {
-				Light* light = lights.at(i);
-                Ray lightRay = sampleLightRay(*light);
-                vector<Path> lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH);
+                Ray lightRay = pathTracer.sampleLightRay(*light, &seed);
+                std::vector<Path> lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, &seed);
                 globalLightPaths.push_back(lightPath);
             }
         }
@@ -66,34 +61,20 @@ public:
         {
             for (int x = 0; x < resX; x++)
             {
-                vector<vector<Path>>* pixelPaths = pathsBuffer.at(x, y);
+                std::vector<std::vector<Path>> &pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
-                for (auto &camPath : *pixelPaths)
+                for (std::vector<Path> &camPath : pixelPaths)
                 {
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
-						vector<Path> lightPath = globalLightPaths.at(i);
-						vector<Path> combinedPaths = pathTracer.combine(camPath, lightPath, scene, lights.at(i / rpp)->getMaterialId());
+						std::vector<Path> lightPath = globalLightPaths.at(i);
+						std::vector<Path> combinedPaths = pathTracer.combine(camPath, lightPath, scene, lights.at(i / rpp)->getMaterialId());
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }
                 floatBuffer.at(x, y) = accumulatedColor;
             }
         }
-
-
-		//clean the buffer
-		for (int y = 0; y < resY; y++)
-        {
-            for (int x = 0; x < resX; x++)
-            {
-                delete pathsBuffer.at(x, y);
-            }
-        }
-
-		//added
-
-		// TODO compute the color for each path and accumulate it into the output buffer // done with above stitch
 
 		toneMap(floatBuffer, imageBuffer);
 
@@ -145,22 +126,6 @@ private:
 			}
 		}
 	}
-
-    Ray sampleLightRay(const Light &light)
-    {
-        float u = Shader::RandomFloat(0.0f, 1.0f);
-        float v = Shader::RandomFloat(0.0f, 1.0f);
-        float theta = TWO_PI * u;
-        float phi = acos(2.0f * v - 1.0f);
-        float x = sin(phi) * cos(theta);
-        float y = sin(phi) * sin(theta);
-        float z = cos(phi);
-        Vector3 dir(x, y, z);
-        dir.normalize();
-        
-        return Ray(dir, light.getPosition());
-    }
-	//added
 };
 
 #endif
