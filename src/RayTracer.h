@@ -24,7 +24,7 @@ public:
 	{
 		Buffer<Color> imageBuffer(resX, resY);
 		Buffer<Vector3> floatBuffer(resX, resY);
-		Buffer<std::vector<std::vector<Path>>> pathsBuffer(resX, resY);
+		Buffer<std::vector<FullPath>> pathsBuffer(resX, resY);
 
 		PathTracer pathTracer;
 		RayGenerator generator(scene.getCamera(), resX, resY);
@@ -36,22 +36,22 @@ public:
 			
 			for (int x = 0; x < resX; x++)
 			{
-				std::vector<std::vector<Path>> pixelPaths;
+				std::vector<FullPath> pixelPaths;
 				Ray ray = generator.getRay(x, y);
 				for (int i = 0; i < (int)rpp; i++)
-					pixelPaths.push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, &localseed));
+					pixelPaths.push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed));
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
 
-		std::vector<std::vector<Path>> globalLightPaths;
+		std::vector<FullPath> globalLightPaths;
 		std::vector<Light*> lights = scene.getLights();
         for (Light *light : lights)
         {
             for (int j = 0; j < (int)rpp; j++)
             {
                 Ray lightRay = pathTracer.sampleLightRay(*light, &seed);
-                std::vector<Path> lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, &seed);
+                FullPath lightPath = pathTracer.trace(lightRay, scene, MAX_TRACE_DEPTH, light->getMaterialId(), &seed);
                 globalLightPaths.push_back(lightPath);
             }
         }
@@ -61,14 +61,14 @@ public:
         {
             for (int x = 0; x < resX; x++)
             {
-                std::vector<std::vector<Path>> &pixelPaths = pathsBuffer.at(x, y);
+                std::vector<FullPath> &pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
-                for (std::vector<Path> &camPath : pixelPaths)
+                for (FullPath &camPath : pixelPaths)
                 {
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
-						std::vector<Path> lightPath = globalLightPaths.at(i);
-						std::vector<Path> combinedPaths = pathTracer.combine(camPath, lightPath, scene, lights.at(i / rpp)->getMaterialId());
+						FullPath &lightPath = globalLightPaths.at(i);
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene);
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }

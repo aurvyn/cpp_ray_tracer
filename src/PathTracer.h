@@ -33,6 +33,34 @@ public:
     }
 };
 
+class FullPath {
+private:
+    Vector3 _startPoint;
+    size_t _startMaterial;
+    std::vector<HitDetails> _hits;
+    std::vector<float> _strengths;
+
+public:
+    FullPath(Vector3 startPoint, size_t startMaterial, std::vector<HitDetails> hits, std::vector<float> strengths)
+        : _startPoint(startPoint), _startMaterial(startMaterial), _hits(hits), _strengths(strengths) { }
+
+    const Vector3 &startPoint() {
+        return _startPoint;
+    }
+
+    const size_t startMaterial() {
+        return _startMaterial;
+    }
+
+    const std::vector<HitDetails> &hits() {
+        return _hits;
+    }
+
+    const std::vector<float> &strengths() {
+        return _strengths;
+    }
+};
+
 class PathTracer {
 private:
     float random(unsigned int *seed, float min, float max) {
@@ -85,14 +113,22 @@ public:
         return diffuseChance + specularChance;
     }
 
-    std::vector<Path> combine(std::vector<Path> const &from, std::vector<Path> const &to, Scene const &scene, size_t lightMaterial) {
-        if (from.empty() || to.empty())
-            return std::vector<Path>();
+    FullPath combine(FullPath &from, FullPath &to, Scene const &scene) {
+        if (from.hits().size() == 0)
+            return from;
     
-        HitDetails fromHd = const_cast<Path&>(from.back()).hd();
-        HitDetails toHd = const_cast<Path&>(to.back()).hd();
+        HitDetails fromHd = from.hits().back();
         Vector3 fromPos = fromHd.position();
-        Vector3 toPos = toHd.position();
+
+        HitDetails toHd;
+        Vector3 toPos;
+        if (to.hits().size() > 0) {
+            toHd = to.hits().back();
+            toPos = toHd.position();
+        } else {
+            toPos = to.startPoint();
+            toHd = HitDetails(Ray(Vector3(0, 0, 0), toPos), Hitpoint(0, Vector3(0, 0, 0), to.startMaterial()));
+        }
     
         Ray connectionRay(toPos - fromPos, fromPos + fromHd.normal() * RAY_JITTER_EPSILON);
         Vector3 dir = connectionRay.getDirection();
@@ -102,41 +138,48 @@ public:
         {
             float distance = (toPos - fromPos).length();
             if (hit.getParameter() < distance - RAY_JITTER_EPSILON)
-                return std::vector<Path>();
+                return from;
 
             float strength = getPathChance(scene, fromHd, dir);
-            std::vector<Path> newVec;
+            std::vector<HitDetails> newHits;
+            std::vector<float> newStrengths;
 
-            for (int i = 0; i < from.size(); i++)
-                newVec.push_back(from.at(i));
+            for (int i = 0; i < from.hits().size(); i++) {
+                newHits.push_back(from.hits().at(i));
+                newStrengths.push_back(from.strengths().at(i));
+            }
 
             HitDetails hd(connectionRay, Hitpoint(distance, toHd.normal(), toHd.materialId()));
 
-            newVec.push_back(Path(hd, strength));
+            newHits.push_back(hd);
+            newStrengths.push_back(strength);
 
-            std::vector<Path> reversedTo = reversePath(to, scene, lightMaterial);
+            if (to.hits().size() > 0) {
+                FullPath reversedTo = reversePath(to, scene);
 
-            for (int i = 0; i < reversedTo.size(); i++)
-                newVec.push_back(reversedTo.at(i));
+                for (int i = 0; i < reversedTo.hits().size(); i++) {
+                    newHits.push_back(reversedTo.hits().at(i));
+                    newStrengths.push_back(reversedTo.strengths().at(i));
+                }
+            }
 
-            return newVec;
+            return FullPath(from.startPoint(), from.startMaterial(), newHits, newStrengths);
         } 
         else
         {
-            return std::vector<Path>();
+            return from;
         }
     }
 
-    std::vector<Path> reversePath(std::vector<Path> const &to, Scene const &scene, size_t lightMaterial) {
-        std::vector<Path> newPathVector;
+    FullPath reversePath(FullPath &to, Scene const &scene) {
+        std::vector<HitDetails> newHits;
+        std::vector<float> newStrengths;
 
-        for (int i = to.size() - 1; i > 0; i--)
+        for (int i = to.hits().size() - 1; i > 0; i--)
         {
-            Path currentPath = to.at(i);
-            Path nextPath = to.at(i - 1);
-
-            HitDetails originalHd = currentPath.hd();
-            HitDetails nextHd = nextPath.hd();
+            HitDetails originalHd = to.hits().at(i);
+            float originalStrength = to.strengths().at(i);
+            HitDetails nextHd = to.hits().at(i - 1);
 
             Vector3 newDirection = originalHd.direction() * -1;
             Ray newRay = Ray(newDirection, originalHd.position());
@@ -144,26 +187,27 @@ public:
             Hitpoint newHitpoint = Hitpoint(originalHd.getParameter(), nextHd.normal(), nextHd.materialId());
 
             HitDetails newHd = HitDetails(newRay, newHitpoint);
-            Path newPath = Path(newHd, currentPath.strength());
+
+            newHits.push_back(newHd);
+            newStrengths.push_back(originalStrength);
         }
 
-        Path lastPath = to.front();
-        HitDetails lastHd = lastPath.hd();
+        HitDetails lastHd = to.hits().front();
+        float lastStrength = to.strengths().front();
 
         Vector3 lastDirection = lastHd.direction() * -1;
         Ray lastRay = Ray(lastDirection, lastHd.position());
         Hitpoint lastPoint;
         
         lastPoint.setParameter(lastHd.getParameter());
-        lastPoint.setMaterialId(lightMaterial);
+        lastPoint.setMaterialId(to.startMaterial());
 
         HitDetails lastNewDetails = HitDetails(lastRay, lastPoint);
 
-        Path lastNewPath = Path(lastNewDetails, lastPath.strength());
+        newHits.push_back(lastNewDetails);
+        newStrengths.push_back(lastStrength);
 
-        newPathVector.push_back(lastNewPath);
-
-        return newPathVector;
+        return FullPath(to.hits().back().position(), to.hits().back().materialId(), newHits, newStrengths);
     }
 
     Ray nextRay(HitDetails const &hd, Scene const &scene, unsigned int *seed) {
@@ -182,31 +226,35 @@ public:
         return Ray(dir, hd.position() + hd.normal() * RAY_JITTER_EPSILON);
     }
     
-    std::vector<Path> trace(Ray start, Scene const &scene, int maxDepth, unsigned int *seed) {
-        std::vector<Path> paths;
+    FullPath trace(Ray start, Scene const &scene, int maxDepth, size_t startingMaterial, unsigned int *seed) {
+        std::vector<HitDetails> hits;
+        std::vector<float> strengths;
         
         Hitpoint hit;
-        while (scene.getRootPrimitive()->intersect(start, hit) && paths.size() < maxDepth) {
+        while (scene.getRootPrimitive()->intersect(start, hit) && hits.size() < maxDepth) {
             HitDetails hd(start, hit);
-            paths.push_back(Path(hd, 1.0f));
+            hits.push_back(hd);
+            strengths.push_back(1.0f);
             start = nextRay(hd, scene, seed);
         }
         
-        return paths;
+        return FullPath(start.getOrigin(), startingMaterial, hits, strengths);
     }
     
-    Vector3 getColor(std::vector<Path> paths, Scene const &scene) {
-        if (paths.size() == 0) {
+    Vector3 getColor(FullPath paths, Scene const &scene) {
+        if (paths.hits().size() == 0) {
             return Vector3(0, 0, 0);
         }
 
-        Path lightPath = paths.back();
-        Vector3 newColor = scene.getMaterials().at(lightPath.hd().materialId()).getKd() * lightPath.strength();
+        HitDetails lightHd = paths.hits().back();
+        float lightStrength = paths.strengths().back();
+        Vector3 newColor = scene.getMaterials().at(lightHd.materialId()).getKd() * lightStrength;
         
-        for (int i = paths.size() - 2; i >= 0; i--) {
-            Path currentPath = paths.at(i);
-            Material currentMaterial = scene.getMaterials().at(currentPath.hd().materialId());
-            newColor = (newColor * currentMaterial.getKd() * currentPath.strength());
+        for (int i = paths.hits().size() - 2; i >= 0; i--) {
+            HitDetails currentHd = paths.hits().at(i);
+            float currentStrength = paths.strengths().at(i);
+            Material currentMaterial = scene.getMaterials().at(currentHd.materialId());
+            newColor = (newColor * currentMaterial.getKd() * currentStrength);
         }
 
         return newColor;
