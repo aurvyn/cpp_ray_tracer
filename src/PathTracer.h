@@ -241,9 +241,9 @@ public:
         return FullPath(start.getOrigin(), startingMaterial, hits, strengths);
     }
     
-    Vector3 getColor(FullPath paths, Scene const &scene) {
+    Vector3 getColor(FullPath paths, Scene const &scene, Vector3 background) {
         if (paths.hits().size() == 0) {
-            return Vector3(0, 0, 0);
+            return background;
         }
 
         HitDetails lightHd = paths.hits().back();

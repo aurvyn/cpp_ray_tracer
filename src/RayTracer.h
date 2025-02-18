@@ -24,10 +24,12 @@ public:
 	{
 		Buffer<Color> imageBuffer(resX, resY);
 		Buffer<Vector3> floatBuffer(resX, resY);
-		Buffer<std::vector<FullPath>> pathsBuffer(resX, resY);
+		Buffer<std::vector<FullPath>*> pathsBuffer(resX, resY);
 
 		PathTracer pathTracer;
 		RayGenerator generator(scene.getCamera(), resX, resY);
+
+		printf("1\n");
 
 		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
@@ -36,14 +38,14 @@ public:
 			
 			for (int x = 0; x < resX; x++)
 			{
-				std::vector<FullPath> pixelPaths;
+				std::vector<FullPath> *pixelPaths = new std::vector<FullPath>();
 				Ray ray = generator.getRay(x, y);
 				for (int i = 0; i < (int)rpp; i++)
-					pixelPaths.push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed));
+					pixelPaths->push_back(pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed));
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
-
+		
 		std::vector<FullPath> globalLightPaths;
 		std::vector<Light*> lights = scene.getLights();
         for (Light *light : lights)
@@ -55,27 +57,27 @@ public:
                 globalLightPaths.push_back(lightPath);
             }
         }
-
+		
 		#pragma omp parallel for
         for (int y = 0; y < resY; y++)
         {
             for (int x = 0; x < resX; x++)
             {
-                std::vector<FullPath> &pixelPaths = pathsBuffer.at(x, y);
+                std::vector<FullPath> *pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
-                for (FullPath &camPath : pixelPaths)
+                for (FullPath &camPath : *pixelPaths)
                 {
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
 						FullPath &lightPath = globalLightPaths.at(i);
 						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene);
-						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
+						accumulatedColor += pathTracer.getColor(combinedPaths, scene, Vector3(198, 252, 255) * (1 / 255.0f / 2.0f));
                     }
                 }
                 floatBuffer.at(x, y) = accumulatedColor;
             }
         }
-
+		
 		toneMap(floatBuffer, imageBuffer);
 
 		for (int y = 0; y < resY; y++)
@@ -119,12 +121,8 @@ private:
 		float toneMappingScale = 1.0f / maxValue;
 
 		for (int y = 0; y < resY; y++)
-		{
 			for (int x = 0; x < resX; x++)
-			{
-				floatBuffer.at(x, y) = floatBuffer.at(x, y) * toneMappingScale;
-			}
-		}
+				floatBuffer.at(x, y) *= toneMappingScale;
 	}
 };
 
