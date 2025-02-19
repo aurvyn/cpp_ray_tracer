@@ -12,6 +12,7 @@
 #include "filters/RGBMultiply.h"
 #include "filters/ToneMapHSV.h"
 #include "filters/Bound.h"
+#include "filters/SSAO.h"
 #include "filters/Vignette.h"
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
@@ -42,7 +43,9 @@ class Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer* motionBuffer
+            MotionBuffer* motionBuffer,
+            Buffer<Vector3>* positionBuffer,
+            Camera camera
         ) = 0;
 };
 
@@ -65,7 +68,9 @@ class DefaultPipeline: public Pipeline
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer* motionBuffer
+            MotionBuffer* motionBuffer,
+            Buffer<Vector3>* positionBuffer,
+            Camera camera
         ) override {
             // Effect *effect = (new RGBMultiply(new Negative(new RGBConvert(new LinearHSVHDR(
             //     (new HueShift(new HSVConvert(
@@ -76,8 +81,15 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR(new HSVConvert((new BasicConvolution (new NoOp(imageBuffer)))->init(2))))))->init(255.0f);
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert((new NoOp(imageBuffer)))))))->init(255.0f);
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
-            // Effect *effect = (new RGBMultiply(new FloydDither(new RGBConvert(new ToneMapHSV( new HSVConvert(imageBuffer))))))->init(255.0f);
-            Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
+            // Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
+            Effect *effect = new RGBConvert(new ToneMapHSV(new HSVConvert(NoOp(imageBuffer))));
+            effect = new BasicConvolution((new SSAO(
+                effect,
+                depthBuffer,
+                normalBuffer,
+                positionBuffer,
+                camera
+            ))->init(0.01, 50));
             return new PostProcessor(ConstMultiply(effect, 255.0f));
         }
         
