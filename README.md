@@ -9,6 +9,7 @@
 - Donut
 - Julia Set
 - Mandelbulb
+- Helix/Spring
 - Cool S (2D)
 - Cross (2D)
 - Box (2D)
@@ -17,6 +18,7 @@
 - Union
 - Intersection
 - Difference
+- Displace
 - Smooth Minimum
 - Twist
 - 2D -> 3D: Extrusion and Revolution
@@ -75,3 +77,34 @@ Revolution follows a similar principle, in which we compute the distance to the 
 **Fractals**
 
 We implemented two fractals as well, the Julia set and the Mandelbulb. These fractals are extremely difficult to render with traditional raytracing since it is very hard to solve for the ray-fractal intersection. Solving for the SDF is easier, and then by just getting "close enough" with raymarching, we can pretty accurately render fractal shapes.
+
+---
+
+**How to Demo**
+
+The command line arguments have been modified to allow the specification of either a raytraced scene, or a raymarched scene. To do this, inject the `-sdf` argument into the command like so:
+
+`program.exe -r <resolution x> <resolution y> -sdf <obj_path.obj/sdf_scene_name> <output_image_path.png>`
+
+If the `-sdf` argument exists, then the program execution will be switched to use raymarching and to process SDFs.
+Note that the `.obj` file format does not support our custom SDF primitives and operations by default, so the SDF
+demo scenes have been hardcoded in the `src/sdf_scenes/` folder and included using the `src/SDFSceneLoader.h` class. While the second-to-last argument for raytracing is the `.obj` scene path, when using raymarching, it simply becomes
+the name of the demo scene to raymarch on. The currently supported demo options are the following:
+
+- `julia`
+- `mandel`
+- `doohickey`
+- `helix`
+- `morph`
+- `sharkegg`
+- `donut`
+- `cools`
+- `rbox`
+- `rcross`
+- `peanut`
+- `intersect`
+- `union`
+
+As a final example, the usage of the program to launch the `helix` scene may look like the following:
+
+`program.exe -r 300 300 -sdf helix outimage.png`
