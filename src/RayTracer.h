@@ -78,13 +78,13 @@ public:
                 {
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
+						bool print = false;//(x == 3 || x == 4) && y == 0 && i == 1;
 						FullPath &lightPath = globalLightPaths.at(i);
-						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background);
-						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background, print);
+						accumulatedColor += pathTracer.getColor(combinedPaths, scene, print);
                     }
                 }
 	            floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
-	            // floatBuffer.at(x, y) = accumulatedColor;
             }
         }
 		

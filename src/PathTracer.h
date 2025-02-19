@@ -91,13 +91,14 @@ public:
         return dir;
 	}
     
-    float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir) {
+    float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir, bool print) {
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
         reflectance = clamp(0, 1, reflectance);
         
         // If the path is within the hemisphere, it's a uniform distribution. Otherwise, 0.
         float diffuseDot = dir.dot(from.normal());
-        float diffuseChance = diffuseDot > 0 ? 1.0f : 0;
+        if (print) printf("Diffuse dot: %.4f\n", diffuseDot);
+        float diffuseChance = diffuseDot >= -RAY_JITTER_EPSILON ? 1.0f : 0;
         if (reflectance == 0)
             return diffuseChance;
 
@@ -106,7 +107,7 @@ public:
         float specularDot = dir.dot(from.reflection());
         if (specularDot > 0) {
             float theta = acos(specularDot);
-            if (theta < MAX_SPECULAR_THETA) {
+            if (theta <= MAX_SPECULAR_THETA) {
                 specularChance = sin(MAX_SPECULAR_THETA);
             }
         }
@@ -114,8 +115,17 @@ public:
         return ((1 - reflectance) * diffuseChance) + (reflectance * specularChance);
     }
 
-    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background) {
+    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background, bool print) {
+        if (print) {
+            printf("From: ((%.2f, %.2f, %.2f), %ld) ->", from.startPoint()[0], from.startPoint()[1], from.startPoint()[2], from.startMaterial());
+            for (int i = 0; i < from.hits().size(); i++) printf(" (%ld, %.2f)", from.hits()[i].materialId(), from.strengths()[i]);
+            printf("\nTo:   ((%.2f, %.2f, %.2f), %ld) ->", to.startPoint()[0], to.startPoint()[1], to.startPoint()[2], to.startMaterial());
+            for (int i = 0; i < to.hits().size(); i++) printf(" (%ld, %.2f)", to.hits()[i].materialId(), to.strengths()[i]);
+            printf("\n");
+        }
+        
         if (from.hits().empty() && to.hits().empty()) {
+            if (print) printf("Both were empty, returning background\n\n");
             return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(from.startPoint(), to.startPoint() - from.startPoint()), background)}, {1});
         }
         
@@ -145,23 +155,27 @@ public:
         Hitpoint hit;
         bool intersected = scene.getRootPrimitive()->intersect(connectionRay, hit);
         if (from.hits().empty() && !intersected) {
-            if (from.hits().empty())
-                return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
-            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
+            if (print) printf("Camera didn't intersect, returning background\n\n");
+            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
         }
             
         float distance = (toPos - fromPos).length();
-        float strength = getPathChance(scene, fromHd, dir);
+        float strength = getPathChance(scene, fromHd, dir, print);
+        if (print) printf("Strength: %.4f\n", strength);
         if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
-            strength = strength / std::max(1.0f, hit.getParameter());
+            if (print) printf("Collided\n");
+            strength = strength / std::max(1.0f, hit.getParameter() * distance);
         }
+        
+        // strength /= distance;
+        // strength /= distance * distance;
 
         std::vector<HitDetails> newHits;
         std::vector<float> newStrengths;
 
         for (int i = 0; i < from.hits().size(); i++) {
-            newHits.push_back(from.hits().at(i));
-            newStrengths.push_back(from.strengths().at(i));
+            newHits.push_back(from.hits()[i]);
+            newStrengths.push_back(from.strengths()[i]);
         }
 
         HitDetails hd(connectionRay, Hitpoint(distance, toHd.normal(), toHd.materialId()));
@@ -173,11 +187,12 @@ public:
             FullPath reversedTo = reversePath(to, scene);
 
             for (int i = 0; i < reversedTo.hits().size(); i++) {
-                newHits.push_back(reversedTo.hits().at(i));
-                newStrengths.push_back(reversedTo.strengths().at(i));
+                newHits.push_back(reversedTo.hits()[i]);
+                newStrengths.push_back(reversedTo.strengths()[i]);
             }
         }
 
+        if (print) printf("Returning a path of length %ld\n\n", newHits.size());
         return FullPath(from.startPoint(), from.startMaterial(), newHits, newStrengths);
     }
 
@@ -187,9 +202,9 @@ public:
 
         for (int i = to.hits().size() - 1; i > 0; i--)
         {
-            HitDetails originalHd = to.hits().at(i);
-            float originalStrength = to.strengths().at(i);
-            HitDetails nextHd = to.hits().at(i - 1);
+            HitDetails originalHd = to.hits()[i];
+            float originalStrength = to.strengths()[i];
+            HitDetails nextHd = to.hits()[i - 1];
 
             Vector3 newDirection = originalHd.direction() * -1;
             Ray newRay = Ray(newDirection, originalHd.position());
@@ -258,22 +273,26 @@ public:
         return fullPaths;
     }
     
-    Vector3 getColor(FullPath paths, Scene const &scene) {
+    Vector3 getColor(FullPath paths, Scene const &scene, bool print) {
         if (paths.hits().size() == 0) {
+            if (print) printf("Colorizing an empty path, returning black\n\n");
             return Vector3(0, 0, 0);
         }
         
         HitDetails lightHd = paths.hits().back();
         float lightStrength = paths.strengths().back();
-        Vector3 newColor = scene.getMaterials().at(lightHd.materialId()).getKd() * lightStrength;
+        Vector3 newColor = scene.getMaterials()[lightHd.materialId()].getKd() * lightStrength;
         
+        if (print) printf("Colorizing (%.4f, %.4f, %.4f)", newColor[0], newColor[1], newColor[2]);
         for (int i = paths.hits().size() - 2; i >= 0; i--) {
-            HitDetails currentHd = paths.hits().at(i);
-            float currentStrength = paths.strengths().at(i);
-            Material currentMaterial = scene.getMaterials().at(currentHd.materialId());
+            HitDetails currentHd = paths.hits()[i];
+            float currentStrength = paths.strengths()[i];
+            Material currentMaterial = scene.getMaterials()[currentHd.materialId()];
             newColor = (newColor * currentMaterial.getKd() * currentStrength);
+            if (print) printf(" --(%.4f)--> (%.4f, %.4f, %.4f)", paths.strengths()[i], newColor[0], newColor[1], newColor[2]);
         }
 
+        if (print) printf("\n\n");
         return newColor;
     }
     
