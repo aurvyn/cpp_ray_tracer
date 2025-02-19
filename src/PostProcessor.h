@@ -17,6 +17,8 @@
 #include "filters/BasicEffect.h"
 #include "filters/BasicConvolution.h"
 #include "filters/ToneMapHSV.h"
+#include "filters/FloydDither.h"
+#include "filters/BayerianDither.h"
 #include "filters/Daltonization.h"
 
 // TODO: Have apply return a Buffer<Vector3> so you can debug write each step in the pipeline to an image?
@@ -47,8 +49,14 @@ class Pipeline
         ) = 0;
 };
 
-Effect *FixingAndrewsMess(Effect *e) {
-    return new RGBConvert(new ToneMapHSV(new HSVConvert(e)));
+Buffer<Vector3> *copyBuffer(Buffer<Vector3> *src) {
+    Buffer<Vector3> *dest = new Buffer<Vector3>(src->getWidth(), src->getHeight());
+    for(int x = 0; x < src->getWidth(); x++) {
+        for(int y = 0; y < src->getHeight(); y++) {
+            dest->at(x,y) = Vector3(src->at(x,y));
+        }
+    }
+    return dest;
 }
 
 class DefaultPipeline: public Pipeline
@@ -74,7 +82,7 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = (new RGBMultiply (new RGBConvert (new LinearHSVHDR( new HSVConvert((new NoOp(imageBuffer)))))))->init(255.0f);
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
             // Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
-            Effect *effect = FixingAndrewsMess(NoOp(imageBuffer));
+            Effect *effect = new RGBConvert(new ToneMapHSV(new HSVConvert(NoOp(imageBuffer))));
             effect = new BasicConvolution(new SSAO(
                 effect,
                 depthBuffer,
@@ -84,4 +92,5 @@ class DefaultPipeline: public Pipeline
             ));
             return new PostProcessor(ConstMultiply(effect, 255.0f));
         }
+        
 };

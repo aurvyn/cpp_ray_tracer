@@ -33,12 +33,15 @@ int hexVal(char hexVal) {
     else return 0;
 }
 
-Vector3 rgbFromHex(char* hex) {
+Vector3 rgbFromHex(std::string hexStr) {
+    const char* hex = hexStr.c_str();
     int r = hexVal(hex[1]) + 16 * hexVal(hex[0]);
     int g = hexVal(hex[3]) + 16 * hexVal(hex[2]);
     int b = hexVal(hex[5]) + 16 * hexVal(hex[4]);
     return Vector3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
 }
+
+
 
 
 
@@ -124,3 +127,6 @@ Vector3 rgb2hsv(Vector3 in) {
     return Vector3(h,s,v);
 }
 
+Vector3 hsvFromHex(std::string hexStr) {
+    return rgb2hsv(rgbFromHex(hexStr));
+}
