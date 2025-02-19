@@ -9,7 +9,7 @@ endif()
 set(EXECUTABLE_NAME "tracer")
 project(${EXECUTABLE_NAME})
 
-set(OP "-fopenmp -O3")
+set(OP "-fopenmp -O3 -ffast-math -march=native -mfpmath=sse -msse3 -mtune=native")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OP}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OP}")
