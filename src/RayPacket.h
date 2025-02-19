@@ -22,15 +22,9 @@ public:
 	void setInvDirection()
 	{
 		inv_dirs.resize(3);
-		// std::cout << "here " << std::endl;
 		for (int i = 0; i < 3; i++){
 			this->inv_dirs[i] = 1.0f / this->dirs[i];
 		}
-
-		// for (int i = 0; i < 8; i++){
-			// std::cout << inv_dirs[1][0] << " ";
-		// }
-		// std::cout << std::endl;
 		
 	}
 
@@ -41,7 +35,7 @@ public:
 			float lenSq = dirsIn[0][i] * dirsIn[0][i] + dirsIn[1][i] * dirsIn[1][i] + dirsIn[2][i] * dirsIn[2][i];
 			float len = std::sqrt(lenSq);
 			
-			if (len != 0.0f) { // Avoid division by zero
+			if (len != 0.0f) {
 				this->dirs[0][i] = dirsIn[0][i] / len;
 				this->dirs[1][i] = dirsIn[1][i] / len;
 				this->dirs[2][i] = dirsIn[2][i] / len;

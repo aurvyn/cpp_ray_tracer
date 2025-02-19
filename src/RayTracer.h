@@ -20,7 +20,7 @@ public:
 		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		if (packets){
-			// #pragma omp parallel for
+			#pragma omp parallel for
 			for(int y=0; y<resY / M; y++)
 			{
 				for(int x=0; x<resX / N; x++)
@@ -32,7 +32,6 @@ public:
 					for (int j = 0; j < M; j++){
 						for (int i = 0; i < N; i++){
 							int index = i + j * N;
-								// std::cout << hitSomething[index] << " ";
 
 							if(hitSomething[index]) {
 								Vector3 dirs;
@@ -41,13 +40,11 @@ public:
 								}
 								Vector3 floatColor = Shader::shade(Ray(dirs, rays.getOrigin()), hits[index], scene);
 								floatBuffer.at(x*N+i,y*M+j) = floatColor;
-								// floatBuffer.at(x*N+i,y*M+j) = Vector3(255.0f,255.0f,255.0f);
 							}
 							else
 								floatBuffer.at(x*N+i,y*M+j) = Vector3(0,0,0);
 						}
 					}
-					// std::cout << std::endl;
 				}
 			}
 		} else {

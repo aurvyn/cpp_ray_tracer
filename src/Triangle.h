@@ -75,48 +75,32 @@ public:
 
 		__m256 mask_u = _mm256_and_ps(_mm256_cmp_ps(u, _mm256_set1_ps(0.0f),  _CMP_GE_OQ),
                                    _mm256_cmp_ps(u, _mm256_set1_ps(1.0f),  _CMP_LE_OQ));
-        // Combine with previous mask
+								   
         __m256 mask_valid = _mm256_and_ps(mask_det, mask_u);
 
-        // Compute sCross = s x e1
         __m256 sCross_x = _mm256_sub_ps(_mm256_mul_ps(s_y, e1_z), _mm256_mul_ps(s_z, e1_y));
         __m256 sCross_y = _mm256_sub_ps(_mm256_mul_ps(s_z, e1_x), _mm256_mul_ps(s_x, e1_z));
         __m256 sCross_z = _mm256_sub_ps(_mm256_mul_ps(s_x, e1_y), _mm256_mul_ps(s_y, e1_x));
 
-        // Compute v = invDet * dot(ray_direction, sCross)
-        __m256 dot_dir_sCross = _mm256_add_ps(
-                                    _mm256_add_ps(_mm256_mul_ps(dir_x, sCross_x),
-                                               _mm256_mul_ps(dir_y, sCross_y)),
-                                    _mm256_mul_ps(dir_z, sCross_z)
-                                );
+        __m256 dot_dir_sCross = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(dir_x, sCross_x), _mm256_mul_ps(dir_y, sCross_y)), _mm256_mul_ps(dir_z, sCross_z));
         __m256 v = _mm256_mul_ps(invDet, dot_dir_sCross);
 
-        // v must be >= 0 and u+v <= 1
-        __m256 mask_v = _mm256_and_ps(_mm256_cmp_ps(v, _mm256_set1_ps(0.0f),  _CMP_GE_OQ),
-                                   _mm256_cmp_ps(_mm256_add_ps(u, v), _mm256_set1_ps(1.0f),  _CMP_LE_OQ));
+        __m256 mask_v = _mm256_and_ps(_mm256_cmp_ps(v, _mm256_set1_ps(0.0f),  _CMP_GE_OQ), _mm256_cmp_ps(_mm256_add_ps(u, v), _mm256_set1_ps(1.0f),  _CMP_LE_OQ));
         mask_valid = _mm256_and_ps(mask_valid, mask_v);
 
-        // Compute t = invDet * dot(e2, sCross)
-        __m256 dot_e2_sCross = _mm256_add_ps(
-                                    _mm256_add_ps(_mm256_mul_ps(e2_x, sCross_x),
-                                               _mm256_mul_ps(e2_y, sCross_y)),
-                                    _mm256_mul_ps(e2_z, sCross_z)
-                                );
+        __m256 dot_e2_sCross = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(e2_x, sCross_x), _mm256_mul_ps(e2_y, sCross_y)), _mm256_mul_ps(e2_z, sCross_z));
         __m256 t = _mm256_mul_ps(invDet, dot_e2_sCross);
 
-        // t must be greater than EPSILON
         __m256 mask_t = _mm256_cmp_ps(t, eps,  _CMP_GT_OQ);
         mask_valid = _mm256_and_ps(mask_valid, mask_t);
 
-        // At this point, mask_valid holds a bitmask (per lane) of rays that passed all tests.
-        // Extract results from the SIMD register and update hits.
         alignas(32) float t_array[8];
 		alignas(32) int mask_array[8];
 		_mm256_storeu_ps(t_array, t);
 		_mm256_store_si256(reinterpret_cast<__m256i*>(mask_array), _mm256_castps_si256(mask_valid));
 
         for (int i = 0; i < 8; i++) {
-            if (mask_array[i] != 0.0f) { // valid intersection candidate
+            if (mask_array[i] != 0.0f) {
                 if (t_array[i] < hits[i].getParameter()) {
                     hits[i].setParameter(t_array[i]);
                     hits[i].setNormal(this->normal);
