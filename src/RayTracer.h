@@ -30,6 +30,12 @@ public:
 		PathTracer pathTracer;
 		RayGenerator generator(scene.getCamera(), resX, resY);
 
+		Material material;
+		// material.setKd(Vector3(198, 252, 255) / 255.0f);
+		material.setKd(Vector3());
+		scene.addMaterial(material);
+		Hitpoint background(INFINITY, Vector3(), scene.getMaterials().size() - 1);
+
 		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
 		{
@@ -43,6 +49,7 @@ public:
 					std::vector<FullPath> pixels = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed);
 					pixelPaths->insert(pixelPaths->end(), pixels.begin(), pixels.end());
 				}
+				// printf("(%d, %d): %d\n", x, y, pixelPaths->size());
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
@@ -51,7 +58,7 @@ public:
 		std::vector<Light*> lights = scene.getLights();
         for (Light *light : lights)
         {
-			globalLightPaths.push_back(FullPath(light->getPosition(), light->getMaterialId(), std::vector<HitDetails>(), std::vector<float>()));
+			// globalLightPaths.push_back(FullPath(light->getPosition(), light->getMaterialId(), std::vector<HitDetails>(), std::vector<float>()));
             for (int j = 0; j < (int)rpl; j++)
             {
                 Ray lightRay = pathTracer.sampleLightRay(*light, &seed);
@@ -67,27 +74,33 @@ public:
             {
                 std::vector<FullPath> *pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
+				// printf("xy\n");
                 for (FullPath &camPath : *pixelPaths)
                 {
+					// printf("CamPath\n");
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
 						FullPath &lightPath = globalLightPaths.at(i);
-						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene);
-						accumulatedColor += pathTracer.getColor(combinedPaths, scene, Vector3(198, 252, 255) * (1 / 255.0f / 4.0f));
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background, x == 49 && y == 70);
+						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }
-                floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
+                floatBuffer.at(x, y) = accumulatedColor;
+                // floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
             }
         }
 		
-		float maxWhite = -INFINITY;
-        for (int y = 0; y < resY; y++) {
-            for (int x = 0; x < resX; x++) {
-				Vector3 c = floatBuffer.at(x, y);
-				maxWhite = std::max(std::max(c[0], c[1]), std::max(c[2], maxWhite));
-			}
-		}
-		ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
+		floatBuffer.at(49, 70) = Vector3(1, 1, 1) / 100;
+		
+		// float maxWhite = -INFINITY;
+        // for (int y = 0; y < resY; y++) {
+        //     for (int x = 0; x < resX; x++) {
+		// 		Vector3 c = floatBuffer.at(x, y);
+		// 		maxWhite = std::max(std::max(c[0], c[1]), std::max(c[2], maxWhite));
+		// 	}
+		// }
+		// ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
+		GlobalToneMapper().apply(floatBuffer);
 		
 		for (int y = 0; y < resY; y++)
 		{

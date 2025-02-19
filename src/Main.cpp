@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #include "GenVector.h"
 #include "simplePNG.h"
@@ -22,9 +23,12 @@ char const * scenePath = defaultScene;
 char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
-size_t rpp = 10;
-size_t rpl = 500;
-unsigned int seed = 42;
+size_t rpp = 1;
+size_t rpl = 1;
+// unsigned int seed = 1739926307; // 50 50
+// unsigned int seed = 1739927124; // 50 500
+unsigned int seed = 1739967780; // 1, 1, only green with middle light
+// unsigned int seed = 0;
 
 void getArgs(int argc, char ** argv)
 {
@@ -122,6 +126,11 @@ int main(int argc, char ** argv)
 	
 	unsigned char * outputImage = (unsigned char*) malloc( resX * resY * 3 * sizeof(unsigned char));
 	Scene scene = loadWithOBJLoader(scenePath);
+
+	if (!seed) {
+		seed = time(0);
+		printf("%d\n", seed);
+	}
 
 	RayTracer tracer;
 	tracer.trace(scene, resX, resY, rpp, rpl, seed, outputImage);

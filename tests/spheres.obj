@@ -12,7 +12,7 @@ v -3 0 0
 vn 0 1 0
 vn 1 0 0
 usemtl red
-sp -1 -1 -2
+#sp -1 -1 -2
 
 #green sphere in middle
 v 0 0 0
@@ -26,12 +26,12 @@ v 3 0 0
 vn 0 1 0
 vn 1 0 0
 usemtl blue
-sp -1 -1 -2
+#sp -1 -1 -2
 
 # lights
 v -5 15 10
 usemtl light
-lp -1
+#lp -1
 
 v 0 10 10
 usemtl light
@@ -39,7 +39,7 @@ lp -1
 
 v 5 15 10
 usemtl light
-lp -1
+#lp -1
 
 #camera
 v 3 3 8
