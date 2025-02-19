@@ -47,10 +47,6 @@ class BayerianDither : public Effect
             return p;
         }
 
-        // 0 8 2 10
-        // 12 4 14 6
-        // 3 11 1 9
-        // 15 7 13 5
         // usually you would pass a premade dither image over the image, multiplying the result, but we can't read images
         void thresholdMap4x4(Buffer<float> *target) {
             *target = Buffer<float>(4, 4);
@@ -94,21 +90,16 @@ class BayerianDither : public Effect
             Buffer<float> thresholdMap = Buffer<float>(4,4);
             this->thresholdMap4x4(&thresholdMap);
             this->colorSpace = RGB;
-
+            
             for(int y=0; y<resY; y++) {
                 for(int x=0; x<resX; x++) {
                     Vector3 color = this->imageBuffer->at(x,y);
                     float thresholdVal = thresholdMap.at(x % 4, y % 4);
                     Vector3 thresholdColor = color + Vector3(thresholdVal, thresholdVal, thresholdVal);
                     Vector3 closestColor = closestColorInPallette(thresholdColor);
-
                     this->imageBuffer->at(x,y) = closestColor;
                 }
             }
             this->colorSpace = this->child->colorSpace;
-        }
-
-        void printColor(Vector3 color) {
-            printf("%f %f %f\n", color[0], color[1], color[2]);
         }
 };
