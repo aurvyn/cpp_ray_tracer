@@ -1,7 +1,7 @@
 #ifndef __SDFDIFFERENCE
 #define __SDFDIFFERENCE
 
-#include "SDFPrims/CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitives/CompositePrimitive.h"
 
 class SDFDifference : public CompositePrimitive
 {

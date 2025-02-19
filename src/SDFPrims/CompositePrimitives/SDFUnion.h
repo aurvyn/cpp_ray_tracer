@@ -1,7 +1,7 @@
 #ifndef __SDFUNION
 #define __SDFUNION
 
-#include "SDFPrims/CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitives/CompositePrimitive.h"
 
 class SDFUnion : public CompositePrimitive
 {

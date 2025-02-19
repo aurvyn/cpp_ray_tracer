@@ -15,8 +15,8 @@ public:
     float aDist = primA->getSignedDistance(rayOrigin);
     float bDist = primB->getSignedDistance(rayOrigin);
     float k = tolerance * 4.0;
-    float h = std::max(k - std::abs(aDist - bDist), 0.0f) / k;
-    return std::min(aDist, bDist) - h * h * k * (1.0 / 4.0);
+    float h = fmax(k - std::abs(aDist - bDist), 0.0f) / k;
+    return fmin(aDist, bDist) - h * h * k * (1.0 / 4.0);
   }
 
     bool isSDF() const override { return true; };

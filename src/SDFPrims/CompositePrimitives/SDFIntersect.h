@@ -1,7 +1,7 @@
 #ifndef __SDFINTERSECT
 #define __SDFINTERSECT
 
-#include "SDFPrims/CompositePrimitive.h"
+#include "SDFPrims/CompositePrimitives/CompositePrimitive.h"
 
 class SDFIntersect : public CompositePrimitive
 {

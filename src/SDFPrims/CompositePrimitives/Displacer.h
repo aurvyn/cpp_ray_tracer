@@ -1,5 +1,5 @@
-#ifndef __DISPLACER
-#define __DISPLACER
+#ifndef __SDFDISPLACE
+#define __SDFDISPLACE
 
 #include "Primitive.h"
 
