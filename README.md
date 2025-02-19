@@ -56,3 +56,11 @@ Since we determine hits and misses just by an object's distance, any operation w
 - Difference = min(a, -b)
 
 Smooth minimums are a bit more complicated, requiring the use of a smoothing function. These are detailed [here](https://iquilezles.org/articles/smin/). We used a quadratic smoothing function.
+
+---
+
+**2D to 3D**
+
+---
+
+**Fractals**
