@@ -25,6 +25,7 @@ public:
 		MotionBuffer motionBuffer(resX, resY);
 		Buffer<Vector3> normalBuffer = Buffer<Vector3>(resX, resY);
 		Buffer<float> depthFloatBuffer = Buffer<float>(resX, resY);
+		Buffer<Vector3> hitBuffer = Buffer<Vector3>(resX, resY);
 		float depthMax = 0.0f;
 		float focal_len = resY / 2 * tan(scene.getCamera().getFov() / 2);
 		
@@ -63,12 +64,14 @@ public:
 					if (depth > depthMax) {
 						depthMax = depth;
 					}
+					hitBuffer.at(x, y) = ray.pointAtParameter(hit.getParameter());
 				}
 				else {
 					floatBuffer.at(x,y) = rc;
 					motionBuffer.at(x,y) = Vector2(0.0f);
 					normalBuffer.at(x,y) = Vector3(0.0f);
 					depthFloatBuffer.at(x,y) = -1.0f;
+					hitBuffer.at(x, y) = ray.getDirection()*INFINITY;
 				}
 			}
 		}
@@ -85,7 +88,7 @@ public:
 			}
 		}
 
-		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, &motionBuffer);
+		PostProcessor *pp = pipeline->buildPipeline(&floatBuffer, &normalBuffer, &depthBuffer, &motionBuffer, &hitBuffer, scene.getCamera());
 		Buffer<Vector3> *ppBuffer = pp->process();
 
 		for(int y=0; y<resY; y++)
