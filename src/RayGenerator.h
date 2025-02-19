@@ -40,7 +40,6 @@ public:
 		
 		float d = h/2.0f * sin(camera.getFov());
 		float u = l + (r - l)*(x+0.5)/nx;
-		printf("u: %f\n", u);
 		float v = b + (t - b)*(y+0.5)/ny;
 		
 		Vector3 s = u*camera.getU() + v*camera.getV() - d*camera.getW();
@@ -48,13 +47,6 @@ public:
 		ray.setDirection(s);
 		ray.setOrigin(camera.getPos());
 		
-		size_t test_x, test_y;
-		getXY(test_x, test_y, ray);
-		printf("test x: %zu, x: %zu \n", test_x, x);
-		// printf("test y: %zu, y: %zu \n", test_y, y);
-		assert(x == test_x);
-		assert(y == test_y);
-
 		return ray;
 	}
 
@@ -75,18 +67,18 @@ public:
 		// because the direction has been normalized we need to un normalize it
 		float scale = d/project(ray.getDirection(), camera.getW()).length();
 		Vector3 dir = ray.getDirection()*scale;
-		printf("cdir: %f %f %f\n", dir[0], dir[1], dir[2]);
+		// printf("cdir: %f %f %f\n", dir[0], dir[1], dir[2]);
 
 		Vector3 projDirOntoU = project(dir, camera.getU());
 		float u = projDirOntoU.length()/camera.getU().length()*(camera.getU().dot(projDirOntoU) > 0 ? 1 : - 1);
-		printf("calcu: %f\n", u);
+		// printf("calcu: %f\n", u);
 		float x_res = roundf(((u - l)*nx)/(r - l) - 0.5);
-		printf("x_res: %f\n", x_res);
+		// printf("x_res: %f\n", x_res);
 		x = (size_t)x_res;
 
 		Vector3 projDirOntoV = project(dir, camera.getV());
 		float v = projDirOntoV.length()/camera.getV().length()*(camera.getV().dot(projDirOntoV) > 0 ? 1 : - 1);
-		printf("calcu: %f\n", v);
+		// printf("calcu: %f\n", v);
 		float y_res = roundf(((v - b)*nx)/(t - b) - 0.5);
 		y = (size_t)y_res;
 	}
