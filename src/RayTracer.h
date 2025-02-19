@@ -30,12 +30,6 @@ public:
 		PathTracer pathTracer;
 		RayGenerator generator(scene.getCamera(), resX, resY);
 
-		Material material;
-		material.setKd(Vector3(198, 252, 255) / 255.0f / 4.0f);
-		// material.setKd(Vector3());
-		scene.addMaterial(material);
-		Hitpoint background(INFINITY, Vector3(), scene.getMaterials().size() - 1);
-
 		#pragma omp parallel for
 		for (int y = 0; y < resY; y++)
 		{
@@ -80,7 +74,7 @@ public:
                     {
 						bool print = false;//(x == 3 || x == 4) && y == 0 && i == 1;
 						FullPath &lightPath = globalLightPaths.at(i);
-						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background, print);
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, print);
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene, print);
                     }
                 }

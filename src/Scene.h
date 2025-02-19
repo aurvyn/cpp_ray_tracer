@@ -70,11 +70,6 @@ public:
 		camera = Camera(pos, lookAt, up);
 	}
 	
-	void addMaterial(Material const & material)
-	{
-		materials.push_back(material);
-	}
-	
 	void addDefaultMaterial()
 	{
 		Material mat;

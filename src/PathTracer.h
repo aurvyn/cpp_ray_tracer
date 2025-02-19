@@ -115,7 +115,7 @@ public:
         return ((1 - reflectance) * diffuseChance) + (reflectance * specularChance);
     }
 
-    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background, bool print) {
+    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, bool print) {
         if (print) {
             printf("From: ((%.2f, %.2f, %.2f), %ld) ->", from.startPoint()[0], from.startPoint()[1], from.startPoint()[2], from.startMaterial());
             for (int i = 0; i < from.hits().size(); i++) printf(" (%ld, %.2f)", from.hits()[i].materialId(), from.strengths()[i]);
@@ -126,7 +126,7 @@ public:
         
         if (from.hits().empty() && to.hits().empty()) {
             if (print) printf("Both were empty, returning background\n\n");
-            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(from.startPoint(), to.startPoint() - from.startPoint()), background)}, {1});
+            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
         }
         
         HitDetails fromHd;
@@ -156,7 +156,7 @@ public:
         bool intersected = scene.getRootPrimitive()->intersect(connectionRay, hit);
         if (from.hits().empty() && !intersected) {
             if (print) printf("Camera didn't intersect, returning background\n\n");
-            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
+            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
         }
             
         float distance = (toPos - fromPos).length();

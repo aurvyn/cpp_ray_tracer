@@ -30,6 +30,7 @@ d  1
 # units are watts/nm^2
 newmtl light
 Ka 1.5 1.5 1.5
-Kd 10.0 10.0 10.0
+# Kd 10.0 10.0 10.0
+Kd 100 100 100
 Ks  2 2 2
 

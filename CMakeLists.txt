@@ -12,7 +12,7 @@ project(${EXECUTABLE_NAME})
 set(OP "-fopenmp")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OP}")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OP}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OP} -O3")
 
 add_definitions ( -DEXEC_NAME="${EXECUTABLE_NAME}" )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
