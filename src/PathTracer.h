@@ -94,6 +94,8 @@ public:
 	}
     
     float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir) {
+        return 1;
+        
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
         reflectance = 0;//clamp(0, 1, reflectance);
         
@@ -122,17 +124,21 @@ public:
     }
 
     FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background, bool print) {
+        if (from.hits().empty() && to.hits().empty()) {
+            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(from.startPoint(), to.startPoint() - from.startPoint()), background)}, {1});
+        }
+        
         if (print) {
             printf("From Paths: ");
             int prev = from.startMaterial();
             for (const HitDetails &fromHit : from.hits()) {
-                printf("(%d -> %d) ", prev, fromHit.materialId());
+                printf("(%d -> %d (%.2f, %.2f, %.2f)) ", prev, fromHit.materialId(), fromHit.position()[0], fromHit.position()[1], fromHit.position()[2]);
                 prev = fromHit.materialId();
             }
             printf("\nTo Paths: ");
             prev = to.startMaterial();
             for (const HitDetails &toHit : to.hits()) {
-                printf("(%d -> %d) ", prev, toHit.materialId());
+                printf("(%d -> %d (%.2f, %.2f, %.2f)) ", prev, toHit.materialId(), toHit.position()[0], toHit.position()[1], toHit.position()[2]);
                 prev = toHit.materialId();
             }
             printf("\n");
@@ -144,8 +150,6 @@ public:
             fromHd = from.hits().back();
             fromPos = fromHd.position();
         } else {
-            // if (print) printf("From size was 0\n");
-            // return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(), background)}, {1});
             fromPos = from.startPoint();
             fromHd = HitDetails(Ray(Vector3(0, 0, 0), fromPos), Hitpoint(0, Vector3(0, 0, 0), from.startMaterial()));
         }
@@ -164,47 +168,48 @@ public:
         Vector3 dir = connectionRay.getDirection();
 
         Hitpoint hit;
-        if (scene.getRootPrimitive()->intersect(connectionRay, hit)) {
-            // if (print) printf("Intersected");
-            
-            float distance = (toPos - fromPos).length();
-            float strength;
-            if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
-                if (print) printf(" but collided in between!\n");
-                return FullPath(from.startPoint(), from.startMaterial(), {}, {});
-            }
-            else {
-                // if (print) printf(" and hit!\n");
-                strength = getPathChance(scene, fromHd, dir);
-            }
-
-            std::vector<HitDetails> newHits;
-            std::vector<float> newStrengths;
-
-            for (int i = 0; i < from.hits().size(); i++) {
-                newHits.push_back(from.hits().at(i));
-                newStrengths.push_back(from.strengths().at(i));
-            }
-
-            HitDetails hd(connectionRay, Hitpoint(distance, toHd.normal(), toHd.materialId()));
-
-            newHits.push_back(hd);
-            newStrengths.push_back(strength);
-
-            if (to.hits().size() > 0) {
-                FullPath reversedTo = reversePath(to, scene);
-
-                for (int i = 0; i < reversedTo.hits().size(); i++) {
-                    newHits.push_back(reversedTo.hits().at(i));
-                    newStrengths.push_back(reversedTo.strengths().at(i));
-                }
-            }
-
-            return FullPath(from.startPoint(), from.startMaterial(), newHits, newStrengths);
-        } else {
-            // if (print) printf("Missed the ball\n");
-            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {0.1});
+        if (from.hits().empty() && !scene.getRootPrimitive()->intersect(connectionRay, hit)) {
+            if (print) printf("Missed the ball\n");
+            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
         }
+            
+        if (print) printf("Intersected");
+        
+        float distance = (toPos - fromPos).length();
+        float strength;
+        if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
+            if (print) printf(" but collided in between!\n");
+            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
+            // strength = 1;
+        }
+        else {
+            if (print) printf(" and hit!\n");
+            strength = getPathChance(scene, fromHd, dir);
+        }
+
+        std::vector<HitDetails> newHits;
+        std::vector<float> newStrengths;
+
+        for (int i = 0; i < from.hits().size(); i++) {
+            newHits.push_back(from.hits().at(i));
+            newStrengths.push_back(from.strengths().at(i));
+        }
+
+        HitDetails hd(connectionRay, Hitpoint(distance, toHd.normal(), toHd.materialId()));
+
+        newHits.push_back(hd);
+        newStrengths.push_back(strength);
+
+        if (to.hits().size() > 0) {
+            FullPath reversedTo = reversePath(to, scene);
+
+            for (int i = 0; i < reversedTo.hits().size(); i++) {
+                newHits.push_back(reversedTo.hits().at(i));
+                newStrengths.push_back(reversedTo.strengths().at(i));
+            }
+        }
+
+        return FullPath(from.startPoint(), from.startMaterial(), newHits, newStrengths);
     }
 
     FullPath reversePath(FullPath &to, Scene const &scene) {

@@ -31,8 +31,8 @@ public:
 		RayGenerator generator(scene.getCamera(), resX, resY);
 
 		Material material;
-		// material.setKd(Vector3(198, 252, 255) / 255.0f);
-		material.setKd(Vector3());
+		material.setKd(Vector3(198, 252, 255) / 255.0f);
+		// material.setKd(Vector3());
 		scene.addMaterial(material);
 		Hitpoint background(INFINITY, Vector3(), scene.getMaterials().size() - 1);
 
@@ -50,7 +50,6 @@ public:
 					std::vector<FullPath> pixels = pathTracer.trace(ray, scene, MAX_TRACE_DEPTH, -1, &localseed);
 					pixelPaths->insert(pixelPaths->end(), pixels.begin(), pixels.end());
 				}
-				// printf("(%d, %d): %d\n", x, y, pixelPaths->size());
 				pathsBuffer.at(x, y) = pixelPaths;
 			}
 		}
@@ -75,10 +74,8 @@ public:
             {
                 std::vector<FullPath> *pixelPaths = pathsBuffer.at(x, y);
                 Vector3 accumulatedColor(0, 0, 0);
-				// printf("xy\n");
                 for (FullPath &camPath : *pixelPaths)
                 {
-					// printf("CamPath\n");
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
 						FullPath &lightPath = globalLightPaths.at(i);
@@ -90,8 +87,6 @@ public:
                 // floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
             }
         }
-		
-		floatBuffer.at(49, 70) = Vector3(1, 1, 1) / 100;
 		
 		// float maxWhite = -INFINITY;
         // for (int y = 0; y < resY; y++) {
