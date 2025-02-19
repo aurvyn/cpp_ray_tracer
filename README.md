@@ -10,9 +10,10 @@
 - Julia Set
 - Mandelbulb
 - Helix/Spring
+- Circle (2D)
+- Box (2D)
 - Cool S (2D)
 - Cross (2D)
-- Box (2D)
 
 **Other Features:**
 - Union
