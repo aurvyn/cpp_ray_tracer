@@ -11,9 +11,7 @@
 #include "GenQuaternion.h"
 #include "math.h"
 
-#define MAX_SPECULAR_THETA (M_PI/16)
-#define DIFFUSE_GRANULARITY 500.0f
-#define SPECULAR_GRANULARITY 50.0f
+#define MAX_SPECULAR_THETA (M_PI/32)
 
 class Path {
 private:
@@ -94,33 +92,26 @@ public:
 	}
     
     float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir) {
-        return 1;
-        
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
         reflectance = clamp(0, 1, reflectance);
         
         // If the path is within the hemisphere, it's a uniform distribution. Otherwise, 0.
         float diffuseDot = dir.dot(from.normal());
-        float diffuseChance = diffuseDot > 0 ? 1.0f / DIFFUSE_GRANULARITY : 0;
+        float diffuseChance = diffuseDot > 0 ? 1.0f : 0;
         if (reflectance == 0)
             return diffuseChance;
-        diffuseChance *= 1 - reflectance;
 
         // If the path is within the lobe, it's more likely to be closer to the reflection. Otherwise, 0.
         float specularChance = 0;
-        float theta = acos(dir.dot(from.reflection()));
-        float specularCoef = theta / MAX_SPECULAR_THETA;
-        if (specularCoef > 0) {
-            float rootValue = 1 - specularCoef * SPECULAR_GRANULARITY;
-            rootValue = clamp(0, SPECULAR_GRANULARITY - 0.0000001f, rootValue);
-            float lowBound = (int)rootValue;
-            float highBound = (int)rootValue + 1;
-            lowBound *= lowBound;
-            highBound *= highBound;
-            specularChance = reflectance * (highBound - lowBound) / highBound;
+        float specularDot = dir.dot(from.reflection());
+        if (specularDot > 0) {
+            float theta = acos(specularDot);
+            if (theta < MAX_SPECULAR_THETA) {
+                specularChance = sin(MAX_SPECULAR_THETA);
+            }
         }
         
-        return diffuseChance + specularChance;
+        return ((1 - reflectance) * diffuseChance) + (reflectance * specularChance);
     }
 
     FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background) {
@@ -160,12 +151,10 @@ public:
         }
             
         float distance = (toPos - fromPos).length();
-        float strength;
+        float strength = getPathChance(scene, fromHd, dir);
         if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
-            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
-        }
-        else {
-            strength = getPathChance(scene, fromHd, dir);
+            // strength = strength / (distance * 10);
+            strength = 0;
         }
 
         std::vector<HitDetails> newHits;
