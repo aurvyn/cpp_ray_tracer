@@ -23,12 +23,12 @@ char const * scenePath = defaultScene;
 char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
-size_t rpp = 1;
-size_t rpl = 1;
+size_t rpp = 50;
+size_t rpl = 50;
 // unsigned int seed = 1739926307; // 50 50
 // unsigned int seed = 1739927124; // 50 500
-unsigned int seed = 1739967780; // 1, 1, only green with middle light
-// unsigned int seed = 0;
+// unsigned int seed = 1739967780; // 1, 1, only green with middle light
+unsigned int seed = 0;
 
 void getArgs(int argc, char ** argv)
 {

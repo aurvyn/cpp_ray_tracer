@@ -31,7 +31,7 @@ usemtl blue
 # lights
 v -5 15 10
 usemtl light
-#lp -1
+lp -1
 
 v 0 10 10
 usemtl light
@@ -39,7 +39,7 @@ lp -1
 
 v 5 15 10
 usemtl light
-#lp -1
+lp -1
 
 #camera
 v 3 3 8

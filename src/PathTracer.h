@@ -84,6 +84,14 @@ public:
 		
 		return (thetaQuat * phiQuat) * axis;
 	}
+
+	Vector3 getPointOnHemisphere(Vector3 const & axis, unsigned int *seed) {
+        Vector3 dir(random(seed, -1, 1), random(seed, -1, 1), random(seed, -1, 1));
+		dir.normalize();
+        if (dir.dot(axis) < 0)
+            dir = -dir;
+        return dir;
+	}
     
     float getPathChance(Scene const &scene, HitDetails const &from, Vector3 const &dir) {
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
@@ -129,14 +137,18 @@ public:
             }
             printf("\n");
         }
-        
-        if (from.hits().size() == 0) {
-            if (print) printf("From size was 0\n");
-            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(), background)}, {1});
-        }
     
-        HitDetails fromHd = from.hits().back();
-        Vector3 fromPos = fromHd.position();
+        HitDetails fromHd;
+        Vector3 fromPos;
+        if (from.hits().size() > 0) {
+            fromHd = from.hits().back();
+            fromPos = fromHd.position();
+        } else {
+            // if (print) printf("From size was 0\n");
+            // return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(), background)}, {1});
+            fromPos = from.startPoint();
+            fromHd = HitDetails(Ray(Vector3(0, 0, 0), fromPos), Hitpoint(0, Vector3(0, 0, 0), from.startMaterial()));
+        }
 
         HitDetails toHd;
         Vector3 toPos;
@@ -153,7 +165,7 @@ public:
 
         Hitpoint hit;
         if (scene.getRootPrimitive()->intersect(connectionRay, hit)) {
-            if (print) printf("Intersected");
+            // if (print) printf("Intersected");
             
             float distance = (toPos - fromPos).length();
             float strength;
@@ -162,7 +174,7 @@ public:
                 return FullPath(from.startPoint(), from.startMaterial(), {}, {});
             }
             else {
-                if (print) printf(" and hit!\n");
+                // if (print) printf(" and hit!\n");
                 strength = getPathChance(scene, fromHd, dir);
             }
 
@@ -190,7 +202,7 @@ public:
 
             return FullPath(from.startPoint(), from.startMaterial(), newHits, newStrengths);
         } else {
-            if (print) printf("Missed the ball\n");
+            // if (print) printf("Missed the ball\n");
             return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {0.1});
         }
     }
@@ -244,7 +256,7 @@ public:
             float specularCoef = 1 - sqrt(random(seed, 0, 1));
             dir = getPointOnGreatArc(hd.reflection(), specularCoef * MAX_SPECULAR_THETA, random(seed, 0, M_PI * 2));
         } else {
-            dir = getPointOnGreatArc(hd.reflection(), random(seed, 0, M_PI / 2), random(seed, 0, M_PI * 2));
+            dir = getPointOnHemisphere(hd.reflection(), seed);
         }
         
         return Ray(dir, hd.position() + hd.normal() * RAY_JITTER_EPSILON);
@@ -259,15 +271,15 @@ public:
         
         Hitpoint hit;
         while (scene.getRootPrimitive()->intersect(start, hit) && hits.size() < maxDepth) {
-            // if (hits.size() != 0)
-                // fullPaths.push_back(FullPath(startingPos, startingMaterial, std::vector(hits), std::vector(strengths)));
+            if (hits.size() != 0)
+                fullPaths.push_back(FullPath(startingPos, startingMaterial, std::vector(hits), std::vector(strengths)));
             HitDetails hd(start, hit);
             hits.push_back(hd);
             strengths.push_back(1.0f);
             start = nextRay(hd, scene, seed);
         }
         
-        // if (hits.size() != 0)
+        if (hits.size() != 0)
             fullPaths.push_back(FullPath(startingPos, startingMaterial, hits, strengths));
         return fullPaths;
     }
