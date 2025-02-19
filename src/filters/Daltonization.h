@@ -62,6 +62,11 @@ public:
                     Vector3 fix(0, .7*error[0]+error[1], .7*error[0]+error[2]);
                     final_rgb += fix;
                 }
+                final_rgb = Vector3(
+                    clamp(0.0f, 255.0f, final_rgb[0]),
+                    clamp(0.0f, 255.0f, final_rgb[1]),
+                    clamp(0.0f, 255.0f, final_rgb[2])
+                );
                 imageBuffer->at(x, y) = final_rgb;
             }
         }
