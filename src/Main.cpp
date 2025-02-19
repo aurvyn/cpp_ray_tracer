@@ -25,9 +25,6 @@ size_t resX = RES;
 size_t resY = RES;
 size_t rpp = 100;
 size_t rpl = 100;
-// unsigned int seed = 1739926307; // 50 50
-// unsigned int seed = 1739927124; // 50 500
-// unsigned int seed = 1739967780; // 1, 1, only green with middle light
 unsigned int seed = 0;
 
 void getArgs(int argc, char ** argv)
@@ -127,10 +124,8 @@ int main(int argc, char ** argv)
 	unsigned char * outputImage = (unsigned char*) malloc( resX * resY * 3 * sizeof(unsigned char));
 	Scene scene = loadWithOBJLoader(scenePath);
 
-	if (!seed) {
-		seed = time(0);
-		printf("%d\n", seed);
-	}
+	if (!seed) seed = time(0);
+	printf("Running with seed: %d\n", seed);
 
 	RayTracer tracer;
 	tracer.trace(scene, resX, resY, rpp, rpl, seed, outputImage);

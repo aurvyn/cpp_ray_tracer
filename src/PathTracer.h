@@ -153,8 +153,7 @@ public:
         float distance = (toPos - fromPos).length();
         float strength = getPathChance(scene, fromHd, dir);
         if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
-            // strength = strength / (distance * 10);
-            strength = 0;
+            strength = strength / std::max(1.0f, hit.getParameter());
         }
 
         std::vector<HitDetails> newHits;

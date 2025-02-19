@@ -31,7 +31,7 @@ public:
 		RayGenerator generator(scene.getCamera(), resX, resY);
 
 		Material material;
-		material.setKd(Vector3(198, 252, 255) / 255.0f / 10.0f);
+		material.setKd(Vector3(198, 252, 255) / 255.0f / 4.0f);
 		// material.setKd(Vector3());
 		scene.addMaterial(material);
 		Hitpoint background(INFINITY, Vector3(), scene.getMaterials().size() - 1);
@@ -84,6 +84,7 @@ public:
                     }
                 }
 	            floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
+	            // floatBuffer.at(x, y) = accumulatedColor;
             }
         }
 		
@@ -95,6 +96,7 @@ public:
 			}
 		}
 		ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
+		// GlobalToneMapper().apply(floatBuffer);
 		
 		for (int y = 0; y < resY; y++)
 		{
