@@ -13,7 +13,7 @@
 #include "Shader.h"
 #include "RayTracer.h"
 
-#define RES 200
+#define RES 1000
 
 bool usePrimitiveArray = false;
 bool foundScene = false;
@@ -23,8 +23,8 @@ char const * scenePath = defaultScene;
 char const * outputPath = defaultOutput;
 size_t resX = RES;
 size_t resY = RES;
-size_t rpp = 100;
-size_t rpl = 100;
+size_t rpp = 12;
+size_t rpl = 12;
 unsigned int seed = 0;
 
 void getArgs(int argc, char ** argv)
