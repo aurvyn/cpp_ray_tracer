@@ -15,7 +15,7 @@
 
 #include "PathTracer.h"
 
-#define MAX_TRACE_DEPTH 2
+#define MAX_TRACE_DEPTH 10
 #define TWO_PI 6.28318530718f
 
 class RayTracer
