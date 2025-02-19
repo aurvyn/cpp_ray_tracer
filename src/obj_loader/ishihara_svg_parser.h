@@ -24,7 +24,7 @@ int parse_ishihara_svg_scene(obj_scene_data *data_out, char const *file_name)
 	}
     std::ofstream mtl_file("../../tests/ishihara.mtl");
     std::ofstream obj_file("../../tests/ishihara.obj");
-    mtl_file << "newmtl background\nKa 255 255 255\n" << std::endl;
+    mtl_file << "newmtl background\nKa 1 1 1\n" << std::endl;
     obj_file << "mtllib ishihara.mtl" << std::endl;
     char token[32], fill[32], *fill_ptr;
     int width, height, centerX, centerY;
@@ -57,7 +57,7 @@ int parse_ishihara_svg_scene(obj_scene_data *data_out, char const *file_name)
             int r, g, b;
             sscanf(fill_ptr, "%2x%2x%2x", &r, &g, &b);
             obj_file << "\nusemtl " << fill_ptr << "\n" << std::endl;
-            mtl_file << "newmtl " << fill_ptr << "\nKa " << r << " " << g << " " << b << "\n" << std::endl;
+            mtl_file << "newmtl " << fill_ptr << "\nKa " << (float)r/255 << " " << (float)g/255 << " " << (float)b/255 << "\n" << std::endl;
         }
     }
     // background

@@ -13,14 +13,17 @@ class Daltonization : public Effect
     using Effect::Effect; // uses super constructor
 
     CVDType type;
+    bool compensate;
     bool simulate;
 public:
     /**
      * @param type The type of color blindness to compensate or simulate.
+     * @param fix If true, the image will be recolored to compensate the color blindness.
      * @param simulate If true, the image will be recolored to simulate the color blindness.
      */
-    Daltonization *init(CVDType type, bool simulate = false) {
+    Daltonization *init(CVDType type, bool compensate = true, bool simulate = false) {
         this->type = type;
+        this->compensate = compensate;
         this->simulate = simulate;
         return this;
     }
@@ -53,13 +56,13 @@ public:
                     -.0102485335*lms[0] + .0540193266*lms[1] - .113614708*lms[2],
                     -.000365296938*lms[0] - .00412161469*lms[1] + .693511405*lms[2]
                 );
-                if (simulate) {
-                    imageBuffer->at(x, y) = cvd_rgb;
-                    continue;
+                Vector3 final_rgb = simulate ? cvd_rgb : rgb;
+                if (compensate) {
+                    Vector3 error = rgb - cvd_rgb; // Invisible for people with the CVD type
+                    Vector3 fix(0, .7*error[0]+error[1], .7*error[0]+error[2]);
+                    final_rgb += fix;
                 }
-                Vector3 error = rgb - cvd_rgb; // Invisible for people with the CVD type
-                Vector3 fix(0, .7*error[0]+error[1], .7*error[0]+error[2]);
-                imageBuffer->at(x, y) = rgb + fix;
+                imageBuffer->at(x, y) = final_rgb;
             }
         }
     }

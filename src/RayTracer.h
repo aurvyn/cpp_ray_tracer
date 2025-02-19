@@ -55,6 +55,7 @@ public:
 					float depth = hit.getParameter();
 					Vector3 motion = hit.getMotion() - scene.getCamera().getMotion();
 					motion.projectToPlane(ray.getDirection());
+					motion[1] = -motion[1];
 					//Vector3 visualMotion = Vector3(fabs(motion[0]), fabs(motion[1]), fabs(motion[2]));
 					//visualMotions.at(x,y) = visualMotion/visualMotion.length()*255;
 					motionBuffer.at(x,y) = motion * focal_len / depth;
