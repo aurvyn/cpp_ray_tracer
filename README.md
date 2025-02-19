@@ -61,6 +61,8 @@ Smooth minimums are a bit more complicated, requiring the use of a smoothing fun
 
 **2D to 3D**
 
+TODO: fill this in
+
 ---
 
 **Fractals**
