@@ -167,6 +167,7 @@ public:
             strength = strength / std::max(1.0f, hit.getParameter() * distance);
         }
         
+        strength /= sqrt(distance);
         // strength /= distance;
         // strength /= distance * distance;
 
