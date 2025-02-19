@@ -1,10 +1,10 @@
-**SDF Rendering**
+# **SDF Rendering**
 
 ---
 
-**Nathan Yang, Anthony Mui, Joshua Lowe, Tony Martin, Jason Heflinger**
+## **Nathan Yang, Anthony Mui, Joshua Lowe, Tony Martin, Jason Heflinger**
 
-**Shapes Implemented:**
+### **Shapes Implemented:**
 - Spheres
 - Donut
 - Julia Set
@@ -64,3 +64,5 @@ Smooth minimums are a bit more complicated, requiring the use of a smoothing fun
 ---
 
 **Fractals**
+
+We implemented two fractals as well, the Julia set and the Mandelbulb. These fractals are extremely difficult to render with traditional raytracing since it is very hard to solve for the ray-fractal intersection. Solving for the SDF is easier, and then by just getting "close enough" with raymarching, we can pretty accurately render fractal shapes.
