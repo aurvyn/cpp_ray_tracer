@@ -84,6 +84,10 @@ class SSAO : public Effect {
         ).normalize();
     }
 
+    bool inrange(size_t x, size_t y) {
+        return x < imageBuffer->getWidth() && y < imageBuffer->getHeight();
+    }
+
     bool point_behind_position_buffer(size_t x, size_t y, Vector3 point) {
         // x and y are used to find the correct pixel to compare to
         // this is kind of backward that I have to calculate this but I lack the necessary ray information
@@ -101,7 +105,7 @@ class SSAO : public Effect {
         // while (get_pixel_dir(x+x_heading,y).dot(point_dir) > get_pixel_dir(x,y).dot(point_dir)) x += x_heading;
         // while (get_pixel_dir(x,y+y_heading).dot(point_dir) > get_pixel_dir(x,y).dot(point_dir)) y += y_heading;
         rg.getXY(x, y, Ray((point - camera.getPos()), camera.getPos()));
-
+        if (!inrange(x, y)) return false;
 
         // now that we have the correct pixel we can actually do our comparison
         float depthSquared = (positionmap->at(x, y) - camera.getPos()).squaredLength();
