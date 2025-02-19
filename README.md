@@ -9,7 +9,8 @@
 - Donut
 - Julia Set
 - Mandelbulb
-- Extruded 2D shapes (Not fully operational)
+- Cool S (2D)
+- Cross (2D)
 
 **Other Features:**
 - Union
@@ -17,12 +18,13 @@
 - Difference
 - Smooth Minimum
 - Twist
+- 2D -> 3D: Extrusion and Revolution
 
 ---
 
 **Rendering Solids Using SDFs**
 
-To render solids with SDFs, we utilize raymarching. This involves finding the closest object in the scene, then moving along the ray that distance. So if we find that the nearest object is 5ft away, we march 5ft *along the ray* (Not towards the object). We then check if the march distance is extremely small (< 0.00001). If it is, then we say that we have hit the object. If this never occurs, we continue marching until the max number of steps is reached.
+To render solids with SDFs, we utilize raymarching. This involves finding the closest object in the scene, then moving along the ray that distance. So if we find that the nearest object is 5ft away, we march 5 ft *in the ray's direction* (not towards the object). We then check if the march distance is extremely small (< 0.00001). If it is, then we say that we have hit the object. If this never occurs, we continue marching until the max number of steps is reached.
 
 Our marching function looks very similar to this:
 ```
@@ -61,7 +63,11 @@ Smooth minimums are a bit more complicated, requiring the use of a smoothing fun
 
 **2D to 3D**
 
-TODO: fill this in
+We used Inigo Quilez's extrusion and revolution algorithms [here](https://iquilezles.org/articles/distfunctions/) for converting 2-dimensional SDFs to 3-dimensional ones. Both of these work such that if the original SDF is "exact" (does not at all distort the object), then the resulting 3D SDF will also be exact. 
+
+Extrusion works by computing the 2D SDF and using the Pythagorean theorem to find the diagonal to the target point. Because the object is uniform along one axis, the correct coordinate is given.
+
+Revolution follows a similar principle, in which we compute the distance to the shape with an offset *as if* we are in its plane, transforming each point into (xz - offset, y). This has the effect of rotating the shape around the y axis and could be replicated on either of the other two by modifying the axes. 
 
 ---
 
