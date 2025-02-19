@@ -15,6 +15,8 @@
 #include "sdf_scenes/SDFCoolS.h"
 #include "sdf_scenes/SDFRevolvedCross.h"
 #include "sdf_scenes/SDFPeanut.h"
+#include "sdf_scenes/SDFIntersect.h"
+#include "sdf_scenes/SDFUnion.h"
 #include "PrettyLogger.h"
 
 using namespace std;
@@ -30,7 +32,9 @@ options = {
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
     {"rcross", loadSDFRevolvedCrossScene},
-    {"peanut", loadSDFPeanutScene}
+    {"peanut", loadSDFPeanutScene},
+    {"intersect", loadSDFIntersectScene},
+    {"union", loadSDFUnionScene}
 };
 
 Scene loadWithSDFLoader(string scene) {
