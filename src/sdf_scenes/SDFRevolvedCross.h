@@ -1,12 +1,12 @@
-#ifndef __SDFREVOLVEDBOX_H
-#define __SDFREVOLVEDBOX_H
+#ifndef __SDFREVOLVEDCROSS_H
+#define __SDFREVOLVEDCROSS_H
 
 #include "SDFPrims/SDF2DRevolve.h"
 #include "SDFPrims/SDF2DExtrude.h"
-#include "SDFPrims/Box2D.h"
+#include "SDFPrims/Cross.h"
 #include "Scene.h"
 
-Scene loadSDFRevolvedBoxScene() {
+Scene loadSDFRevolvedCrossScene() {
     Scene scene;
     scene.addDefaultLight();
     scene.setCamera(Camera({-1, 2, -3}, Vector3(0,0,0), {0, 1, 0}));
@@ -19,12 +19,13 @@ Scene loadSDFRevolvedBoxScene() {
     materials.push_back(material);
     scene.setMaterials(materials);
 	PrimitiveArray *primArray = new PrimitiveArray();
-    Box2D *b = new Box2D(Vector2(0.5f,0.25f));
+    Cross *b = new Cross(Vector2(1.0f,0.5f),0.4f);
     Primitive* revol = new SDF2DRevolve(b,Vector3(0.0,0.0,0.0),2.0f);
+    // Primitive* revol = new SDFExtrude(b,Vector3(0.0,0.0,0.0),1.0f);
 	revol->setMaterialId(0);
 	primArray->add(revol);
 	scene.setRootPrimitive(primArray);
     return scene;
 }
 
-#endif
+#endif // __SDFREVOLVEDCROSS_H

@@ -12,21 +12,23 @@ class Cross : public Primitive2D {
 public:
   Cross(Vector2 size, float corner_rad) : size(size), corner_rad(corner_rad){};
   float getSignedDistance(Vector2 pos) const override{
-    pos = Vector2(abs(pos[0]),abs(pos[1]));
-    pos = (pos[1]>pos[0]) ? pos[1] : pos[0];
-    Vector2 q = pos - size;
+    Vector2 p = Vector2(abs(pos[0]),abs(pos[1]));
+    p = (p[1] > p[0]) ? Vector2(p[1],p[0]) : p;
+    Vector2 q = p - size;
     float k = fmax(q[1],q[0]);
-    Vector2  w = (k>0.0) ? q : Vector2(size[1]-pos[0],-k);
-    Vector2 wpos = Vector2(abs(w[0]), abs(w[1]));
+    Vector2 w = (k>0.0) ? q : Vector2(size[1]-p[0],-k);
+    Vector2 wpos = Vector2(fmax(0.0f,w[0]), fmax(0.0f,w[1]));
     return sign(k)*wpos.length() + corner_rad;
   };
 
     Vector2 getBBMax() const override {
-        return Vector2(-0.4, -0.6);
+        float p = -1*fmax(size[0],size[1]);
+        return Vector2(p,p);
     };
 
     Vector2 getBBMin() const override {
-        return Vector2(0.4, 0.6);
+        float p = fmax(size[0],size[1]);
+        return Vector2(p,p);
     }
 protected:
     Vector2 size;

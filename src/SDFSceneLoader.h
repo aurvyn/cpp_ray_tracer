@@ -14,6 +14,7 @@
 #include "sdf_scenes/SDFDonut.h"
 #include "sdf_scenes/SDFCoolS.h"
 #include "sdf_scenes/SDFRevolvedBox.h"
+#include "sdf_scenes/SDFRevolvedCross.h"
 #include "sdf_scenes/SDFPeanut.h"
 #include "sdf_scenes/SDFIntersect.h"
 #include "sdf_scenes/SDFUnion.h"
@@ -32,6 +33,7 @@ options = {
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
     {"rbox", loadSDFRevolvedBoxScene},
+    {"rcross", loadSDFRevolvedCrossScene},
     {"peanut", loadSDFPeanutScene},
     {"intersect", loadSDFIntersectScene},
     {"union", loadSDFUnionScene}

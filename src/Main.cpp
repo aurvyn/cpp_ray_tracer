@@ -23,6 +23,7 @@
 #include "SDFPrims/SDF2DExtrude.h"
 #include "SDFPrims/CoolS.h"
 #include "SDFPrims/Box2D.h"
+#include "SDFPrims/Cross.h"
 #include "SDFPrims/Circle.h"
 #include "Displacer.h"
 #include "SDFPrims/Twister.h"
