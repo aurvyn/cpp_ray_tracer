@@ -83,8 +83,7 @@ public:
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }
-                floatBuffer.at(x, y) = accumulatedColor;
-                // floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
+                floatBuffer.at(x, y) = accumulatedColor / (pixelPaths->size() * globalLightPaths.size());
             }
         }
 		
@@ -96,7 +95,7 @@ public:
 		// 	}
 		// }
 		// ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
-		GlobalToneMapper().apply(floatBuffer);
+		// GlobalToneMapper().apply(floatBuffer);
 		
 		for (int y = 0; y < resY; y++)
 		{
