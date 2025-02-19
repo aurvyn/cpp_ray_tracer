@@ -77,7 +77,7 @@ public:
 		return traverse(ray, hitpoint, root);
 	}
 
-	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	virtual std::array<bool, N*M> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
 	{	
 		return packetTraverse(rays, hits, root);
 	}
@@ -151,16 +151,16 @@ private:
 		return hitLeft || hitRight;
 	}
 
-	virtual std::array<bool, N*N> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
+	virtual std::array<bool, N*M> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
 	{
-		std::array<bool, N*N> hitNodes = node.packetIntersectNoUpdate(rays, hitpoints);
+		std::array<bool, N*M> hitNodes = node.packetIntersectNoUpdate(rays, hitpoints);
 		bool hit = false;
-		for (int i = 0; i < N*N; i++) {
+		for (int i = 0; i < N*M; i++) {
 			hit = hit || hitNodes[i];
 		}
 		if (!hit){
-			std::array<bool, N*N> none;
-			for (int i = 0; i < N*N; i++) {
+			std::array<bool, N*M> none;
+			for (int i = 0; i < N*M; i++) {
 				none[i] = false;
 			}
 			return none;
@@ -170,9 +170,9 @@ private:
 			return node.getPrimitve()->packetIntersect(rays, hitpoints);
 		}
 		
-		std::array<bool, N*N> hitLeft  = packetTraverse(rays, hitpoints, *node.getLeft());
-		std::array<bool, N*N> hitRight = packetTraverse(rays, hitpoints, *node.getRight());
-		for (int i = 0; i < N*N; i++){
+		std::array<bool, N*M> hitLeft  = packetTraverse(rays, hitpoints, *node.getLeft());
+		std::array<bool, N*M> hitRight = packetTraverse(rays, hitpoints, *node.getRight());
+		for (int i = 0; i < N*M; i++){
 			hitLeft[i] = hitLeft[i] || hitRight[i];
 		}
 		return hitLeft;

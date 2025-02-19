@@ -23,7 +23,7 @@
 #endif
 
 template <int dimension, class T = v3float, int padding = 0>
-class GenVector
+class alignas(32) GenVector
 {
 public:
 
@@ -415,6 +415,7 @@ static GenVector<dimension, T, padding> operator/(const T f, const GenVector<dim
 typedef GenVector<2> Vector2;
 typedef GenVector<3> Vector3;
 typedef GenVector<4> Vector4;
+typedef GenVector<8> Vector8;
 typedef GenVector<3, unsigned char> Color;
 
 #endif

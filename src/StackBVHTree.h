@@ -73,11 +73,11 @@ private:
 		return hitOne;
 	}
 
-	virtual std::array<bool, N*N> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
+	virtual std::array<bool, N*M> packetTraverse(RayPacket const & rays, Hitpoint* hitpoints, BVHNode const & node) const
 	{
 		Stack<BVHNode> stack;
-		std::array<bool, N*N> hitOne;
-		for (int i = 0; i < N*N; i++) {
+		std::array<bool, N*M> hitOne;
+		for (int i = 0; i < N*M; i++) {
 			hitOne[i] = false;
 		}
 		const BVHNode* currentNodePtr = &node;
@@ -86,17 +86,17 @@ private:
 			if (currentNodePtr != nullptr){
 				
 				const BVHNode& currentNode = *currentNodePtr;
-				std::array<bool, N*N> hitNodes = currentNode.packetIntersectNoUpdate(rays, hitpoints);
+				std::array<bool, N*M> hitNodes = currentNode.packetIntersectNoUpdate(rays, hitpoints);
 
 				bool hit = false;
-				for (int i = 0; i < N*N; i++) {
+				for (int i = 0; i < N*M; i++) {
 					hit = hit || hitNodes[i];
 				}
 				if (hit){
 					if(currentNode.isLeaf())
 					{
-						std::array<bool, N*N> newHits = currentNode.getPrimitve()->packetIntersect(rays, hitpoints);
-						for (int i = 0; i < N*N; i++) {
+						std::array<bool, N*M> newHits = currentNode.getPrimitve()->packetIntersect(rays, hitpoints);
+						for (int i = 0; i < N*M; i++) {
 							hitOne[i] = newHits[i] || hitOne[i];
 						}
 					}else {

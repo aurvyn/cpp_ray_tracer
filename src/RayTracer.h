@@ -20,25 +20,29 @@ public:
 		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		if (packets){
-			#pragma omp parallel for
-			for(int y=0; y<resY / N; y++)
+			// #pragma omp parallel for
+			for(int y=0; y<resY / M; y++)
 			{
 				for(int x=0; x<resX / N; x++)
 				{
 					RayPacket rays = generator.getRayPacket(x, y);
-					std::array<bool, N*N> hitSomething;
-					Hitpoint hits[N*N];
+					std::array<bool, N*M> hitSomething;
+					Hitpoint hits[N*M];
 					hitSomething = scene.getRootPrimitive()->packetIntersect(rays, hits);
-					for (int j = 0; j < N; j++){
+					for (int j = 0; j < M; j++){
 						for (int i = 0; i < N; i++){
 							int index = i + j * N;
 							if(hitSomething[index]) {
-								Vector3 floatColor = Shader::shade(Ray(rays.getDirections()[index], rays.getOrigin()), hits[index], scene);
-								floatBuffer.at(x*N+i,y*N+j) = floatColor;
+								Vector3 dirs;
+								for (int k = 0; k < 3; k++){
+									 dirs[k] = rays.getDirections()[k][index];
+								}
+								Vector3 floatColor = Shader::shade(Ray(dirs, rays.getOrigin()), hits[index], scene);
+								floatBuffer.at(x*N+i,y*M+j) = floatColor;
 								//floatBuffer.at(x,y) = Vector3(0.0f);
 							}
 							else
-								floatBuffer.at(x*N+i,y*N+j) = Vector3(0,0,0);
+								floatBuffer.at(x*N+i,y*M+j) = Vector3(0,0,0);
 						}
 					}
 				}

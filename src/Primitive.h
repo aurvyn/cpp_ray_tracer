@@ -5,6 +5,7 @@
 #include "Hitpoint.h"
 #include "RayPacket.h"
 #include <array>
+#include <immintrin.h>
 
 class Primitive
 {
@@ -13,9 +14,9 @@ public:
 	virtual bool intersect(Ray const & ray, Hitpoint & hit) const
 	{ return false; }
 
-	virtual std::array<bool, N*N> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
+	virtual std::array<bool, N*M> packetIntersect(RayPacket const & rays, Hitpoint* hits) const
 	{	
-		std::array<bool, N*N> val;
+		std::array<bool, N*M> val;
 		return val;
 	}
 	
