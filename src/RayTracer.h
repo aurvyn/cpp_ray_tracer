@@ -87,15 +87,14 @@ public:
             }
         }
 		
-		// float maxWhite = -INFINITY;
-        // for (int y = 0; y < resY; y++) {
-        //     for (int x = 0; x < resX; x++) {
-		// 		Vector3 c = floatBuffer.at(x, y);
-		// 		maxWhite = std::max(std::max(c[0], c[1]), std::max(c[2], maxWhite));
-		// 	}
-		// }
-		// ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
-		// GlobalToneMapper().apply(floatBuffer);
+		float maxWhite = -INFINITY;
+        for (int y = 0; y < resY; y++) {
+            for (int x = 0; x < resX; x++) {
+				Vector3 c = floatBuffer.at(x, y);
+				maxWhite = std::max(std::max(c[0], c[1]), std::max(c[2], maxWhite));
+			}
+		}
+		ExtendedReinhardToneMapper(maxWhite).apply(floatBuffer);
 		
 		for (int y = 0; y < resY; y++)
 		{
