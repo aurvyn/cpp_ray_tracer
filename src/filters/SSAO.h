@@ -70,7 +70,7 @@ class SSAO : public Effect {
             random(-1, 1)
         )*dist*random(0, 1);
         // flip if wrong side of hemisphere
-        off = (normal.dot(normal) < 0) ? -off : off;
+        off = (normal.dot(off) < 0) ? -off : off;
         return point + off;
     }
 

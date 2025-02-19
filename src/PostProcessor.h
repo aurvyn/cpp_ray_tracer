@@ -83,13 +83,13 @@ class DefaultPipeline: public Pipeline
             // Effect *effect = new BasicConvolution(new NoOp(imageBuffer));
             // Effect *effect = Threshold(NoOp(imageBuffer), 0.995, AVG);
             Effect *effect = new RGBConvert(new ToneMapHSV(new HSVConvert(NoOp(imageBuffer))));
-            effect = new BasicConvolution(new SSAO(
+            effect = new BasicConvolution((new SSAO(
                 effect,
                 depthBuffer,
                 normalBuffer,
                 positionBuffer,
                 camera
-            ));
+            ))->init(0.01, 50));
             return new PostProcessor(ConstMultiply(effect, 255.0f));
         }
         
