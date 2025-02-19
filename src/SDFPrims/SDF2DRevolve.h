@@ -14,16 +14,17 @@ public:
   bool isSDF() const override { return true; };
   float getSignedDistance(Vector3 rayOrigin) const override {
     Vector3 ray = rayOrigin - pos;
+    ray[2] -= axisDst;
     Vector2 q = Vector2(Vector2(ray[0], ray[2]).length() - axisDst, ray[1]);
     return prim->getSignedDistance(q);
   }
   Vector3 getBBMin() const {
     Vector2 bbMin = prim->getBBMin();
-    return {bbMin[0]-axisDst,bbMin[1],bbMin[0]-axisDst};
+    return {bbMin[0]-axisDst+pos[0],bbMin[1]+pos[1],bbMin[0]-axisDst+pos[2]};
   }
   Vector3 getBBMax() const {
     Vector2 bbMax = prim->getBBMax();
-    return {bbMax[0]+axisDst,bbMax[1],bbMax[0]+axisDst};
+    return {bbMax[0]+axisDst+pos[0],bbMax[1]+pos[1],bbMax[0]+axisDst+pos[2]};
   }
 protected:
   Primitive2D *prim;
