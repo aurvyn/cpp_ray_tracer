@@ -97,7 +97,7 @@ public:
         return 1;
         
         float reflectance = scene.getMaterials()[from.materialId()].getReflectance();
-        reflectance = 0;//clamp(0, 1, reflectance);
+        reflectance = clamp(0, 1, reflectance);
         
         // If the path is within the hemisphere, it's a uniform distribution. Otherwise, 0.
         float diffuseDot = dir.dot(from.normal());
@@ -123,27 +123,11 @@ public:
         return diffuseChance + specularChance;
     }
 
-    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background, bool print) {
+    FullPath combine(FullPath &from, FullPath &to, Scene const &scene, Hitpoint &background) {
         if (from.hits().empty() && to.hits().empty()) {
             return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(Ray(from.startPoint(), to.startPoint() - from.startPoint()), background)}, {1});
         }
         
-        if (print) {
-            printf("From Paths: ");
-            int prev = from.startMaterial();
-            for (const HitDetails &fromHit : from.hits()) {
-                printf("(%d -> %d (%.2f, %.2f, %.2f)) ", prev, fromHit.materialId(), fromHit.position()[0], fromHit.position()[1], fromHit.position()[2]);
-                prev = fromHit.materialId();
-            }
-            printf("\nTo Paths: ");
-            prev = to.startMaterial();
-            for (const HitDetails &toHit : to.hits()) {
-                printf("(%d -> %d (%.2f, %.2f, %.2f)) ", prev, toHit.materialId(), toHit.position()[0], toHit.position()[1], toHit.position()[2]);
-                prev = toHit.materialId();
-            }
-            printf("\n");
-        }
-    
         HitDetails fromHd;
         Vector3 fromPos;
         if (from.hits().size() > 0) {
@@ -168,22 +152,19 @@ public:
         Vector3 dir = connectionRay.getDirection();
 
         Hitpoint hit;
-        if (from.hits().empty() && !scene.getRootPrimitive()->intersect(connectionRay, hit)) {
-            if (print) printf("Missed the ball\n");
-            return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
+        bool intersected = scene.getRootPrimitive()->intersect(connectionRay, hit);
+        if (from.hits().empty() && !intersected) {
+            if (from.hits().empty())
+                return FullPath(from.startPoint(), from.startMaterial(), {HitDetails(connectionRay, background)}, {1});
+            return FullPath(from.startPoint(), from.startMaterial(), {}, {});
         }
             
-        if (print) printf("Intersected");
-        
         float distance = (toPos - fromPos).length();
         float strength;
         if (hit.getParameter() < distance - RAY_JITTER_EPSILON) {
-            if (print) printf(" but collided in between!\n");
             return FullPath(from.startPoint(), from.startMaterial(), {}, {});
-            // strength = 1;
         }
         else {
-            if (print) printf(" and hit!\n");
             strength = getPathChance(scene, fromHd, dir);
         }
 
@@ -253,7 +234,7 @@ public:
 
     Ray nextRay(HitDetails const &hd, Scene const &scene, unsigned int *seed) {
         const Material &mat = scene.getMaterials()[hd.materialId()];
-        float percentSpecular = 0;//clamp(0, 1, mat.getReflectance());
+        float percentSpecular = clamp(0, 1, mat.getReflectance());
         
         Vector3 dir;
         if (random(seed, 0, 1) < percentSpecular) {

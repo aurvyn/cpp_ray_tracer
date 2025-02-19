@@ -79,7 +79,7 @@ public:
                     for (int i = 0; i < globalLightPaths.size(); i++)
                     {
 						FullPath &lightPath = globalLightPaths.at(i);
-						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background, x == 49 && y == 70);
+						FullPath combinedPaths = pathTracer.combine(camPath, lightPath, scene, background);
 						accumulatedColor += pathTracer.getColor(combinedPaths, scene);
                     }
                 }
