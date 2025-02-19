@@ -31,7 +31,7 @@ options = {
     {"sharkegg", loadSDFSharkEggScene},
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
-    {"rcross", loadSDFRevolvedBoxScene},
+    {"rbox", loadSDFRevolvedBoxScene},
     {"peanut", loadSDFPeanutScene},
     {"intersect", loadSDFIntersectScene},
     {"union", loadSDFUnionScene}
