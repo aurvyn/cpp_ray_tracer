@@ -126,51 +126,58 @@ int main(int argc, char **argv)
 	getArgs(argc, argv);
 	reportArgs();
 
-	unsigned char *outputImage = (unsigned char *)malloc(resX * resY * 3 * sizeof(unsigned char));
+	unsigned char *outputImage = (unsigned char *)malloc(resX * resY * 3 * sizeof(unsigned char)); // Original output image
 	Scene scene = loadWithOBJLoader(scenePath);
 	RayTracer tracer;
 	tracer.trace(scene, resX, resY, outputImage);
 
 	size_t newResX = resX * 2;
 	size_t newResY = resY * 2;
-	unsigned char *antiAliasedImageEnd = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	unsigned char *antiAliasedImagePerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	unsigned char *antiAliasedImageGuassianPerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	unsigned char *antiAliasedImageJitterBoxPP = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char));
-	unsigned char *downSampling = (unsigned char *)malloc(resX/2 * resY/2 * 3 * sizeof(unsigned char));
+	
+	unsigned char *antiAliasedImageEnd = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char)); // Box filter anti-aliased image
+	unsigned char *antiAliasedImagePerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char)); // Per-pixel box filter anti-aliased image
+	unsigned char *antiAliasedImageGuassianPerPixel = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char)); // Per-pixel Gaussian filter anti-aliased image
+	unsigned char *antiAliasedImageJitterBoxPP = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char)); // Jittered box filter anti-aliased image
+	unsigned char *antiAliasedImageJitterGaussianPP = (unsigned char *)malloc(newResX * newResY * 3 * sizeof(unsigned char)); // Jittered Gaussian filter anti-aliased image
+	unsigned char *downSampling = (unsigned char *)malloc(resX/2 * resY/2 * 3 * sizeof(unsigned char)); // Downsampled image
 
 	Aliasing alias;
-	alias.boxFilterAliasing(outputImage, antiAliasedImageEnd, resX, resY);
-	alias.aliasTraceBoxFilter(scene, newResX, newResY, antiAliasedImagePerPixel);
-	alias.aliasTraceGaussian(scene, newResX, newResY, antiAliasedImageGuassianPerPixel);
-	alias.boxFilterWithJitter(scene, newResX, newResY, antiAliasedImageJitterBoxPP);
-	alias.downsampleTrace(scene, resX/2, resY/2, downSampling);
+	alias.boxFilterAliasing(outputImage, antiAliasedImageEnd, resX, resY); // Apply box filter anti-aliasing
+	alias.aliasTraceBoxFilter(scene, newResX, newResY, antiAliasedImagePerPixel); // Trace scene with per-pixel box filter anti-aliasing
+	alias.aliasTraceGaussian(scene, newResX, newResY, antiAliasedImageGuassianPerPixel); // Trace scene with per-pixel Gaussian filter anti-aliasing
+	alias.boxFilterWithJitter(scene, newResX, newResY, antiAliasedImageJitterBoxPP); // Trace scene with jittered box filter anti-aliasing
+	alias.gaussianFilterWithJitter(scene, newResX, newResY, antiAliasedImageJitterGaussianPP); // Trace scene with jittered Gaussian filter anti-aliasing
+	alias.downsampleTrace(scene, resX/2, resY/2, downSampling); // Downsample the traced scene
 
-	char antiAliasedOutputPath[256];
-	char antiAliasedOutputPathPP[256];
-	char antiAliasedOutputPathPPG[256];
-	char antiAliasedOutputPathJitterBox[256];
-	char downSampledOutputPath[256];
-	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "boxFilter_%s", outputPath);
-	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "traceBoxFilter_%s", outputPath);
-	snprintf(antiAliasedOutputPathPPG, sizeof(antiAliasedOutputPathPPG), "traceGaussian_%s", outputPath);
-	snprintf(antiAliasedOutputPathJitterBox, sizeof(antiAliasedOutputPathJitterBox), "jitterBox_%s", outputPath);
-	snprintf(downSampledOutputPath, sizeof(downSampledOutputPath), "downSampled_%s", outputPath);
+	char antiAliasedOutputPath[256]; // Output path for box filter anti-aliased image
+	char antiAliasedOutputPathPP[256]; // Output path for per-pixel box filter anti-aliased image
+	char antiAliasedOutputPathPPG[256]; // Output path for per-pixel Gaussian filter anti-aliased image
+	char antiAliasedOutputPathJitterBox[256]; // Output path for jittered box filter anti-aliased image
+	char antiAliasedOutputPathGaussianBox[256]; // Output path for jittered Gaussian filter anti-aliased image
+	char downSampledOutputPath[256]; // Output path for downsampled image
+	
+	snprintf(antiAliasedOutputPath, sizeof(antiAliasedOutputPath), "boxFilter_%s", outputPath); // Format output path for box filter anti-aliased image
+	snprintf(antiAliasedOutputPathPP, sizeof(antiAliasedOutputPathPP), "traceBoxFilter_%s", outputPath); // Format output path for per-pixel box filter anti-aliased image
+	snprintf(antiAliasedOutputPathPPG, sizeof(antiAliasedOutputPathPPG), "traceGaussian_%s", outputPath); // Format output path for per-pixel Gaussian filter anti-aliased image
+	snprintf(antiAliasedOutputPathJitterBox, sizeof(antiAliasedOutputPathJitterBox), "jitterBox_%s", outputPath); // Format output path for jittered box filter anti-aliased image
+	snprintf(antiAliasedOutputPathGaussianBox, sizeof(antiAliasedOutputPathGaussianBox), "jitterGaus_%s", outputPath); // Format output path for jittered Gaussian filter anti-aliased image
+	snprintf(downSampledOutputPath, sizeof(downSampledOutputPath), "downSampled_%s", outputPath); // Format output path for downsampled image
 
-	simplePNG_write(outputPath, resX, resY, outputImage);
-	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImageEnd);
-	simplePNG_write(antiAliasedOutputPathPP, newResX, newResY, antiAliasedImagePerPixel);
-	simplePNG_write(antiAliasedOutputPathPPG, newResX, newResY, antiAliasedImageGuassianPerPixel);
-	simplePNG_write(antiAliasedOutputPathJitterBox, newResX, newResY, antiAliasedImageJitterBoxPP);
-	simplePNG_write(downSampledOutputPath, resX / 2, resY / 2, downSampling);
+	simplePNG_write(outputPath, resX, resY, outputImage); // Write original output image to file
+	simplePNG_write(antiAliasedOutputPath, newResX, newResY, antiAliasedImageEnd); // Write box filter anti-aliased image to file
+	simplePNG_write(antiAliasedOutputPathPP, newResX, newResY, antiAliasedImagePerPixel); // Write per-pixel box filter anti-aliased image to file
+	simplePNG_write(antiAliasedOutputPathPPG, newResX, newResY, antiAliasedImageGuassianPerPixel); // Write per-pixel Gaussian filter anti-aliased image to file
+	simplePNG_write(antiAliasedOutputPathJitterBox, newResX, newResY, antiAliasedImageJitterBoxPP); // Write jittered box filter anti-aliased image to file
+	simplePNG_write(antiAliasedOutputPathGaussianBox, newResX, newResY, antiAliasedImageJitterGaussianPP); // Write jittered Gaussian filter anti-aliased image to file
+	simplePNG_write(downSampledOutputPath, resX / 2, resY / 2, downSampling); // Write downsampled image to file
 
-
-	free(outputImage);
-	free(antiAliasedImageEnd);
-	free(antiAliasedImagePerPixel);
-	free(antiAliasedImageGuassianPerPixel);
-	free(antiAliasedImageJitterBoxPP);
-	free(downSampling);
+	free(outputImage); // Free memory for original output image
+	free(antiAliasedImageEnd); // Free memory for box filter anti-aliased image
+	free(antiAliasedImagePerPixel); // Free memory for per-pixel box filter anti-aliased image
+	free(antiAliasedImageGuassianPerPixel); // Free memory for per-pixel Gaussian filter anti-aliased image
+	free(antiAliasedImageJitterBoxPP); // Free memory for jittered box filter anti-aliased image
+	free(antiAliasedImageJitterGaussianPP); // Free memory for jittered Gaussian filter anti-aliased image
+	free(downSampling); // Free memory for downsampled image
 
 	return 0;
 }
