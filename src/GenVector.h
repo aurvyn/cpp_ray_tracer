@@ -23,7 +23,7 @@
 #endif
 
 template <int dimension, class T = v3float, int padding = 0>
-class alignas(32) GenVector
+class GenVector
 {
 public:
 

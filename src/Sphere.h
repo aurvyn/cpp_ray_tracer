@@ -72,8 +72,7 @@ public:
 	{	
 		std::array<bool, N*M> rets;
 		alignas(32) float discriminants[8]; // Store discriminants for 8 rays
-		alignas(32) float t1_array[8];  // Store t1 values for 8 rays
-		alignas(32) float t2_array[8];  // Store t2 values for 8 rays
+		alignas(32) float closest[8];  // Store t1 values for 8 rays
 
 		// Load ray directions and origins into AVX registers
 		__m256 orig_x, orig_y, orig_z;
@@ -82,9 +81,9 @@ public:
 		__m256 c_z = _mm256_set1_ps(this->getPosition()[2]);
 		__m256 radius = _mm256_set1_ps(this->getRadius());
 
-		__m256 dir_x = _mm256_load_ps(rays.getDirections()[0].c);
-		__m256 dir_y = _mm256_load_ps(rays.getDirections()[1].c);
-		__m256 dir_z = _mm256_load_ps(rays.getDirections()[2].c);
+		__m256 dir_x = _mm256_loadu_ps(rays.getDirections()[0].c);
+		__m256 dir_y = _mm256_loadu_ps(rays.getDirections()[1].c);
+		__m256 dir_z = _mm256_loadu_ps(rays.getDirections()[2].c);
 
 		orig_x = _mm256_set1_ps(rays.getOrigin()[0]);
 		orig_y = _mm256_set1_ps(rays.getOrigin()[1]);
@@ -94,26 +93,17 @@ public:
 			_mm256_add_ps(_mm256_mul_ps(dir_x, dir_x), _mm256_mul_ps(dir_y, dir_y)),
 			_mm256_mul_ps(dir_z, dir_z)); // A = d.dot(d)
 
-		__m256 B = _mm256_add_ps(
-					_mm256_add_ps(
-						_mm256_mul_ps(_mm256_set1_ps(2.0f), _mm256_add_ps(
+		__m256 B =
+						_mm256_mul_ps(_mm256_set1_ps(2.0f), _mm256_add_ps( _mm256_add_ps(
 							_mm256_mul_ps(dir_x, _mm256_sub_ps(orig_x, c_x)),
 							_mm256_mul_ps(dir_y, _mm256_sub_ps(orig_y, c_y))
-						)),
-						_mm256_mul_ps(dir_z, _mm256_sub_ps(orig_z, c_z))
-					),
-					_mm256_set1_ps(0.0f)); // B = 2*d.dot(e - c)
-
-		__m256 C = _mm256_add_ps(
-					_mm256_sub_ps(
-						_mm256_add_ps(
-							_mm256_mul_ps(_mm256_sub_ps(orig_x, c_x), _mm256_sub_ps(orig_x, c_x)),
-							_mm256_mul_ps(_mm256_sub_ps(orig_y, c_y), _mm256_sub_ps(orig_y, c_y))
 						),
-						_mm256_mul_ps(_mm256_sub_ps(orig_z, c_z), _mm256_sub_ps(orig_z, c_z))
-					),
-					_mm256_sub_ps(_mm256_set1_ps(radius[0] * radius[0]), _mm256_set1_ps(0.0f))
-				); // C = (e-c)^2 - r^2
+						_mm256_mul_ps(dir_z, _mm256_sub_ps(orig_z, c_z)))); // B = 2*d.dot(e - c)
+
+		__m256 ec_x = _mm256_sub_ps(orig_x, c_x);
+		__m256 ec_y = _mm256_sub_ps(orig_y, c_y);
+		__m256 ec_z = _mm256_sub_ps(orig_z, c_z);
+		__m256 C = _mm256_sub_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(ec_x, ec_x), _mm256_mul_ps(ec_x, ec_x)), _mm256_mul_ps(ec_x, ec_x)), _mm256_mul_ps(radius, radius)); // C = (e-c)^2 - r^2
 
 		// Calculate discriminant: B^2 - 4AC
 		__m256 discriminant = _mm256_sub_ps(
@@ -123,7 +113,7 @@ public:
 
 		// Check if discriminant is less than zero (no intersection)
 		__m256 mask_discriminant = _mm256_cmp_ps(discriminant, _mm256_set1_ps(0.0f), _CMP_LT_OQ);
-		_mm256_store_ps(discriminants, discriminant); // Store discriminants
+		_mm256_storeu_ps(discriminants, discriminant); // Store discriminants
 	
 		// Calculate t1 and t2 if discriminant is >= 0
 		__m256 sqrt_discriminant = _mm256_sqrt_ps(discriminant);
@@ -133,18 +123,36 @@ public:
 		// Mask for valid rays (those with discriminant >= 0)
 		__m256 mask_valid = _mm256_and_ps(mask_discriminant, _mm256_cmp_ps(t1, _mm256_set1_ps(0.0f), _CMP_GE_OQ));
 	
-		// Find the closest t (the smallest positive t value)
-		__m256 closestT = _mm256_min_ps(t1, t2);
+		// Initialize a mask for negative values (t < 0)
+		__m256 mask_t2_neg = _mm256_cmp_ps(t2, _mm256_set1_ps(0.0f), _CMP_LT_OQ);
+		__m256 mask_t1_neg = _mm256_cmp_ps(t1, _mm256_set1_ps(0.0f), _CMP_LT_OQ);
+
+		// Case: If t2 < 0, use t1
+		__m256 closestT = _mm256_blendv_ps(_mm256_set1_ps(-1.0f), t1, _mm256_and_ps(mask_t2_neg, _mm256_xor_ps(mask_t1_neg, _mm256_set1_ps(-1.0f))));
+
+		// Case: If t1 < 0, use t2
+		closestT = _mm256_blendv_ps(closestT, t2, _mm256_and_ps(mask_t1_neg, _mm256_xor_ps(mask_t2_neg, _mm256_set1_ps(-1.0f))));
+
+		// Case: If t1 < t2, use t1
+		__m256 mask_t1_lt_t2 = _mm256_and_ps(_mm256_and_ps(_mm256_cmp_ps(t1, t2, _CMP_LT_OQ), _mm256_xor_ps(mask_t1_neg, _mm256_set1_ps(-1.0f))), _mm256_xor_ps(mask_t2_neg, _mm256_set1_ps(-1.0f)));
+		closestT = _mm256_blendv_ps(closestT, t1, mask_t1_lt_t2);
+
+		__m256 mask_t2_lt_t1 = _mm256_and_ps(_mm256_and_ps(_mm256_cmp_ps(t2, t1, _CMP_LT_OQ), _mm256_xor_ps(mask_t1_neg, _mm256_set1_ps(-1.0f))), _mm256_xor_ps(mask_t2_neg, _mm256_set1_ps(-1.0f)));
+		closestT = _mm256_blendv_ps(closestT, t2, mask_t2_lt_t1);
 	
 		// Store results in arrays
-		_mm256_store_ps(t1_array, t1);
-		_mm256_store_ps(t2_array, t2);
-		_mm256_store_ps(reinterpret_cast<float*>(rets.data()), mask_valid); // Store final results for valid rays
-	
+		_mm256_storeu_ps(closest, closestT);
+		alignas(32) float resultArr[8];
+		_mm256_storeu_ps(resultArr, _mm256_xor_ps(discriminant, _mm256_set1_ps(-1.0f)));
+		for (int i = 0; i < N * M; i++) {
+			rets[i] = closest[i] >= 0.0f && (resultArr[i] != 0.0f); // Convert float to bool
+		} // Store final results for valid rays
+
 		// Process hits
-		for (int j = 0; j < 8; j++) {
+		for (int j = 0; j < N * M; j++) {
+			std::cout << rets[j] << " ";
 			if (rets[j]) {
-				float closest_t = closestT[j];
+				float closest_t = closest[j];
 				if (closest_t < hits[j].getParameter()) {
 					hits[j].setParameter(closest_t);
 					Vector3 normal = rays.pointAtParameter(j, closest_t) - this->getPosition();
@@ -153,6 +161,7 @@ public:
 				}
 			}
 		}
+		std::cout << std::endl;
 
 	// 	std::array<bool, N*M> rets;
 	// 	for (int i = 0; i < N*M; i++){

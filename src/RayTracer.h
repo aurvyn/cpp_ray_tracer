@@ -32,6 +32,8 @@ public:
 					for (int j = 0; j < M; j++){
 						for (int i = 0; i < N; i++){
 							int index = i + j * N;
+								// std::cout << hitSomething[index] << " ";
+
 							if(hitSomething[index]) {
 								Vector3 dirs;
 								for (int k = 0; k < 3; k++){
@@ -39,12 +41,13 @@ public:
 								}
 								Vector3 floatColor = Shader::shade(Ray(dirs, rays.getOrigin()), hits[index], scene);
 								floatBuffer.at(x*N+i,y*M+j) = floatColor;
-								//floatBuffer.at(x,y) = Vector3(0.0f);
+								// floatBuffer.at(x*N+i,y*M+j) = Vector3(255.0f,255.0f,255.0f);
 							}
 							else
 								floatBuffer.at(x*N+i,y*M+j) = Vector3(0,0,0);
 						}
 					}
+					// std::cout << std::endl;
 				}
 			}
 		} else {

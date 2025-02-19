@@ -45,9 +45,9 @@ public:
 		__m256 v0_y = _mm256_set1_ps(vertex[0][1]);
 		__m256 v0_z = _mm256_set1_ps(vertex[0][2]);
 
-		__m256 dir_x = _mm256_load_ps(rays.getDirections()[0].c);
-		__m256 dir_y = _mm256_load_ps(rays.getDirections()[1].c);
-		__m256 dir_z = _mm256_load_ps(rays.getDirections()[2].c);
+		__m256 dir_x = _mm256_loadu_ps(rays.getDirections()[0].c);
+		__m256 dir_y = _mm256_loadu_ps(rays.getDirections()[1].c);
+		__m256 dir_z = _mm256_loadu_ps(rays.getDirections()[2].c);
 
 		__m256 orig_x = _mm256_set1_ps(rays.getOrigin()[0]);
 		__m256 orig_y = _mm256_set1_ps(rays.getOrigin()[1]);	
@@ -112,7 +112,7 @@ public:
         // Extract results from the SIMD register and update hits.
         alignas(32) float t_array[8];
 		alignas(32) int mask_array[8];
-		_mm256_store_ps(t_array, t);
+		_mm256_storeu_ps(t_array, t);
 		_mm256_store_si256(reinterpret_cast<__m256i*>(mask_array), _mm256_castps_si256(mask_valid));
 
         for (int i = 0; i < 8; i++) {

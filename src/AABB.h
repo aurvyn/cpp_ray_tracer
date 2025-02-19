@@ -96,9 +96,9 @@ private:
 		__m256 orig_x = _mm256_set1_ps(rays.getOrigin()[0]);
 		__m256 orig_y = _mm256_set1_ps(rays.getOrigin()[1]);
 		__m256 orig_z = _mm256_set1_ps(rays.getOrigin()[2]);
-		__m256 invDir_x = _mm256_load_ps(rays.getInvDirections()[0].c);
-		__m256 invDir_y = _mm256_load_ps(rays.getInvDirections()[1].c);
-		__m256 invDir_z = _mm256_load_ps(rays.getInvDirections()[2].c);
+		__m256 invDir_x = _mm256_loadu_ps(rays.getInvDirections()[0].c);
+		__m256 invDir_y = _mm256_loadu_ps(rays.getInvDirections()[1].c);
+		__m256 invDir_z = _mm256_loadu_ps(rays.getInvDirections()[2].c);
 
 		__m256 tmin = _mm256_mul_ps(_mm256_sub_ps(bbMin_x, orig_x), invDir_x);
 		__m256 tmax = _mm256_mul_ps(_mm256_sub_ps(bbMax_x, orig_x), invDir_x);
@@ -108,6 +108,18 @@ private:
 		tmin = _mm256_blendv_ps(tmin, tmax, mask);
 		tmax = _mm256_blendv_ps(tmax, temp, mask);
 
+		__m256 rollingMask;
+		mask = _mm256_cmp_ps( _mm256_set1_ps(0), tmax, _CMP_GE_OQ);
+		rollingMask = mask;
+		if (_mm256_movemask_ps(mask) == 0xFF) {
+			for (int i = 0; i < N * M; i++) {
+				rets[i] = false; // Convert float to bool
+			}
+			// std::cout << "end-early ";
+			return rets;
+		}
+
+		
 		__m256 tymin = _mm256_mul_ps(_mm256_sub_ps(bbMin_y, orig_y), invDir_y);
 		__m256 tymax = _mm256_mul_ps(_mm256_sub_ps(bbMax_y, orig_y), invDir_y);
 
@@ -117,8 +129,12 @@ private:
 		tymax = _mm256_blendv_ps(tymax, temp, mask);
 
 		mask = _mm256_or_ps(_mm256_cmp_ps(tmin, tymax, _CMP_GT_OQ), _mm256_cmp_ps(tymin, tmax, _CMP_GT_OQ));
+		rollingMask = _mm256_or_ps(mask, rollingMask);
 		if (_mm256_movemask_ps(mask) == 0xFF) {
-			_mm256_store_ps(reinterpret_cast<float*>(rets.data()), _mm256_setzero_ps());
+			for (int i = 0; i < N * M; i++) {
+				rets[i] = false; // Convert float to bool
+			}
+			// std::cout << "end-early ";
 			return rets;
 		}
 		// std::cout << "here " << std::endl;
@@ -135,8 +151,12 @@ private:
 		tzmax = _mm256_blendv_ps(tzmax, temp, mask);
 
 		mask = _mm256_or_ps(_mm256_cmp_ps(tmin, tzmax, _CMP_GT_OQ), _mm256_cmp_ps(tzmin, tmax, _CMP_GT_OQ));
+		rollingMask = _mm256_or_ps(mask, rollingMask);
 		if (_mm256_movemask_ps(mask) == 0xFF) {
-			_mm256_store_ps(reinterpret_cast<float*>(rets.data()), _mm256_setzero_ps());
+			for (int i = 0; i < N * M; i++) {
+				rets[i] = false; // Convert float to bool
+			}
+			// std::cout << "end-early ";
 			return rets;
 		}
 		// std::cout << "here1 " << std::endl;
@@ -145,20 +165,19 @@ private:
 
 		__m256 result = _mm256_cmp_ps(tmin, tmax, _CMP_LE_OQ);
 		alignas(32) float resultArr[8];
-		_mm256_store_ps(resultArr, result);
+		_mm256_storeu_ps(resultArr, _mm256_and_ps(result, _mm256_xor_ps(rollingMask, _mm256_set1_ps(-1.0f))));
 		for (int i = 0; i < N * M; i++) {
 			rets[i] = (resultArr[i] != 0.0f); // Convert float to bool
 		}
-
-		std::cout << "rets matrix:\n";
-		for (int j = 0; j < M; j++) {
-			for (int i = 0; i < N; i++) {
-				std::cout << rets[i + j * N] << " ";
-			}
-			std::cout << std::endl;
-		}
+		// std::cout << "rets matrix:\n";
+		// for (int j = 0; j < M; j++) {
+		// 	for (int i = 0; i < N; i++) {
+		// 		std::cout << rets[i + j * N] << " ";
+		// 	}
+		// 	std::cout << std::endl;
+		// }
 		return rets;
-
+	}
 		// std::array<bool, N*M> rets;
 		// for (int i = 0; i < N*M; i++){
 		// 	float tmin, tmax, tymin, tymax;
@@ -209,7 +228,6 @@ private:
 		// 	rets[i] = true;	
 		// }
 		// return rets;
-	}
 	
 	template<bool updateHit>
 	bool _intersect(Ray const & ray, Hitpoint & hit) const
