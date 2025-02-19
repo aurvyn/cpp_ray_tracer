@@ -11,6 +11,7 @@
 - Mandelbulb
 - Cool S (2D)
 - Cross (2D)
+- Box (2D)
 
 **Other Features:**
 - Union
@@ -54,7 +55,7 @@ To get the normal vector of a function, consider that the distance from an objec
 Since we determine hits and misses just by an object's distance, any operation we can perform on floats can be used to modify how our objects look. We can implement a few different operations using simple min's and max's
 
 - Union = min(a, b)
-- Intersction = max(a, b)
+- Intersection = max(a, b)
 - Difference = min(a, -b)
 
 Smooth minimums are a bit more complicated, requiring the use of a smoothing function. These are detailed [here](https://iquilezles.org/articles/smin/). We used a quadratic smoothing function.
