@@ -15,6 +15,8 @@
 #include "sdf_scenes/SDFCoolS.h"
 #include "sdf_scenes/SDFRevolvedBox.h"
 #include "sdf_scenes/SDFPeanut.h"
+#include "sdf_scenes/SDFIntersect.h"
+#include "sdf_scenes/SDFUnion.h"
 #include "PrettyLogger.h"
 
 using namespace std;
@@ -29,8 +31,10 @@ options = {
     {"sharkegg", loadSDFSharkEggScene},
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
-    {"rbox", loadSDFRevolvedBoxScene},
-    {"peanut", loadSDFPeanutScene}
+    {"rcross", loadSDFRevolvedBoxScene},
+    {"peanut", loadSDFPeanutScene},
+    {"intersect", loadSDFIntersectScene},
+    {"union", loadSDFUnionScene}
 };
 
 Scene loadWithSDFLoader(string scene) {
