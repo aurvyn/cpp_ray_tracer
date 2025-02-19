@@ -6,6 +6,12 @@
 #include "Ray.h"
 #include "Camera.h"
 
+Vector3 project(Vector3 a, Vector3 b) {
+	// project a onto b
+	Vector3 b_hat = Vector3(b).normalize();
+	return a.dot(b_hat)*b_hat;
+}
+
 class RayGenerator
 {
 public:
@@ -42,11 +48,12 @@ public:
 		ray.setDirection(s);
 		ray.setOrigin(camera.getPos());
 		
-		// size_t test_x, test_y;
-		// getXY(test_x, test_y, ray);
-		// printf("test x: %zu, x: %zu \n", test_x, x);
-		// // printf("test y: %zu, y: %zu \n", test_y, y);
-		// assert(x == test_x);
+		size_t test_x, test_y;
+		getXY(test_x, test_y, ray);
+		printf("test x: %zu, x: %zu \n", test_x, x);
+		// printf("test y: %zu, y: %zu \n", test_y, y);
+		assert(x == test_x);
+		assert(y == test_y);
 
 		return ray;
 	}
@@ -61,27 +68,27 @@ public:
 		r =  w/2.0f;
 		b =  h/2.0f;
 		t = -(h/2.0f);
-		
 
 		assert(ray.getOrigin() == camera.getPos());
 
 		float d = h/2.0f * sin(camera.getFov());
-		Vector3 dir = ray.getDirection() + d*camera.getW();
+		// because the direction has been normalized we need to un normalize it
+		float scale = d/project(ray.getDirection(), camera.getW()).length();
+		Vector3 dir = ray.getDirection()*scale;
+		printf("cdir: %f %f %f\n", dir[0], dir[1], dir[2]);
 
-		Vector3 projDirOntoU = (dir.dot(camera.getU()))*camera.getU();
-		float u = projDirOntoU.length();
+		Vector3 projDirOntoU = project(dir, camera.getU());
+		float u = projDirOntoU.length()/camera.getU().length()*(camera.getU().dot(projDirOntoU) > 0 ? 1 : - 1);
 		printf("calcu: %f\n", u);
-		float x_res = ((u - l)*nx)/(r - l) - 125.5;
+		float x_res = roundf(((u - l)*nx)/(r - l) - 0.5);
 		printf("x_res: %f\n", x_res);
 		x = (size_t)x_res;
 
-		// Vector3 v = camera.getV();
-		// v = v.normalize();
-		// Vector3 projDirOntoV = (dir.dot(v))*v;
-		// // printf("%f %f %f\n", projDirOntoV[0], projDirOntoV[1], projDirOntoV[2]);
-		// float y_res = ((projDirOntoV.length()/v.length()))*d + h/2.0f; // should be correct;
-		// printf("%f\n", y_res);
-		// y = (size_t)y_res;
+		Vector3 projDirOntoV = project(dir, camera.getV());
+		float v = projDirOntoV.length()/camera.getV().length()*(camera.getV().dot(projDirOntoV) > 0 ? 1 : - 1);
+		printf("calcu: %f\n", v);
+		float y_res = roundf(((v - b)*nx)/(t - b) - 0.5);
+		y = (size_t)y_res;
 	}
 	
 private:
