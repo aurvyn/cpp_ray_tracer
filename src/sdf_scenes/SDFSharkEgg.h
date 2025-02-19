@@ -17,7 +17,7 @@ Scene loadSDFSharkEggScene() {
     scene.setMaterials(materials);
 	PrimitiveArray *primArray = new PrimitiveArray();
     Donut *dn = new Donut(0.5, 0.2);
-    Twister *tw = new Twister(dn, 1.2f);
+    SDFTwist *tw = new SDFTwist(dn, 1.2f);
     tw->setMaterialId(0);
 	primArray->add(tw);
 	scene.setRootPrimitive(primArray);

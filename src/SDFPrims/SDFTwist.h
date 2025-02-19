@@ -1,11 +1,11 @@
-#ifndef __TWISTER
-#define __TWISTER
+#ifndef __SDFTWIST
+#define __SDFTWIST
 
 #include "Primitive.h"
 
-class Twister : public Primitive {
+class SDFTwist : public Primitive {
 public:
-    Twister(Primitive* primitive, float twisty) : prim(primitive), twisty(twisty) {}
+    SDFTwist(Primitive* primitive, float twisty) : prim(primitive), twisty(twisty) {}
 
     virtual Vector3 getBBMin() const {
         LOG_WARN("Helix getBBMin is not implemented");

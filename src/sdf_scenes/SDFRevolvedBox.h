@@ -1,9 +1,6 @@
 #ifndef __SDFREVOLVEDBOX_H
 #define __SDFREVOLVEDBOX_H
 
-#include "SDFPrims/SDF2DRevolve.h"
-#include "SDFPrims/SDF2DExtrude.h"
-#include "SDFPrims/Box2D.h"
 #include "Scene.h"
 
 Scene loadSDFRevolvedBoxScene() {

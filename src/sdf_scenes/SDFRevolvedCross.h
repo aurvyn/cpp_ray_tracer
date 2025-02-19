@@ -1,9 +1,6 @@
 #ifndef __SDFREVOLVEDCROSS_H
 #define __SDFREVOLVEDCROSS_H
 
-#include "SDFPrims/SDF2DRevolve.h"
-#include "SDFPrims/SDF2DExtrude.h"
-#include "SDFPrims/Cross.h"
 #include "Scene.h"
 
 Scene loadSDFRevolvedCrossScene() {

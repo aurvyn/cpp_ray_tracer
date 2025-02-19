@@ -10,7 +10,8 @@
 Scene loadSDFCoolSScene() {
     Scene scene;
     scene.addDefaultLight();
-    scene.addDefaultCamera();
+    scene.setCamera(Camera(Vector3(1,0,3),Vector3(),Vector3(0,1,0)));
+    // scene.addDefaultCamera();
     std::vector<Material> materials;
     Material material;
     material.setKa(Vector3(0.65, 0.65, 0.65));
