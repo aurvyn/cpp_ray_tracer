@@ -1,16 +1,14 @@
-#ifndef __SDFREVOLVEDCROSS_H
-#define __SDFREVOLVEDCROSS_H
+#ifndef __SDFREVOLVEDBOX_H
+#define __SDFREVOLVEDBOX_H
 
 #include "SDFPrims/SDF2DRevolve.h"
-#include "SDFPrims/SDF2DExtrude.h"
-#include "SDFPrims/Cross.h"
-#include "SDFPrims/Circle.h"
+#include "SDFPrims/Box2D.h"
 #include "Scene.h"
 
-Scene loadSDFRevolvedCrossScene() {
+Scene loadSDFRevolvedBoxScene() {
     Scene scene;
     scene.addDefaultLight();
-    scene.addDefaultCamera();
+    scene.setCamera(Camera({2, 2, 5}, Vector3(0,0,0), {0, 1, 0}));
     std::vector<Material> materials;
     Material material;
     material.setKa(Vector3(0.5, 0.0, 0.0));
@@ -20,11 +18,8 @@ Scene loadSDFRevolvedCrossScene() {
     materials.push_back(material);
     scene.setMaterials(materials);
 	PrimitiveArray *primArray = new PrimitiveArray();
-    // LOG_INFO("Creating circle.");
-    // Circle *c = new Circle(1.0f);
-    Cross *c = new Cross(Vector2(0.5,0.5),0.01f);
-    Primitive* revol = new SDFExtrude(c, Vector3(0,0,0),0.5f);
-    // Primitive* revol = new SDF2DRevolve(c,Vector3(0.0,0.0,-2.0),0.0f);
+    Box2D *b = new Box2D(Vector2(0.5f,0.25f));
+    Primitive* revol = new SDF2DRevolve(b,Vector3(0.0,0.0,0.0),1.0f);
 	revol->setMaterialId(0);
 	primArray->add(revol);
 	scene.setRootPrimitive(primArray);

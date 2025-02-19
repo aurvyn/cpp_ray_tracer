@@ -13,7 +13,7 @@
 #include "sdf_scenes/SDFSharkEgg.h"
 #include "sdf_scenes/SDFDonut.h"
 #include "sdf_scenes/SDFCoolS.h"
-#include "sdf_scenes/SDFRevolvedCross.h"
+#include "sdf_scenes/SDFRevolvedBox.h"
 #include "sdf_scenes/SDFPeanut.h"
 #include "PrettyLogger.h"
 
@@ -29,7 +29,7 @@ options = {
     {"sharkegg", loadSDFSharkEggScene},
     {"donut", loadSDFDonutScene},
     {"cools", loadSDFCoolSScene},
-    {"rcross", loadSDFRevolvedCrossScene},
+    {"rbox", loadSDFRevolvedBoxScene},
     {"peanut", loadSDFPeanutScene}
 };
 
