@@ -20,7 +20,7 @@ public:
 		bool packets = true;
 		RayGenerator generator = RayGenerator(scene.getCamera(), resX, resY);
 		if (packets){
-			#pragma omp parallel for
+			#pragma omp parallel for schedule(static, 16) collapse(2)
 			for(int y=0; y<resY / N; y++)
 			{
 				for(int x=0; x<resX / N; x++)
