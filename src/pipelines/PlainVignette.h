@@ -9,7 +9,9 @@ class PlainVignette : public Pipeline {
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer* motionBuffer
+            MotionBuffer* motionBuffer,
+            Buffer<Vector3>* positionBuffer,
+            Camera camera
         ) override {
             // Effect *result = ConstMultiply((new Vignette( new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer)))))->init(Vector4(0,0,0,0)), 255.0f);
             Effect *result = ConstMultiply((new Vignette( new RGBConvert(new ToneMapHSV(new HSVConvert(imageBuffer)))))->init(Vector4(0.3,0.1,0.1,0), 1.5f, 2.0f, 2.0f), 255.0f);

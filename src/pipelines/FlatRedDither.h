@@ -9,7 +9,9 @@ class FlatRedDither : public Pipeline {
             Buffer<Vector3>* imageBuffer,
             Buffer<Vector3>* normalBuffer,
             Buffer<Vector3>* depthBuffer,
-            MotionBuffer* motionBuffer
+            MotionBuffer* motionBuffer,
+            Buffer<Vector3>* positionBuffer,
+            Camera camera
         ) override {
             Buffer<Vector3> *imageBuffer2 = copyBuffer(imageBuffer);
             // Buffer<Vector3> *imageBuffer3 = copyBuffer(imageBuffer);
