@@ -74,7 +74,8 @@ class BasicBlendMode : public BlendMode {
     }
 
     void _apply() override
-    {
+    {   
+
         size_t resX = this->imageBuffer->getWidth();
         size_t resY = this->imageBuffer->getHeight();
         this->colorSpace = this->child->colorSpace;

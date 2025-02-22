@@ -140,7 +140,9 @@ class SSAO : public Effect {
                 //     this->positionmap->at(x,y)[1],
                 //     this->positionmap->at(x,y)[2]
                 // );
-                imageBuffer->at(x, y) = (1 - ssao(x, y));
+                imageBuffer->at(x, y) = 1 - ssao(x, y);
+            //     auto is = imageBuffer->at(x, y);
+            //     imageBuffer->at(x, y) = Vector3(std::max(0.0f, is[0]), std::max(0.0f, is[1]), std::max(0.0f, is[2]));
             }
         }
 
